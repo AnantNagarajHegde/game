@@ -148,6 +148,15 @@ public static class ChapterChecks {
  Check(DeedInvestigation.AdjustCode("0000",3,-1)=="0009","lock digit decrements wrap");
  Check(DeedInvestigation.AdjustCode("oops",2,1)=="0010","invalid dial input normalizes without unlocking");
  Check(!ReturnInvestigation.Begin(journey,true),"completed return cannot restart from stale choice");
+ for(int chapter=0;chapter<=14;chapter++) {
+ var seeded=ChapterReplay.Seed((ReplayChapter)chapter,prefs);Check(TeaSaveStore.SupportedPosition(seeded.position),"chapter spawn is supported");Check(!seeded.storyCompleted && !seeded.libraryProtected,"practice does not pre-complete ending");Check(seeded.reducedMotion && seeded.quality==VillageQuality.Low,"chapter keeps preferences");
+ }
+ Check(!ChapterReplay.IsUnlocked(new TeaProgress(),ReplayChapter.Deed) && !ChapterReplay.IsUnlocked(journey,(ReplayChapter)99),"unreached and invalid chapter locked");
+ Check(new TempleConversation(false).Start(ChapterReplay.Seed(ReplayChapter.Temple,prefs)).Id=="hello","temple replay starts at witness intro");
+ Check(DeedInvestigation.CanInspect(ChapterReplay.Seed(ReplayChapter.Deed,prefs)) && !ChapterReplay.Seed(ReplayChapter.Deed,prefs).trunkOpened,"deed replay keeps puzzle unopened");
+ Check(ReturnInvestigation.CanReturn(ChapterReplay.Seed(ReplayChapter.Return,prefs),true),"return replay has reviewed original");
+ Check(FinaleInvestigation.CanPresent(ChapterReplay.Seed(ReplayChapter.Council,prefs)) && !ChapterReplay.Seed(ReplayChapter.Council,prefs).workSuspended,"council replay does not grant decision");
+ Check(EpilogueInvestigation.Review(ChapterReplay.Seed(ReplayChapter.Epilogue,prefs)),"epilogue replay can reach later review");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;

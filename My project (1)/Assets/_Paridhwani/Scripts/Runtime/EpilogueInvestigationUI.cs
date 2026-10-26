@@ -31,10 +31,10 @@ namespace Paridhwani {
  Word(scroll,"ನಮಸ್ಕಾರ","Namaskara","A respectful greeting");Word(scroll,"ಸ್ವಲ್ಪ ನೀರು ಕೊಡಿ","Swalpa neeru kodi","A little water, please");Word(scroll,"ಎಡಕ್ಕೆ ಹೋಗಿ","Edakke hogi","Go left");Word(scroll,"ಮೂಲ ಪತ್ರ","Moola patra","Original document");Word(scroll,"ಸಮುದಾಯಕ್ಕಾಗಿ","Samudaayakkaagi","For the community");Word(scroll,"ಮತ್ತೆ ಬನ್ನಿ","Matte banni","Come again");
  Add(scroll,"This recap records encountered phrases. Independent recall grows through practice.","body");
  Add(scroll,"CREDITS","section-title");Add(scroll,"Paridhwani / Kannada through a village story. Procedural prototype environment and authored local dialogue. Noto Sans and Noto Sans Kannada fonts, distributed under the SIL Open Font License. Characters, places and the deed are fictional.","body");
- Button(card,"Revisit the completed village",session.Close);if(session.IsPracticeVisit) Button(card,"Return to the completed story",session.ReturnToCompletedStory,"quiet-button"); else Button(card,"Replay in a separate practice visit",session.StartPracticeVisit,"quiet-button");
+ Button(card,"Revisit the completed village",session.Close);if(session.IsPracticeVisit) Button(card,"Return to the main visit",session.ReturnToCompletedStory,"quiet-button"); else Button(card,"Choose a chapter to practise",ShowChapterReplay,"quiet-button");
  }
  public void ShowPracticeArrival() {
- var card=Card("practice-arrival","paper");Add(card,"SEPARATE PRACTICE VISIT","eyebrow");Add(card,"Begin again at the tea stall","title");Add(card,"Your completed story is preserved. This visit has its own temporary save. Use Pause to return to the completed story; quitting and reopening also returns to the main save.","body");Button(card,"Begin practice",session.Close);
+ var card=Card("practice-arrival","paper");Add(card,"SEPARATE PRACTICE VISIT","eyebrow");Add(card,session.PracticeChapterName,"title");Add(card,"Your main visit is preserved. This chapter has its own temporary save and the required earlier clues. Pause lets you return to the main visit; quitting and reopening also returns to the main save.","body");Button(card,"Begin practice",session.Close);
  }
  }
 }

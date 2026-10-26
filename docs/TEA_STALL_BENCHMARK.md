@@ -268,3 +268,9 @@ All 15 major story beats now have authored source implementations. This means th
 Save storage now recovers a valid backup even when the primary is missing, preserves a good backup during corruption recovery, and retains unreadable/unsupported save files before a fresh primary is written. Real file-I/O tests run through an injected minimal JSON codec; these do not claim Unity serializer coverage. Reduced-motion camera behavior, vertical-look inversion, volume and Low/Balanced/High runtime rendering profiles are persisted. Runtime quality uses an owned pipeline clone and restores original engine settings on teardown. Pause/settings now scroll.
 
 Source compilation and 146 assertions pass. Read docs/PRODUCTION_STATUS.md for current production gates rather than interpreting older iteration sections as current limitations.
+
+## Chapter-select practice
+
+Pause now offers earlier reached chapters, and credits offer all reached story beats. Practice starts from one of 15 authored checkpoints with its preceding clues, a supported spawn and copied accessibility/settings preferences. It does not pre-complete that chapter's puzzle or ending. Unreached chapters remain locked. The main visit must save successfully before switching to a distinct temporary practice store. Pause returns to that main visit; nested practice visits are blocked. This supersedes the earlier full-visit-only replay limitation.
+
+Source compilation and 197 assertions pass. These include all checkpoint seeds, several provider/task entry gates, preference copying and actual storage recovery tests. In-engine checkpoint placement/staging still requires the Unity smoke run.

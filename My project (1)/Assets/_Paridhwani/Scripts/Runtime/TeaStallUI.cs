@@ -263,7 +263,8 @@ namespace Paridhwani
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
             Button(card,"Return to the village",session.Close);
             Button(card,"Open field notebook",session.OpenNotebook);
-            if(session.IsPracticeVisit) Button(card,"Return to the completed story",session.ReturnToCompletedStory);
+            if(session.IsPracticeVisit) Button(card,"Return to the main visit",session.ReturnToCompletedStory);
+            else Button(card,"Practise an earlier chapter",ShowChapterReplay);
             if(session.Progress.storyCompleted) Button(card,"Credits and phrase recap",ShowCredits);
             Button(card,"Save this visit",()=>{session.Save(); ShowPause();});
             Button(card,"Restore saved visit",session.Load);
