@@ -19,7 +19,7 @@ namespace Paridhwani
             source.spatialBlend=1; source.minDistance=5; source.maxDistance=34; source.rolloffMode=AudioRolloffMode.Linear;
             source.Play();
         }
-        void Update() { if(source) source.volume=preferences && preferences.muted?0:.45f; }
+        void Update() { if(source) source.volume=!preferences || preferences.muted?0:.45f; }
         void OnDestroy() { if(clip) Destroy(clip); }
     }
 }

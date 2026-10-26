@@ -92,6 +92,7 @@ namespace Paridhwani
             SetCursor(false);
             if(!Progress.arrivalAcknowledged && !smoke) { ui.ShowArrival(); SetCursor(true); }
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
             if(smoke) { Application.runInBackground=true; gameObject.AddComponent<VillageSmokeCheck>().Begin(this); }
 #endif
         }

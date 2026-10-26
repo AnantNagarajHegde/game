@@ -282,3 +282,13 @@ Seven deterministic, periodic 512px source maps now cover wet earth, weathered s
 Ananya, Kamalamma and Rathnamma now use the female model variant rather than the generic moustached model. Placeholder rigs have subtle idle/work/talk motion, turn towards a conversation partner, and derive walking motion from observed NPC movement so the companion animates. This is improved procedural presentation, not final production character art or voice lip-sync.
 
 C# compilation and 197 assertions pass. One intermittent restricted-runtime file preservation failure returned an explicit save error; later runs passed. Save writes now expose an internal operation diagnostic for troubleshooting without displaying paths in the player-facing error.
+
+## Additive world package and diagnostics
+
+An optional editor workflow now exports Bootstrap.unity (one persistent player/camera/session/UI), Village_World.unity, and Forest_Farm_World.unity. Use Paridhwani > Create Additive World Package or Build Additive World Package. The legacy TeaStall_Benchmark source is retained. The exporter first generates/checks the legacy benchmark, then moves environment roots into regional scenes, records local world-reference bindings, clears cross-scene NPC/audio pointers and validates ownership/reference uniqueness. At runtime a loading panel waits for both worlds and binds references before enabling the session/player. Retry and quit are provided on load failure.
+
+Both regional scenes load at startup in this first modular package; this is additive authoring/loading, not distance-based scene streaming. Fourteen NPC instances are registered once, including inactive story actors. Runtime binding restores eye targets/audio preferences. The exporter/build and world-reference validation compile but have not executed in Unity here, so no generated modular files or modular build success is claimed.
+
+Development builds accept -village-profile to write an opt-in local report after warm-up: 600 frame intervals, mean/p95/max interval and allocated/reserved memory. The report records resolution and quality and makes no minimum-spec certification. No telemetry is transmitted. Actual performance results remain pending.
+
+Runtime/editor source compilation and 200 assertions pass, including binding-field ownership/type policy. Engine-dependent additive loading, exports, shader imports and performance capture still require a licensed Unity run.

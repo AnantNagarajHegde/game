@@ -157,6 +157,9 @@ public static class ChapterChecks {
  Check(ReturnInvestigation.CanReturn(ChapterReplay.Seed(ReplayChapter.Return,prefs),true),"return replay has reviewed original");
  Check(FinaleInvestigation.CanPresent(ChapterReplay.Seed(ReplayChapter.Council,prefs)) && !ChapterReplay.Seed(ReplayChapter.Council,prefs).workSuspended,"council replay does not grant decision");
  Check(EpilogueInvestigation.Review(ChapterReplay.Seed(ReplayChapter.Epilogue,prefs)),"epilogue replay can reach later review");
+ Check(WorldBindingPolicy.Resolve("trunkAnchor")!=null && WorldBindingPolicy.Resolve("finaleCast")!=null,"modular world fields recognized");
+ Check(WorldBindingPolicy.Resolve("player")==null && WorldBindingPolicy.Resolve("villagers")==null,"bootstrap retains core and actor registry ownership");
+ Check(WorldBindingPolicy.Resolve("ridgeRouteChecked")==null && WorldBindingPolicy.Resolve("typo")==null,"invalid modular binding rejected");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
