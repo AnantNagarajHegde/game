@@ -1,7 +1,7 @@
 using System;
 namespace Paridhwani
 {
-    public enum VillageActivity { None, MarketReceipt, BusTimetable, BicycleInspection, BookingSlip, RiverDeduction, ArchiveReference, PanchayatNotice, CheckpostTravel, VillageReturn, CheckpostDirections, RidgeTrailhead, RidgeWayfinding, TrunkLock, DeedReview, ReturnTogether, FridayPreparation }
+    public enum VillageActivity { None, MarketReceipt, BusTimetable, BicycleInspection, BookingSlip, RiverDeduction, ArchiveReference, PanchayatNotice, CheckpostTravel, VillageReturn, CheckpostDirections, RidgeTrailhead, RidgeWayfinding, TrunkLock, DeedReview, ReturnTogether, FridayPreparation, CouncilEvidence }
     public interface IActivityConversationProvider
     {
         TeaTurn ResumeAfterActivity(TeaTurn current,TeaProgress progress);

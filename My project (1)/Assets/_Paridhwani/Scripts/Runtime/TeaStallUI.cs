@@ -204,6 +204,8 @@ namespace Paridhwani
                 Add(scroll,"Giri’s notice beside the bus timetable reports a bicycle near the river weir. The notice alone does not prove an accident or Ananya’s whereabouts. See the direct observations below if you have inspected the bicycle.","body");
             }
             AddRiverNotebook(scroll);
+            if(session.Progress.deedPresented) { Add(scroll,"LIBRARY COURT / ORIGINAL PRESENTED","section-title"); Button(scroll,"Review council evidence",()=>session.OpenActivity(VillageActivity.CouncilEvidence)); }
+            if(session.Progress.workSuspended) Add(scroll,"Council president: clearance works suspended pending review of the original, its educational purpose, commercial-use restriction and community beneficiary. Final protection is not yet confirmed.","body");
             if(session.Progress.returnJourneyStarted) { Add(scroll,"RETURN / ORIGINAL PROTECTED","section-title"); Add(scroll,"Returning with Ananya by the checked ridge and open auto approach. Walking and skipping the familiar journey preserve the same evidence.","body"); }
             if(session.Progress.returnedWithAnanya) Add(scroll,"Returned safely to Kalyanapura with Ananya and the original. Friday begins only after confirming preparations with her.","body");
             if(session.Progress.fridayFinaleStarted) Add(scroll,"FRIDAY / BEFORE 09:00: meet the council at the library court. Work is not suspended until the evidence is presented and reviewed.","body");

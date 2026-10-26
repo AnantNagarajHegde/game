@@ -157,10 +157,11 @@ namespace Paridhwani.Editor
                 Check(entry.guid.ToString()==sceneGuid,"Build Settings uses imported scene GUID");
             var session=UnityEngine.Object.FindFirstObjectByType<TeaStallSession>();
             Check(session && session.player && session.vendor && session.ui && session.ambience,"scene references");
-            Check(session.villagers!=null && session.villagers.Length==13,"thirteen NPC instances share interaction system");
+            Check(session.villagers!=null && session.villagers.Length==14,"fourteen NPC instances share interaction system");
             foreach(var npc in session.villagers) Check(npc && npc.eyes,"NPC eye anchors");
             Check(session.checkpostArrival && session.villageArrival && session.checkpostBoard && session.ridgeEntrance && session.ridgeGate,"checkpost travel and gate references");
             Check(session.ridgeMarker && session.farmArrival && session.farmGate,"ridge and farm progression anchors");
+            Check(session.councilPresident && session.finaleSet && session.worksPendingMarker && session.worksSuspendedMarker,"finale staging references");
             Check(session.panchayatNotice,"public notice anchor");
             Check(session.archiveDoor && session.archiveDesk,"archive room references");
             Check(session.busTimetable,"public timetable interaction anchor");

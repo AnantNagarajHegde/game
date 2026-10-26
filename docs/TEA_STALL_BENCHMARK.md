@@ -236,3 +236,13 @@ After protecting the reviewed deed, speak to Ananya. Confirm either walking back
 Safe return records Ananya and the original back in the village but does not automatically advance the day. Speak to Ananya at the village pickup and explicitly confirm rest/Friday preparations. Friday begins at the library court before 09:00, with the original still protected and work not yet suspended. The transition saves immediately. Reading and exploration do not consume the deadline.
 
 Source compilation and 106 logic assertions pass, including unavailable-route gates, beginning versus completing a return, walk/skip state equivalence, and explicit Friday progression. Companion motion, collisions, travel framing, serialization and in-engine scene/build checks remain pending Unity verification.
+
+## Library court finale cycle
+
+After Friday preparation, meet the council president at the library court. Friday staging activates the president, familiar community members, an idle works vehicle and posted works status. Inactive NPCs no longer offer interaction prompts.
+
+Present the protected original while near the president, then restate education purpose, commercial restriction and community beneficiary through three short supported choices. A wrong answer offers retry. Ananya's explanation and Roman/English assistance remain available and do not affect the decision. Notebook rereading away from the court is allowed, but presenting evidence or requesting a decision requires being near the president.
+
+After all evidence, explicitly request the council's decision. Works are suspended pending review; the original does not instantly grant permanent protection. The works-status sign changes while the vehicle remains parked. Later protection is a separate epilogue transition.
+
+Source compilation and 116 executable logic assertions pass. Friday staging, council framing, physics, Kannada text, native save serialization and the final built-player sequence still require Unity verification.

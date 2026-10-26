@@ -94,6 +94,16 @@ public static class ChapterChecks {
  var skip=new TeaProgress {deedRetrieved=true,deedConceptsReviewed=true,ananyaFound=true,disappearanceExplained=true,ridgeCrossed=true,thursdayStarted=true,deedRequired=true,checkpostDestinationKnown=true,checkpostVisited=true,checkpostAccountKnown=true,trailInstructionsUnderstood=true};
  ReturnInvestigation.Begin(walk,true); ReturnInvestigation.Complete(walk,true,true); ReturnInvestigation.Begin(skip,true); ReturnInvestigation.Complete(skip,true,true);
  Check(walk.returnedWithAnanya==skip.returnedWithAnanya && walk.fridayFinaleStarted==skip.fridayFinaleStarted,"walk and skip share story result");
+ Check(!FinaleInvestigation.Answer(locked,0,true) && !FinaleInvestigation.Decide(locked,true),"no finale from early visit");
+ Check(!FinaleInvestigation.Answer(journey,0,false),"presentation requires council proximity");
+ Check(!FinaleInvestigation.Answer(journey,1,true) && !journey.deedPresented,"booking cannot replace original");
+ Check(FinaleInvestigation.Answer(journey,0,true) && !journey.workSuspended,"presenting original alone insufficient");
+ Check(!FinaleInvestigation.Decide(journey,true),"no interim decision before clauses");
+ Check(!FinaleInvestigation.Answer(journey,0,true) && FinaleInvestigation.Answer(journey,1,true),"education purpose restated");
+ Check(!FinaleInvestigation.Answer(journey,1,true) && FinaleInvestigation.Answer(journey,0,true),"restriction restated");
+ Check(!FinaleInvestigation.Answer(journey,0,true) && FinaleInvestigation.Answer(journey,2,true),"beneficiary restated");
+ Check(!FinaleInvestigation.Decide(journey,false) && FinaleInvestigation.Decide(journey,true) && journey.workSuspended,"council decision suspends works after full evidence");
+ Check(new CouncilConversation().Start(journey).Id=="decision","revisit preserves decision");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;

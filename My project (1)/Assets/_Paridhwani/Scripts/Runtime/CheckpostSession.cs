@@ -8,6 +8,8 @@ namespace Paridhwani
         public bool ridgeRouteChecked;
         ITeaConversationProvider CreateConversation(VillageNpc npc)
         {
+            if(npc.role==VillageNpcRole.CouncilPresident) return new CouncilConversation();
+            if(Progress.fridayFinaleStarted && (npc.role==VillageNpcRole.Ananya || npc.role==VillageNpcRole.Librarian || npc.role==VillageNpcRole.PanchayatClerk || npc.role==VillageNpcRole.MessOwner)) return new FinaleCommunityConversation(npc.displayName);
             if(npc.role==VillageNpcRole.AutoDriver || npc.role==VillageNpcRole.CheckpostDriver) return new TravelConversation(AtCheckpost);
             if(npc.role==VillageNpcRole.Ananya && Progress.deedRetrieved) return new ReturnConversation();
             if(npc.role==VillageNpcRole.ForestGuard) return new CheckpostConversation(ridgeRouteChecked);
