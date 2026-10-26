@@ -262,3 +262,9 @@ Runtime and editor sources compile, and 132 executable logic assertions pass for
 ## Current completion boundary
 
 All 15 major story beats now have authored source implementations. This means the planned main story has an end-to-end code path, not that the game is release-ready or fully verified. Remaining work includes in-engine compilation/import and generation, full route/camera/Kannada/save testing, resolving any resulting defects, the finished tea-stall visual benchmark, production assets/materials/animation/audio, external NLP integration, accessibility/performance work and release QA. Separate additive scenes and per-chapter replay are also still future work.
+
+## Recovery and accessibility hardening
+
+Save storage now recovers a valid backup even when the primary is missing, preserves a good backup during corruption recovery, and retains unreadable/unsupported save files before a fresh primary is written. Real file-I/O tests run through an injected minimal JSON codec; these do not claim Unity serializer coverage. Reduced-motion camera behavior, vertical-look inversion, volume and Low/Balanced/High runtime rendering profiles are persisted. Runtime quality uses an owned pipeline clone and restores original engine settings on teardown. Pause/settings now scroll.
+
+Source compilation and 146 assertions pass. Read docs/PRODUCTION_STATUS.md for current production gates rather than interpreting older iteration sections as current limitations.

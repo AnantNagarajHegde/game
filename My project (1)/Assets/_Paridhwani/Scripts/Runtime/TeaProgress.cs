@@ -24,6 +24,9 @@ namespace Paridhwani
         public StoryEnding endingChoice;
         public string drink = "";
         public bool english = true, roman = true, muted;
+        public bool reducedMotion,invertY;
+        public float masterVolume=1;
+        public VillageQuality quality;
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
@@ -45,60 +48,82 @@ namespace Paridhwani
             drinkOrdered ? "Ask Manjunatha where the library is" : "Introduce yourself at the tea stall";
     }
 
-    // File storage is injectable so smoke checks never touch the player's real save.
+    public interface ITeaProgressCodec
+    {
+        string Encode(TeaProgress value);
+        TeaProgress Decode(string json);
+    }
+    public sealed class UnityTeaProgressCodec : ITeaProgressCodec
+    {
+        public string Encode(TeaProgress value) => JsonUtility.ToJson(value,true);
+        public TeaProgress Decode(string json) => JsonUtility.FromJson<TeaProgress>(json);
+    }
+    // The codec is injectable for real filesystem tests without launching Unity.
     public sealed class TeaSaveStore
     {
         readonly string path;
-        public TeaSaveStore(string path) { this.path = path; }
+        readonly ITeaProgressCodec codec;
+        bool preserveBeforeWrite,recoveredBackup;
+        public string LastFailureDetail {get;private set;}
+        public TeaSaveStore(string path,ITeaProgressCodec codec=null)
+        { this.path=Path.GetFullPath(path); this.codec=codec??new UnityTeaProgressCodec(); }
         public bool HasValidSave => TryRead(path,out _) || TryRead(path+".bak",out _);
-        public bool Write(TeaProgress progress, out string error)
+        public bool Write(TeaProgress progress,out string error)
         {
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
-                string temp = path + ".tmp";
-                File.WriteAllText(temp, JsonUtility.ToJson(progress, true));
-                if (File.Exists(path)) File.Replace(temp, path, path + ".bak");
-                else File.Move(temp, path);
-                error = null;
-                return true;
+                if(preserveBeforeWrite)
+                {
+                    string suffix=".unreadable-"+Guid.NewGuid().ToString("N");
+                    if(File.Exists(path)) File.Copy(path,path+suffix);
+                    if(File.Exists(path+".bak") && !recoveredBackup) File.Copy(path+".bak",path+".bak"+suffix);
+                    preserveBeforeWrite=false;
+                }
+                string temp=path+".tmp";
+                File.WriteAllText(temp,codec.Encode(progress));
+                if(File.Exists(path)) File.Replace(temp,path,recoveredBackup?null:path+".bak");
+                else File.Move(temp,path);
+                recoveredBackup=false; LastFailureDetail=null; error=null; return true;
             }
-            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
-            { error = "Progress could not be saved. Please try again."; Debug.LogWarning(e.Message); return false; }
+            catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
+            {LastFailureDetail=e.GetType().Name+": "+e.Message;error="Progress could not be saved. Please try again.";return false;}
         }
         public TeaProgress Read(out string error)
         {
-            error = null;
-            if (!File.Exists(path)) return new TeaProgress();
-            if (TryRead(path, out TeaProgress data)) return data;
-            if (TryRead(path + ".bak", out data))
-            { error = "Recovered your previous saved visit."; return data; }
-            error = "The saved visit could not be read. Starting at the bus stand.";
+            error=null; preserveBeforeWrite=false; recoveredBackup=false;
+            if(TryRead(path,out var value)) return value;
+            if(TryRead(path+".bak",out value))
+            {recoveredBackup=true;preserveBeforeWrite=File.Exists(path);error="Recovered your previous saved visit.";return value;}
+            if(!File.Exists(path) && !File.Exists(path+".bak")) return new TeaProgress();
+            preserveBeforeWrite=true;
+            error="The visit could not be read. Its files will be preserved before saving a fresh visit.";
             return new TeaProgress();
         }
         public static bool SupportedPosition(Vector3 v) => float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z) && v.y>=-1 && v.y<=4 &&
             ((v.x>=-30 && v.x<=13 && v.z>=-13 && v.z<=34) || CheckpostInvestigation.IsCheckpostPosition(v));
-        static bool TryRead(string file, out TeaProgress p)
+        bool TryRead(string file,out TeaProgress p)
         {
-            p = null;
+            p=null;
             try
             {
-                if (!File.Exists(file)) return false;
-                string json = File.ReadAllText(file);
-                if (!json.TrimStart().StartsWith("{") || !json.Contains("\"version\"")) return false;
-                p = JsonUtility.FromJson<TeaProgress>(json);
-                if (p == null || p.version != 1) return false;
-                if (!SupportedPosition(p.position))
-                    p.position = new Vector3(2.1f, .2f, -5.7f);
+                if(!File.Exists(file)) return false;
+                string json=File.ReadAllText(file);
+                if(!json.TrimStart().StartsWith("{") || !json.Contains("\"version\"")) return false;
+                p=codec.Decode(json); if(p==null || p.version!=1) return false;
+                if(!SupportedPosition(p.position)) p.position=new Vector3(2.1f,.2f,-5.7f);
                 if(p.endingChoice!=StoryEnding.None && p.endingChoice!=StoryEnding.Stay && p.endingChoice!=StoryEnding.Depart) {p.endingChoice=StoryEnding.None;p.storyCompleted=false;}
-                if (!float.IsFinite(p.heading)) p.heading = -18;
-                p.textScale = float.IsFinite(p.textScale) ? Mathf.Clamp(p.textScale, .85f, 1.3f) : 1;
-                p.sensitivity = float.IsFinite(p.sensitivity) ? Mathf.Clamp(p.sensitivity, .05f, .3f) : .12f;
-                if (p.drink != "tea" && p.drink != "water") p.drink = p.drinkOrdered ? "tea" : "";
+                p.masterVolume=json.Contains("\"masterVolume\"")?PresentationPolicy.Volume(p.masterVolume):1;
+                p.quality=PresentationPolicy.ValidQuality(p.quality);
+                if(!float.IsFinite(p.heading)) p.heading=-18;
+                // Avoid native engine calls during file recovery and clamp old/new preferences consistently.
+                p.textScale=Clamp(p.textScale,.85f,1.3f,1); p.sensitivity=Clamp(p.sensitivity,.05f,.3f,.12f);
+                if(p.drink!="tea" && p.drink!="water") p.drink=p.drinkOrdered?"tea":"";
                 return true;
             }
-            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
-            { return false; }
+            catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is FormatException)
+            {return false;}
         }
+        static float Clamp(float value,float min,float max,float fallback) => !float.IsFinite(value)?fallback:Math.Min(max,Math.Max(min,value));
     }
 }

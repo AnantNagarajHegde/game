@@ -71,6 +71,7 @@ namespace Paridhwani
         int nearbyInspection;
         float nextSave;
         bool ready;
+        public bool LastSaveSucceeded {get;private set;}=true;
         public string SaveMessage { get; private set; }="Your visit saves automatically";
         void Start()
         {
@@ -96,6 +97,7 @@ namespace Paridhwani
         }
         void ApplyState()
         {
+            ApplyPresentation();
             ApplyCheckpostState();
             ApplyDeedState();
             ApplyReturnState();
@@ -320,7 +322,8 @@ namespace Paridhwani
         {
             if(Progress==null || saves==null) return;
             Progress.position=player.transform.position; Progress.heading=player.Heading;
-            SaveMessage=saves.Write(Progress,out string error)?"Visit saved":error;
+            LastSaveSucceeded=saves.Write(Progress,out string error);
+            SaveMessage=LastSaveSucceeded?"Visit saved":error;
         }
         public void Load()
         {

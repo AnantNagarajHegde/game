@@ -257,7 +257,8 @@ namespace Paridhwani
         }
         public void ShowPause()
         {
-            var card=Card("pause","paper");
+            var shell=Card("pause","paper");shell.style.height=Length.Percent(85);
+            var card=new ScrollView();Class(card,"evidence-scroll");shell.Add(card);
             Add(card,"PAUSE  /  UNDER THE EAVES","eyebrow"); Add(card,"A moment to yourself","title");
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
             Button(card,"Return to the village",session.Close);
@@ -272,6 +273,11 @@ namespace Paridhwani
             size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;card.style.scale=new Scale(Vector3.one*e.newValue);card.style.maxHeight=Length.Percent(85/e.newValue);session.SettingsChanged();}); card.Add(size);
             var sensitivity=new Slider("Look sensitivity",.05f,.3f){value=session.Progress.sensitivity};
             sensitivity.RegisterValueChangedCallback(e=>{session.Progress.sensitivity=e.newValue;session.SettingsChanged();}); card.Add(sensitivity);
+            var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);
+            var invert=new Toggle("Invert vertical mouse look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
+            var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
+            var quality=new DropdownField("Rendering quality",new System.Collections.Generic.List<string>{"Balanced","Low","High"},(int)PresentationPolicy.ValidQuality(session.Progress.quality));quality.RegisterValueChangedCallback(e=>{session.Progress.quality=(VillageQuality)quality.index;session.SettingsChanged();});card.Add(quality);
+            Add(card,"Low reduces resolution and shadow distance; High uses full resolution and more antialiasing.","small");
             Add(card,"F5  Save visit    F9  Restore visit","small");
         }
         public void HideModal() { Mode=""; modal.Clear(); modal.style.display=DisplayStyle.None; }

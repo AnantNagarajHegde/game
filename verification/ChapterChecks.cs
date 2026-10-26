@@ -27,7 +27,32 @@ public static class ChapterChecks {
  Check(p.thursdayStarted && a.Start(p).Id=="morning","confirmed rest advances once");
  t=a.Start(p); Check(t.Choices[0].Activity==VillageActivity.ArchiveReference,"reference remains available after rest");
  }
- public static int Main() {
+ sealed class StorageCodec : ITeaProgressCodec {
+ public string Encode(TeaProgress p) => "{\"version\":"+p.version+",\"sign\":"+(p.signRead?"true":"false")+"}";
+ public TeaProgress Decode(string json) => new TeaProgress {version=json.Contains("\"version\":99")?99:1,signRead=json.Contains("\"sign\":true")};
+ }
+ static void FileChecks() {
+ string directory=System.IO.Path.Combine(Environment.CurrentDirectory,"Temp","IterationVerification","ParidhwaniStore-"+Guid.NewGuid().ToString("N"));
+ string file=System.IO.Path.Combine(directory,"visit.json");var codec=new StorageCodec();var store=new TeaSaveStore(file,codec);
+ try {
+ Check(!store.Read(out _).signRead,"new storage defaults");
+ Check(store.Write(new TeaProgress {signRead=true},out _),"file write succeeds: "+store.LastFailureDetail);
+ Check(store.Write(new TeaProgress(),out _),"second write creates backup");
+ System.IO.File.Delete(file); Check(store.Read(out var recovered).signRead && recovered!=null,"missing primary recovers backup");
+ Check(store.Write(new TeaProgress {signRead=true},out _),"recovered backup can be saved");
+ System.IO.File.WriteAllText(file,"broken");Check(store.Read(out _).signRead,"corrupt primary recovers backup");
+ Check(store.Write(new TeaProgress(),out _),"recovery writes fresh primary");
+ System.IO.File.Delete(file);Check(store.Read(out _).signRead,"recovery did not overwrite the good backup with corrupt primary");
+ System.IO.File.WriteAllText(file,"{\"version\":99}");System.IO.File.WriteAllText(file+".bak","{\"version\":99}");
+ store.Read(out _);Check(store.Write(new TeaProgress(),out _),"unsupported files preserved before fresh write");
+ Check(System.IO.Directory.GetFiles(directory,"*.unreadable-*").Length>=2,"unsupported primary and backup retained");
+ Check(!System.IO.File.Exists(file+".tmp"),"atomic write leaves no temp file");
+ } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
+ }
+ public static int Main() { FileChecks();
+ Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
+ Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
+ var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");
  Witnesses(false); Witnesses(true);
  var journey=new TeaProgress(); var driver=new TravelConversation(false); var guard=new CheckpostConversation(false);
  Check(driver.Start(journey).Id=="early" && !CheckpostInvestigation.CanTravel(journey),"early travel blocked");
