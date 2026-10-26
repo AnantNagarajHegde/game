@@ -143,6 +143,12 @@ namespace Paridhwani.Editor
                 var cs=new TeaSaveStore(checkpointSave); Check(cs.Write(cp,out _),"checkpost save written"); var cr=cs.Read(out _);
                 Check(cr.position==cp.position && cr.checkpostVisited && cr.ananyaLocationReported && cr.trailInstructionsUnderstood,"checkpost position and facts round-trip");
             } finally { if(File.Exists(checkpointSave)) File.Delete(checkpointSave); if(File.Exists(checkpointSave+".bak")) File.Delete(checkpointSave+".bak"); }
+            string farmSave=Path.Combine(Path.GetTempPath(),"farm-save-"+Guid.NewGuid().ToString("N")+".json");
+            try {
+                var fp=new TeaProgress {position=new Vector3(50,.13f,38.7f),ridgeWayfindingKnown=true,ridgeCrossed=true,guddaManeReached=true,ananyaFound=true,disappearanceExplained=true,trunkLocationKnown=true};
+                var fs=new TeaSaveStore(farmSave); Check(fs.Write(fp,out _),"farm save written"); var fr=fs.Read(out _);
+                Check(fr.position==fp.position && fr.ananyaFound && fr.disappearanceExplained && fr.trunkLocationKnown && fr.guddaManeReached,"farm position and direct evidence round-trip");
+            } finally { if(File.Exists(farmSave)) File.Delete(farmSave); if(File.Exists(farmSave+".bak")) File.Delete(farmSave+".bak"); }
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);
@@ -151,9 +157,10 @@ namespace Paridhwani.Editor
                 Check(entry.guid.ToString()==sceneGuid,"Build Settings uses imported scene GUID");
             var session=UnityEngine.Object.FindFirstObjectByType<TeaStallSession>();
             Check(session && session.player && session.vendor && session.ui && session.ambience,"scene references");
-            Check(session.villagers!=null && session.villagers.Length==11,"eleven NPC instances share interaction system");
+            Check(session.villagers!=null && session.villagers.Length==13,"thirteen NPC instances share interaction system");
             foreach(var npc in session.villagers) Check(npc && npc.eyes,"NPC eye anchors");
             Check(session.checkpostArrival && session.villageArrival && session.checkpostBoard && session.ridgeEntrance && session.ridgeGate,"checkpost travel and gate references");
+            Check(session.ridgeMarker && session.farmArrival && session.farmGate,"ridge and farm progression anchors");
             Check(session.panchayatNotice,"public notice anchor");
             Check(session.archiveDoor && session.archiveDesk,"archive room references");
             Check(session.busTimetable,"public timetable interaction anchor");

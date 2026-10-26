@@ -49,6 +49,29 @@ public static class ChapterChecks {
  Check(TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(-26,.15f,2)),"river saves retained");
  Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(30,0,0)),"empty gap between locations rejected");
  Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(float.NaN,0,0)),"invalid coordinates rejected");
+ var lost=new TeaProgress(); var ananya=new FarmConversation(false); var kamalamma=new FarmConversation(true);
+ Check(ananya.Start(lost).Id=="early" && kamalamma.Start(lost).Id=="early","no early reunion or trunk clue");
+ Check(!RidgeInvestigation.Answer(lost,0,true,true) && !RidgeInvestigation.Arrive(lost,true,true),"ridge requires checkpost readiness");
+ Check(!RidgeInvestigation.Answer(journey,2,true,true) && !journey.ridgeWayfindingKnown,"wrong path grants no waypoint");
+ Check(!RidgeInvestigation.Answer(journey,0,true,false),"marker must be physically visited");
+ Check(RidgeInvestigation.Answer(journey,0,true,true),"left path recalled at marker");
+ Check(!RidgeInvestigation.Arrive(journey,true,false) && !journey.guddaManeReached,"correct directions alone do not grant arrival");
+ Check(!RidgeInvestigation.Arrive(journey,false,true),"unchecked route cannot grant farm arrival");
+ Check(RidgeInvestigation.Arrive(journey,true,true) && journey.ridgeCrossed && journey.guddaManeReached,"physical arrival completes ridge");
+ Check(kamalamma.Start(journey).Id=="wait","elder does not reveal trunk before explanation");
+ var ft=ananya.Start(journey); ft=ananya.Reply(ft,1,journey); Check(!journey.ananyaFound,"help does not record reunion");
+ ft=ananya.Reply(ft,0,journey); Check(journey.ananyaFound && !journey.disappearanceExplained,"meeting distinct from hearing explanation");
+ ananya.Reply(ft,2,journey); Check(ananya.Start(journey).Id=="explain" && !journey.disappearanceExplained,"early exit preserves unheard account");
+ ft=ananya.Start(journey); ft=ananya.Reply(ft,1,journey); Check(!journey.disappearanceExplained,"repeat grants no unseen response");
+ ft=ananya.Reply(ft,0,journey); Check(journey.disappearanceExplained && !journey.trunkLocationKnown,"account does not grant elder clue");
+ ft=ananya.Reply(ft,2,journey); Check(journey.farmHospitalityKnown && ft.Id=="records","declining a drink is valid");
+ ft=kamalamma.Start(journey); ft=kamalamma.Reply(ft,1,journey); Check(!journey.trunkLocationKnown,"elder help grants no trunk clue");
+ kamalamma.Reply(ft,0,journey); Check(journey.trunkLocationKnown && kamalamma.Start(journey).Id=="elder_return","trunk clue earned and repeatable");
+ for(int choice=0;choice<3;choice++) {
+ var drink=new TeaProgress {ridgeCrossed=true,guddaManeReached=true,ridgeWayfindingKnown=true,ananyaFound=true,disappearanceExplained=true};
+ ananya.Reply(ananya.Start(drink),choice,drink); Check(drink.farmHospitalityKnown,"kashaya, water and decline all accepted"); }
+ Check(TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(48,.13f,41)),"farm position saveable");
+ Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(48,0,65)),"outside authored farm region rejected");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
@@ -64,6 +87,6 @@ public static class ChapterChecks {
  Check(PanchayatInvestigation.Answer(notice,2) && notice.deadlineKnown,"repeated reading preserves facts");
  var p=new TeaProgress(); Check(!ArchiveInvestigation.FindShelf(p,1) && !ArchiveInvestigation.ReadReference(p,0),"early archive tasks blocked");
  Check(!RiverInvestigation.Deduce(p,2) && !MarketInvestigation.TryReadTimetable(p,0),"earlier evidence gates retained");
- Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; both witness orders, retries, access, research inference explicit rest, panchayat notice, deadline and document prerequisites."); return 0;
+ Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; both witness orders, retries, access, research inference explicit rest, panchayat notice, deadline, ridge arrival and reunion gates."); return 0;
  }
 }

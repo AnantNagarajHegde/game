@@ -8,7 +8,8 @@ namespace Paridhwani.Editor {
  Box("Forest approach road",V(60,.02f,-1),V(4,.04f,14),"Lane");
  Box("Ridge approach path",V(48,.02f,9),V(2.6f,.04f,12),"Lane");
  foreach(float x in new[]{43f,67f}) Rail(V(x,0,4),V(.15f,1,26));
- foreach(float z in new[]{-9f,17f}) Rail(V(55,0,z),V(24,1,.15f));
+ foreach(float z in new[]{-9f}) Rail(V(55,0,z),V(24,1,.15f));
+ Rail(V(44.75f,0,17),V(3.5f,1,.15f)); Rail(V(58.25f,0,17),V(17.5f,1,.15f));
  Box("Checkpost shelter floor",V(51,.05f,4),V(5,.1f,4.5f),"StoneDark");
  Box("Checkpost damp wall",V(51,1.5f,6.1f),V(5,2.8f,.18f),"Plaster");
  Roof("Forest checkpost roof",51,4,4,5.8f,5.2f);
@@ -32,8 +33,6 @@ namespace Paridhwani.Editor {
  s.ridgeGate=Box("Ridge permission gate",V(48,.65f,8.6f),V(2.8f,1.3f,.15f),"Wood"); s.ridgeRouteChecked=true;
  Ellipsoid("Ridge stone marker",V(46.9f,.4f,7),V(.8f,.9f,.65f),"Stone");
  Text("RIDGE / KEEP LEFT",V(48,1.7f,8.6f),.055f,false,0);
- Box("Prototype ridge end fence",V(48,.65f,14.5f),V(2.8f,1.3f,.15f),"Wood");
- Text("ONWARD RIDGE / NEXT CHAPTER",V(48,1.8f,14.5f),.05f,false,0);
  for(int i=0;i<14;i++) {
  float x=i%2==0?44.5f:65.5f,z=-7+i*1.6f;
  Cylinder("Forest trunk",V(x,2.2f,z),.13f,4.4f,"Trunk",true);

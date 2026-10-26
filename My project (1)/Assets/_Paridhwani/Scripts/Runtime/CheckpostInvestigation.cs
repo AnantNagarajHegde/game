@@ -5,7 +5,7 @@ namespace Paridhwani
     public static class CheckpostInvestigation
     {
         public static bool CanTravel(TeaProgress p) => p.thursdayStarted && p.deedRequired && p.checkpostDestinationKnown;
-        public static bool IsCheckpostPosition(Vector3 v) => v.x>=40 && v.x<=70 && v.z>=-10 && v.z<=20;
+        public static bool IsCheckpostPosition(Vector3 v) => v.x>=40 && v.x<=70 && v.z>=-10 && v.z<=55;
         public static bool CanPermit(TeaProgress p,bool checkedRoute) => CanTravel(p) && p.checkpostVisited && p.checkpostAccountKnown && p.trailInstructionsUnderstood && checkedRoute;
         public static void RefreshPermission(TeaProgress p,bool checkedRoute)
         { p.ridgeRouteOpen=p.checkpostAccountKnown && checkedRoute; p.trailPermission=CanPermit(p,checkedRoute); }

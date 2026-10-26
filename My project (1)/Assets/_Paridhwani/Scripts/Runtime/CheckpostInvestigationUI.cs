@@ -37,8 +37,8 @@ namespace Paridhwani
                 if(!session.Progress.trailInstructionsUnderstood) {
                     Add(scroll,"WHICH INSTRUCTIONS MATCH THE SAFE ROUTE?","section-title");
                     Answers(scroll,new[]{new TeaLine("ರಸ್ತೆಯಲ್ಲಿ ಹೋಗಿ","Rasteyalli hogi","Cross the road barrier"),new TeaLine("ಎಡಕ್ಕೆ ಹೋಗಿ. ಬೇಲಿಯ ಪಕ್ಕದಲ್ಲಿ ನಡೆಯಿರಿ.","Edakke hogi. Beliya pakkadalli nadeyiri.","Left at the stone; follow the fence uphill"),new TeaLine("ನದಿಯನ್ನು ದಾಟಿ","Nadiyannu daati","Cross the river")});
-                } else Add(scroll,session.Progress.trailPermission?"Directions recorded. The checked ridge approach is available; the farm journey will be added next.":"Directions understood. Permission remains withheld until Kencha confirms the ridge is checked.","success");
-                Add(scroll,"Ridge trailhead: this prototype stops at the marked approach. Gudda Mane and the reunion are not implemented yet. Return via Raghavendra whenever you wish.","small");
+                } else Add(scroll,session.Progress.trailPermission?"Directions recorded. The checked ridge approach is available; follow the stone marker and fenced path towards Gudda Mane.":"Directions understood. Permission remains withheld until Kencha confirms the ridge is checked.","success");
+                Add(scroll,"Ridge trailhead: continue to the stone marker, recall the left turn, then follow the fenced bends to Gudda Mane. You can return along the same trail and travel back with Raghavendra.","small");
             }
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
             var english=new Toggle("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowCheckpostActivity(activity);}); aids.Add(english);

@@ -29,6 +29,7 @@ namespace Paridhwani
             get
             {
                 if(Progress==null || ui.IsModal) return "";
+                string ridgeHint=RidgeHint(); if(ridgeHint.Length>0) return ridgeHint;
                 string journeyHint=CheckpostHint(); if(journeyHint.Length>0) return journeyHint;
                 if(Progress.thursdayStarted && panchayatNotice)
                     return Progress.checkpostDestinationKnown?"Next chapter: safe travel via the forest checkpost":Mathf.CeilToInt(Vector3.Distance(player.transform.position,panchayatNotice.position))+" m / PANCHAYAT PUBLIC NOTICE";
@@ -91,6 +92,7 @@ namespace Paridhwani
         void ApplyState()
         {
             ApplyCheckpostState();
+            if(farmGate) farmGate.SetActive(!Progress.ridgeWayfindingKnown || !Progress.trailPermission);
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
             if(servedMeal) servedMeal.SetActive(Progress.mealOrdered);
@@ -101,6 +103,7 @@ namespace Paridhwani
         void Update()
         {
             if(!ready) return;
+            UpdateFarmArrival();
             FindInteraction();
             var keys=Keyboard.current;
             if(keys!=null && Application.isFocused)
@@ -155,6 +158,7 @@ namespace Paridhwani
                     hit.collider.GetComponentInParent<VillageNpc>()!=npc) continue;
                 nearest=d; nearbyNpc=npc;
             }
+            if(FindRidgeInteraction()) return;
             if(FindCheckpostInteraction()) return;
             if(panchayatNotice && Vector3.Distance(player.transform.position,panchayatNotice.position)<2.3f && !nearbyNpc)
             { Nearby="Read the panchayat notice"; nearbyInspection=6; }
@@ -173,6 +177,7 @@ namespace Paridhwani
         public void Interact()
         {
             if(nearbyNpc) { StartConversation(nearbyNpc); return; }
+            if(nearbyInspection==9) { OpenActivity(VillageActivity.RidgeWayfinding); return; }
             if(nearbyInspection==7) { OpenActivity(VillageActivity.CheckpostDirections); return; }
             if(nearbyInspection==8) { OpenActivity(VillageActivity.RidgeTrailhead); return; }
             if(nearbyInspection==6) { OpenActivity(VillageActivity.PanchayatNotice); return; }
@@ -221,7 +226,7 @@ namespace Paridhwani
             ActiveActivity=activity;
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();
-            if(activity==VillageActivity.CheckpostTravel || activity==VillageActivity.VillageReturn || activity==VillageActivity.CheckpostDirections || activity==VillageActivity.RidgeTrailhead) ui.ShowCheckpostActivity(activity); else if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
+            if(activity==VillageActivity.RidgeWayfinding) ui.ShowRidgeActivity(); else if(activity==VillageActivity.CheckpostTravel || activity==VillageActivity.VillageReturn || activity==VillageActivity.CheckpostDirections || activity==VillageActivity.RidgeTrailhead) ui.ShowCheckpostActivity(activity); else if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
             SetCursor(true);
         }
         public void SelectBicyclePart(BicyclePart part)
@@ -236,6 +241,7 @@ namespace Paridhwani
             switch(ActiveActivity)
             {
                 case VillageActivity.CheckpostDirections: case VillageActivity.RidgeTrailhead: correct=CheckpostInvestigation.Answer(Progress,index,ridgeRouteChecked); break;
+                case VillageActivity.RidgeWayfinding: correct=RidgeInvestigation.Answer(Progress,index,ridgeRouteChecked,ridgeMarker && Vector3.Distance(player.transform.position,ridgeMarker.position)<3); break;
                 case VillageActivity.PanchayatNotice: correct=PanchayatInvestigation.Answer(Progress,index); break;
                 case VillageActivity.ArchiveReference: correct=Progress.archiveShelfLocated?ArchiveInvestigation.ReadReference(Progress,index):ArchiveInvestigation.FindShelf(Progress,index); break;
                 case VillageActivity.MarketReceipt: correct=MarketInvestigation.TryReadReceipt(Progress,index); break;
@@ -246,6 +252,7 @@ namespace Paridhwani
             }
             if(correct) { activityChanged=true; ApplyState(); Save(); }
             if(ActiveActivity==VillageActivity.CheckpostDirections || ActiveActivity==VillageActivity.RidgeTrailhead) { ui.ShowCheckpostActivity(ActiveActivity,correct?"Directions recorded. Check the route status before proceeding.":"Edakke means left. Follow the fence; the damaged road and river are closed."); return; }
+            if(ActiveActivity==VillageActivity.RidgeWayfinding) { ui.ShowRidgeActivity(correct?"Direction recorded. Continue beside the fence.":"Edakke means left. Stay beside the fence; do not climb it or use the old road."); return; }
             if(ActiveActivity==VillageActivity.PanchayatNotice) { ui.ShowPanchayatActivity(correct?"Recorded with its source in your field notes.":!Progress.noticeIdentified?"Granthalaya means library. Match the named place.":!Progress.deadlineKnown?"Shukravaara is Friday; beligge means morning; ombattu is nine.":"Moola patra is the original document. The catalogue identifies it but cannot replace it."); return; }
             if(ActiveActivity==VillageActivity.ArchiveReference) { ui.ShowArchiveActivity(correct?"Recorded with its source.":Progress.archiveShelfLocated?"Moola patra means original document. A catalogue is not proof of arrival.":"Eradane means second; olage means inside. Try again."); return; }
             string hint=correct?"Recorded with its source in your field notes.":
