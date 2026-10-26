@@ -67,6 +67,7 @@ namespace Paridhwani
         public string LastFailureDetail {get;private set;}
         public TeaSaveStore(string path,ITeaProgressCodec codec=null)
         { this.path=Path.GetFullPath(path); this.codec=codec??new UnityTeaProgressCodec(); }
+        public bool HasAnySaveFiles => File.Exists(path) || File.Exists(path+".bak");
         public bool HasValidSave => TryRead(path,out _) || TryRead(path+".bak",out _);
         public bool Write(TeaProgress progress,out string error)
         {

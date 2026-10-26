@@ -79,7 +79,7 @@ namespace Paridhwani
             string path=smoke?Path.Combine(Application.temporaryCachePath,"village-smoke-"+Guid.NewGuid().ToString("N")+".json"):
                 Path.Combine(Application.persistentDataPath,"paridhwani-tea-v1.json");
             saves=new TeaSaveStore(path);
-            if(!smoke && !File.Exists(path))
+            if(!smoke && !saves.HasAnySaveFiles)
             {
                 string legacy=Path.Combine(Path.GetDirectoryName(Application.persistentDataPath),"My project (1)","paridhwani-tea-v1.json");
                 var previous=new TeaSaveStore(legacy);
@@ -326,7 +326,7 @@ namespace Paridhwani
         public void SettingsChanged() { ApplyState(); Save(); }
         public void Save()
         {
-            if(Progress==null || saves==null) return;
+            if(skipQuitSave || Progress==null || saves==null) return;
             Progress.position=player.transform.position; Progress.heading=player.Heading;
             LastSaveSucceeded=saves.Write(Progress,out string error);
             SaveMessage=LastSaveSucceeded?"Visit saved":error;

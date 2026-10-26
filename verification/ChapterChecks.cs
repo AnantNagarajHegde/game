@@ -38,7 +38,7 @@ public static class ChapterChecks {
  Check(!store.Read(out _).signRead,"new storage defaults");
  Check(store.Write(new TeaProgress {signRead=true},out _),"file write succeeds: "+store.LastFailureDetail);
  Check(store.Write(new TeaProgress(),out _),"second write creates backup");
- System.IO.File.Delete(file); Check(store.Read(out var recovered).signRead && recovered!=null,"missing primary recovers backup");
+ System.IO.File.Delete(file); Check(store.HasAnySaveFiles,"existing backup prevents legacy migration overwrite");Check(store.Read(out var recovered).signRead && recovered!=null,"missing primary recovers backup");
  Check(store.Write(new TeaProgress {signRead=true},out _),"recovered backup can be saved");
  System.IO.File.WriteAllText(file,"broken");Check(store.Read(out _).signRead,"corrupt primary recovers backup");
  Check(store.Write(new TeaProgress(),out _),"recovery writes fresh primary");

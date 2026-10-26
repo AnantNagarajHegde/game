@@ -1,6 +1,7 @@
 using UnityEngine;
 namespace Paridhwani {
  public sealed partial class TeaStallSession {
+ bool skipQuitSave;
  public bool HasSavedVisit => saves!=null && saves.HasValidSave;
  public bool TitleSettings {get;private set;}
  public void OpenTitle() {EndForJourney();TitleSettings=false;ui.ShowMainMenu();SetCursor(true);}
@@ -14,7 +15,14 @@ namespace Paridhwani {
  if(!saves.Write(next,out var error)){ui.ShowMainMenu(error);return;}
  EndForJourney();ResetActorsToOrigins();Progress=next;player.Restore(next.position,next.heading);ApplyState();Save();ui.ShowArrival();SetCursor(true);
  }
- public void RequestQuit() {Save();if(LastSaveSucceeded)Application.Quit();else {ui.ShowQuitSaveError();SetCursor(true);}}
- public void QuitWithoutSaving(){Application.Quit();}
+ public void RequestQuit() {Save();if(LastSaveSucceeded)ExitPlayer();else {ui.ShowQuitSaveError();SetCursor(true);}}
+ public void QuitWithoutSaving(){skipQuitSave=true;ExitPlayer();}
+ static void ExitPlayer(){
+#if UNITY_EDITOR
+ UnityEditor.EditorApplication.isPlaying=false;
+#else
+ Application.Quit();
+#endif
+ }
  }
 }

@@ -317,3 +317,7 @@ Runtime/editor compilation and 209 assertions pass, including real archive-file 
 Rendering quality now also controls cached renderer-distance culling (45/80/120 metres) while retaining all collision and quest objects. This reduces distant draw work; it is not LOD mesh production or proven FPS improvement. The opt-in frame profiler waits for initial gameplay movement before its warm-up so it does not profile an unattended title screen as the representative scene.
 
 Regeneration preserves copies of every dirty loaded scene, including untitled scenes, before replacing generated content. Deprecated object-finding APIs were updated against the installed Unity references. The smoke sequence includes reduced camera motion, audio/presentation save restoration, title return, chapter practice and a fake optional text adapter that cannot grant quest effects. These engine tests remain authored but unexecuted. Source compilation and 209 assertions pass.
+
+## Migration and explicit quit safeguards
+
+A valid backup now also blocks the old-product migration path, so a missing current primary cannot let an older legacy visit replace newer recoverable progress. Choosing to leave without saving suppresses subsequent quit/focus autosaves. The in-Editor exit action stops Play mode; standalone exits the player. Source compilation and 210 assertions pass.
