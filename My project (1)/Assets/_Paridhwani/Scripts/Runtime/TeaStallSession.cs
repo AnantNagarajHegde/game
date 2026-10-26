@@ -75,6 +75,9 @@ namespace Paridhwani
         public string SaveMessage { get; private set; }="Your visit saves automatically";
         void Start()
         {
+            if(!RuntimeWorldReady()) {
+                Progress=new TeaProgress();player.enabled=false;player.GetComponent<CharacterController>().enabled=false;ui.Bind(this);ui.ShowWorldUpdateRequired();SetCursor(true);Debug.LogError("PARIDHWANI_WORLD_OUTDATED: regenerate the world before playing; no saved visit was read or changed.");return;
+            }
             bool smoke=Array.IndexOf(Environment.GetCommandLineArgs(),"-village-smoke")>=0;
             string path=smoke?Path.Combine(Application.temporaryCachePath,"village-smoke-"+Guid.NewGuid().ToString("N")+".json"):
                 Path.Combine(Application.persistentDataPath,"paridhwani-tea-v1.json");

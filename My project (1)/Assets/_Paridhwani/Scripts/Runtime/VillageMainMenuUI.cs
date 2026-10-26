@@ -1,6 +1,11 @@
 using UnityEngine.UIElements;
 namespace Paridhwani {
  public sealed partial class TeaStallUI {
+ public void ShowWorldUpdateRequired() {
+ var card=Card("world-update-required","paper");Add(card,"This world needs regeneration","title");
+ Add(card,"The scene was generated from an older world recipe. Your saved visit has not been opened or changed. In Unity, use Paridhwani > Create Tea Stall Benchmark, or recreate the additive package, then press Play again.","body");
+ Button(card,"Close this play session",session.RequestQuit);
+ }
  public void ShowMainMenu(string feedback="") {
  var shell=Card("main-menu","paper");shell.style.height=Length.Percent(85);var card=new ScrollView();Class(card,"evidence-scroll");shell.Add(card);Add(card,"P A R I D H W A N I","brand");Add(card,"A language. A place. A way to belong.","title");
  Add(card,"Arrive in Kalyanapura, follow Ananya's trail and learn Kannada through the people and places along the way.","body");

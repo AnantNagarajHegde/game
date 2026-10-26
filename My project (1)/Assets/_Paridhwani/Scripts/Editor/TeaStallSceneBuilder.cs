@@ -75,6 +75,7 @@ namespace Paridhwani.Editor
 
             var systems=new GameObject("Tea Stall Session");
             var session=systems.AddComponent<TeaStallSession>();
+            session.generatedWorldRevision=TeaStallSession.RequiredWorldRevision;session.generatedRecipeSignature=WorldRecipeSignature.Compute(Path.Combine(Application.dataPath,"_Paridhwani","Scripts","Editor"));
             session.player=walker; session.vendor=vendor.transform;
             session.sign=new GameObject("Sign inspection anchor").transform; session.sign.position=V(-2.1f,.1f,-.8f);
             session.libraryLane=new GameObject("Library lane anchor").transform; session.libraryLane.position=V(1.5f,.1f,14);

@@ -321,3 +321,9 @@ Regeneration preserves copies of every dirty loaded scene, including untitled sc
 ## Migration and explicit quit safeguards
 
 A valid backup now also blocks the old-product migration path, so a missing current primary cannot let an older legacy visit replace newer recoverable progress. Choosing to leave without saving suppresses subsequent quit/focus autosaves. The in-Editor exit action stops Play mode; standalone exits the player. Source compilation and 210 assertions pass.
+
+## Stale generated-world safeguard
+
+Generated worlds now carry a schema revision and a fingerprint of the editor world recipes. In Editor play, changed recipes require regeneration. Standalone validates the authored world revision and essential late-story bindings. If the checked-in older benchmark is opened against newer scripts, play stops before reading or writing the visit and explains how to regenerate, rather than allowing progress into missing locations. Generator fingerprints ignore checkout line endings and detect changed recipe content.
+
+Source compilation and 212 assertions pass. The current checked-in scene is intentionally treated as stale until a licensed Unity generation succeeds.
