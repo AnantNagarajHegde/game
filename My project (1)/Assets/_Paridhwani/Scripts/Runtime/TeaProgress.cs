@@ -70,24 +70,25 @@ namespace Paridhwani
         public bool HasValidSave => TryRead(path,out _) || TryRead(path+".bak",out _);
         public bool Write(TeaProgress progress,out string error)
         {
+            string operation="create directory";
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 if(preserveBeforeWrite)
                 {
                     string suffix=".unreadable-"+Guid.NewGuid().ToString("N");
-                    if(File.Exists(path)) File.Copy(path,path+suffix);
-                    if(File.Exists(path+".bak") && !recoveredBackup) File.Copy(path+".bak",path+".bak"+suffix);
+                    operation="preserve primary";if(File.Exists(path)) File.Copy(path,path+suffix);
+                    operation="preserve backup";if(File.Exists(path+".bak") && !recoveredBackup) File.Copy(path+".bak",path+".bak"+suffix);
                     preserveBeforeWrite=false;
                 }
                 string temp=path+".tmp";
-                File.WriteAllText(temp,codec.Encode(progress));
-                if(File.Exists(path)) File.Replace(temp,path,recoveredBackup?null:path+".bak");
+                operation="write temp";File.WriteAllText(temp,codec.Encode(progress));
+                operation="replace primary";if(File.Exists(path)) File.Replace(temp,path,recoveredBackup?null:path+".bak");
                 else File.Move(temp,path);
                 recoveredBackup=false; LastFailureDetail=null; error=null; return true;
             }
             catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
-            {LastFailureDetail=e.GetType().Name+": "+e.Message;error="Progress could not be saved. Please try again.";return false;}
+            {LastFailureDetail=operation+" / "+e.GetType().Name+": "+e.Message;error="Progress could not be saved. Please try again.";return false;}
         }
         public TeaProgress Read(out string error)
         {

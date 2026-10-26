@@ -274,3 +274,11 @@ Source compilation and 146 assertions pass. Read docs/PRODUCTION_STATUS.md for c
 Pause now offers earlier reached chapters, and credits offer all reached story beats. Practice starts from one of 15 authored checkpoints with its preceding clues, a supported spawn and copied accessibility/settings preferences. It does not pre-complete that chapter's puzzle or ending. Unreached chapters remain locked. The main visit must save successfully before switching to a distinct temporary practice store. Pause returns to that main visit; nested practice visits are blocked. This supersedes the earlier full-visit-only replay limitation.
 
 Source compilation and 197 assertions pass. These include all checkpoint seeds, several provider/task entry gates, preference copying and actual storage recovery tests. In-engine checkpoint placement/staging still requires the Unity smoke run.
+
+## Reusable surfaces and character presentation
+
+Seven deterministic, periodic 512px source maps now cover wet earth, weathered stone, lime plaster, clay, timber, cotton and bark. The material shader uses world-space triplanar mapping with restrained tint/roughness; matte roof limits are retained. The editor importer configures repeat sampling, mipmaps and compression. Foliage has subtle wind, disabled by reduced motion. The generator is verification/Generate-Surfaces.py. Size/variance and opposite-edge checks pass for all seven PNGs; actual shader import and rendered appearance still require Unity.
+
+Ananya, Kamalamma and Rathnamma now use the female model variant rather than the generic moustached model. Placeholder rigs have subtle idle/work/talk motion, turn towards a conversation partner, and derive walking motion from observed NPC movement so the companion animates. This is improved procedural presentation, not final production character art or voice lip-sync.
+
+C# compilation and 197 assertions pass. One intermittent restricted-runtime file preservation failure returned an explicit save error; later runs passed. Save writes now expose an internal operation diagnostic for troubleshooting without displaying paths in the player-facing error.

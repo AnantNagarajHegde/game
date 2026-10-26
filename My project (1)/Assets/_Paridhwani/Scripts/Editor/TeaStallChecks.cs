@@ -156,6 +156,7 @@ namespace Paridhwani.Editor
                 Check(main.Write(ending,out _) && practice.Write(new TeaProgress(),out _),"distinct ending and practice saves written");
                 var saved=main.Read(out _);Check(saved.storyCompleted && saved.libraryProtected && saved.endingChoice==StoryEnding.Depart && !practice.Read(out _).storyCompleted,"practice storage leaves completed ending intact");
             } finally {if(Directory.Exists(endingDir)) Directory.Delete(endingDir,true);}
+            foreach(string texture in new[]{"WetEarth","WeatheredStone","LimePlaster","ClayTile","Timber","CottonWeave","Bark"}) {var asset=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Paridhwani/Art/Textures/Surfaces/"+texture+".png");Check(asset && asset.width==512 && asset.height==512,"source surface texture imported");}
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);

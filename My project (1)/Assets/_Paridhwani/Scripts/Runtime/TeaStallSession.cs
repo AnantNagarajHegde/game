@@ -88,7 +88,7 @@ namespace Paridhwani
             Progress=saves.Read(out string notice);
             if(notice!=null) SaveMessage=notice;
             player.Restore(Progress.position,Progress.heading);
-            CaptureActorOrigins(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
+            CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
             if(!Progress.arrivalAcknowledged && !smoke) { ui.ShowArrival(); SetCursor(true); }
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -114,6 +114,7 @@ namespace Paridhwani
         void Update()
         {
             if(!ready) return;
+            UpdateCharacterPresentation();
             UpdateReturnJourney();
             UpdateFarmArrival();
             FindInteraction();

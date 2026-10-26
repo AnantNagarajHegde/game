@@ -159,6 +159,7 @@ namespace Paridhwani.Editor
         {
             var m=new Material(Shader.Find("Paridhwani/Village Surface"));
             m.SetColor("_BaseColor",Hex(hex)); m.SetFloat("_Roughness",rough); m.SetFloat("_Wet",wet); m.SetFloat("_Grain",grain);
+            ConfigureSurfaceTexture(m,name);
             mats[name]=Save(m,Root+"/Generated/Materials/"+name+".mat"); return mats[name];
         }
         static T Save<T>(T asset,string path) where T:UnityEngine.Object

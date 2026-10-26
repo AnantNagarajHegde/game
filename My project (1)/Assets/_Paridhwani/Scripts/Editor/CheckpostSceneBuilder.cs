@@ -48,7 +48,7 @@ namespace Paridhwani.Editor {
  }
  static Transform Anchor(string name,Vector3 p) { var t=new GameObject(name).transform; t.position=p; return t; }
  static GameObject AddJourneyNpc(TeaStallSession s,List<VillageNpc> all,string name,Vector3 p,VillageNpcRole role,string label) {
- var a=Character(name,p,false); a.transform.rotation=Quaternion.Euler(0,180,0);
+ var a=Character(name,p,false,role==VillageNpcRole.Ananya || role==VillageNpcRole.Kamalamma); a.transform.rotation=Quaternion.Euler(0,180,0);
  var c=a.GetComponentInChildren<VillageCharacter>(); c.lookTarget=s.player.transform;
  var n=a.AddComponent<VillageNpc>(); n.role=role; n.displayName=name; n.roleLabel=label; n.eyes=c.head; all.Add(n); return a;
  }

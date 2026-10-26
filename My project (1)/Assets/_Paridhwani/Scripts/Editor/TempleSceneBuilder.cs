@@ -19,7 +19,7 @@ namespace Paridhwani.Editor {
  for(int i=0;i<18;i++) Ellipsoid("Flower bundle",V(-3.25f+(i%6)*.16f,1.14f,25.8f+(i/6)*.15f),V(.12f,.06f,.1f),"Cream");
  var all=new List<VillageNpc>(s.villagers);
  foreach(bool flowers in new[]{false,true}) {
- var a=Character(flowers?"Rathnamma":"Gurumurthy",V(flowers?-1.7f:-5.6f,.09f,26),false); a.transform.rotation=Quaternion.Euler(0,180,0);
+ var a=Character(flowers?"Rathnamma":"Gurumurthy",V(flowers?-1.7f:-5.6f,.09f,26),false,flowers); a.transform.rotation=Quaternion.Euler(0,180,0);
  var c=a.GetComponentInChildren<VillageCharacter>(); c.lookTarget=s.player.transform;
  var n=a.AddComponent<VillageNpc>(); n.displayName=flowers?"Rathnamma":"Gurumurthy"; n.role=flowers?VillageNpcRole.FlowerSeller:VillageNpcRole.TempleKeeper; n.roleLabel="TEMPLE / NORTHERN STOP"; n.eyes=c.head; all.Add(n);
  }
