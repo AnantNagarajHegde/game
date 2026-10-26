@@ -12,3 +12,11 @@ See [Unity game plan](docs/UNITY_GAME_PLAN.md) for the project audit, village ar
 ## Playable village slice
 
 See [play and build instructions](docs/TEA_STALL_BENCHMARK.md). Open Assets/_Paridhwani/Scenes/TeaStall_Benchmark.unity in the Unity project and press Play.
+
+## Current readiness and verification
+
+Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. The latest generated world is stale; regenerate it before playing. Runtime/editor source compilation and 212 standalone assertions pass, but the current session cannot initialize Unity licensing.
+
+The project now includes reached-chapter practice, recovery/archival safeguards, title/settings/exit flow, quality and motion preferences, reusable source textures, additive world packaging and an optional cancellable text adapter. Final production art, the real separate NLP service, language review and full in-engine release testing remain outstanding.
+
+From the master workspace root, run `./game/verification/Verify-Sources.ps1` for source/logic checks. In a normal licensed Unity desktop session, use `./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke` (or `-Layout Additive`) for a fresh build and isolated rendered playthrough.
