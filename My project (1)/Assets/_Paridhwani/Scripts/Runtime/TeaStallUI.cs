@@ -288,7 +288,7 @@ namespace Paridhwani
             var invert=new Toggle("Invert vertical mouse look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
             var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
             var quality=new DropdownField("Rendering quality",new System.Collections.Generic.List<string>{"Balanced","Low","High"},(int)PresentationPolicy.ValidQuality(session.Progress.quality));quality.RegisterValueChangedCallback(e=>{session.Progress.quality=(VillageQuality)quality.index;session.SettingsChanged();});card.Add(quality);
-            Add(card,"Low reduces resolution and shadow distance; High uses full resolution and more antialiasing.","small");
+            Add(card,"Low reduces resolution, shadows and distant scenery; High uses full resolution and more antialiasing.","small");
             Add(card,"F5  Save visit    F9  Restore visit","small");
         }
         public void HideModal() { Mode=""; modal.Clear(); modal.style.display=DisplayStyle.None; }

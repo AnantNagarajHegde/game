@@ -311,3 +311,9 @@ The normal launch now opens a scrollable title menu with Continue, new story, re
 Starting a new main story explicitly confirms the reset and writes the previous visit into ArchivedVisits before saving the new one. If saving/archiving fails, the new story does not start. Accessibility/display preferences are retained. Pause offers return to title and save-and-exit. A failed exit save offers returning to the visit or explicitly leaving without the latest changes. The rendered smoke sequence now includes title/settings return, chapter practice and a new main visit using its isolated save.
 
 Runtime/editor compilation and 209 assertions pass, including real archive-file creation with the injected storage codec. Native menu layout, interaction, archives with Unity serialization and the whole newly generated game still require the engine run.
+
+## Final source hardening
+
+Rendering quality now also controls cached renderer-distance culling (45/80/120 metres) while retaining all collision and quest objects. This reduces distant draw work; it is not LOD mesh production or proven FPS improvement. The opt-in frame profiler waits for initial gameplay movement before its warm-up so it does not profile an unattended title screen as the representative scene.
+
+Regeneration preserves copies of every dirty loaded scene, including untitled scenes, before replacing generated content. Deprecated object-finding APIs were updated against the installed Unity references. The smoke sequence includes reduced camera motion, audio/presentation save restoration, title return, chapter practice and a fake optional text adapter that cannot grant quest effects. These engine tests remain authored but unexecuted. Source compilation and 209 assertions pass.

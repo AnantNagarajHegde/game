@@ -163,7 +163,7 @@ namespace Paridhwani.Editor
             Check(!string.IsNullOrEmpty(sceneGuid),"scene has imported GUID");
             foreach(var entry in EditorBuildSettings.scenes) if(entry.path==scene)
                 Check(entry.guid.ToString()==sceneGuid,"Build Settings uses imported scene GUID");
-            var session=UnityEngine.Object.FindFirstObjectByType<TeaStallSession>();
+            var session=UnityEngine.Object.FindAnyObjectByType<TeaStallSession>();
             Check(session && session.player && session.vendor && session.ui && session.ambience,"scene references");
             Check(session.villagers!=null && session.villagers.Length==14,"fourteen NPC instances share interaction system");
             foreach(var npc in session.villagers) Check(npc && npc.eyes,"NPC eye anchors");
@@ -181,18 +181,18 @@ namespace Paridhwani.Editor
                 Check(!Physics.CheckCapsule(point+Vector3.up*.3f,point+Vector3.up*1.4f,.25f,~(1<<2)),"river route approach clearance");
             Check(Physics.CheckCapsule(new Vector3(-29.85f,.4f,0),new Vector3(-29.85f,1.3f,0),.25f,~(1<<2)),"water-edge barrier");
             Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/River Water")),"river shader compile");
-            foreach(var filter in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            foreach(var filter in UnityEngine.Object.FindObjectsByType<MeshFilter>())
                 if(filter.name=="Sagging canvas awning" || filter.name=="Areca crown")
                     foreach(var normal in filter.sharedMesh.normals) Check(normal.sqrMagnitude>.5f,"fabric/foliage normals must not cancel");
-            var volume=UnityEngine.Object.FindFirstObjectByType<UnityEngine.Rendering.Volume>();
+            var volume=UnityEngine.Object.FindAnyObjectByType<UnityEngine.Rendering.Volume>();
             Check(volume && volume.sharedProfile && volume.sharedProfile.components.Count==4,"atmosphere profile");
             foreach(var effect in volume.sharedProfile.components) Check(effect && AssetDatabase.Contains(effect),"volume effects persisted as subassets");
             Check(RenderSettings.skybox && RenderSettings.skybox.shader.name=="Paridhwani/Overcast Sky","sunless sky shader");
             Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/Overcast Sky")),"sky shader compile");
             Check(session.player.actions!=null,"input actions assigned");
             Check(session.ui.kannadaFont && session.ui.latinFont,"fonts bundled");
-            Check(UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None).Length==1,"one audio listener");
-            Check(UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None).Length==1,"one camera");
+            Check(UnityEngine.Object.FindObjectsByType<AudioListener>().Length==1,"one audio listener");
+            Check(UnityEngine.Object.FindObjectsByType<Camera>().Length==1,"one camera");
             Check(session.offeredTea && session.offeredWater,"drink props");
             Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/Village Surface")),"village shader compile");
             Debug.Log("PARIDHWANI_CHECKS_OK: story source gates, fourteen NPC instances, evidence, ending/practice saves, recovery and generated scene references.");

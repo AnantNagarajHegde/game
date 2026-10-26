@@ -37,12 +37,11 @@ namespace Paridhwani.Editor
         {
             if(!Application.isBatchMode)
             {
-                var active=EditorSceneManager.GetActiveScene();
-                if(active.IsValid() && active.isDirty)
-                {
-                    string backup=Root+"/Scenes/ReviewBackups"; Directory.CreateDirectory(backup); AssetDatabase.Refresh();
-                    if(!EditorSceneManager.SaveScene(active,backup+"/BeforeRegeneration_"+DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")+".unity",true))
-                        throw new IOException("Could not preserve the edited scene before regeneration.");
+                for(int index=0;index<SceneManager.sceneCount;index++) {
+                    var active=SceneManager.GetSceneAt(index);if(!active.IsValid() || !active.isDirty)continue;
+                    string backup=Root+"/Scenes/ReviewBackups";Directory.CreateDirectory(backup);AssetDatabase.Refresh();
+                    string name="BeforeRegeneration_"+index+"_"+DateTime.UtcNow.ToString("yyyyMMdd_HHmmssfff")+".unity";
+                    if(!EditorSceneManager.SaveScene(active,backup+"/"+name,true))throw new IOException("Could not preserve an edited scene before regeneration.");
                 }
             }
             foreach(string path in new[]{"Scenes","Generated","Generated/Materials","Generated/Meshes","Generated/UI"})

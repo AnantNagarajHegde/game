@@ -77,7 +77,7 @@ namespace Paridhwani.Editor
             foreach(var component in asset.components)
                 if(component && !AssetDatabase.Contains(component)) AssetDatabase.AddObjectToAsset(component,asset);
             EditorUtility.SetDirty(asset);
-            Object.FindFirstObjectByType<Volume>().sharedProfile=asset;
+            Object.FindAnyObjectByType<Volume>().sharedProfile=asset;
         }
 
         static void ConfigureBenchmarkRendering()
