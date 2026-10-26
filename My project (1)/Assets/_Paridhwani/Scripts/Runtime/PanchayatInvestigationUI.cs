@@ -26,7 +26,7 @@ namespace Paridhwani
                 Answers(scroll,new[]{new TeaLine("ಬಸ್ ಚೀಟಿ","Bus cheeti","The advance bus booking"),new TeaLine("ಕಡತದ ಸೂಚಿ","Kadatada soochi","The library catalogue entry alone"),new TeaLine("ಮೂಲ ಪತ್ರ","Moola patra","The family's original deed for council review")});
             } else {
                 Add(scroll,"Recorded: library clearance scheduled Friday at 09:00; seek the original deed at Gudda Mane for council review. Submitting it does not itself guarantee protection.","success");
-                Add(scroll,"PUBLIC ROUTE ADVISORY: Ask the forest checkpost about safe access to Gudda Mane. The river road may be closed after rain. The checkpost journey is the next chapter.","body");
+                Add(scroll,"PUBLIC ROUTE ADVISORY: Ask the forest checkpost about safe access to Gudda Mane. The river road may be closed after rain. Ask Raghavendra at the auto pickup for transport to the checkpost.","body");
             }
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
             var english=new Toggle("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowPanchayatActivity();}); aids.Add(english);

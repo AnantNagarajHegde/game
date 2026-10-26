@@ -15,12 +15,13 @@ namespace Paridhwani
         public bool gurumurthyAccountKnown,rathnammaAccountKnown,witnessAccountsCompared,guddaFamilyLeadKnown;
         public bool libraryAccessGranted,archiveShelfLocated,deedReferenceFound,thursdayStarted;
         public bool noticeIdentified,deadlineKnown,deedRequired,checkpostDestinationKnown;
+        public bool checkpostVisited,checkpostAccountKnown,ananyaLocationReported,ridgeRouteOpen,trailInstructionsUnderstood,trailPermission;
         public string drink = "";
         public bool english = true, roman = true, muted;
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
-        public string Objective => checkpostDestinationKnown ? "Panchayat evidence complete - forest checkpost journey comes next" : deadlineKnown ? "Compare the archive reference with the notice checklist" : noticeIdentified ? "Read the clearance day and time" : thursdayStarted ? "Read the public panchayat notice" : deedReferenceFound ? "Return to Somanna when ready to rest" : libraryAccessGranted ? "Read the catalogue inside the library" : guddaFamilyLeadKnown ? "Bring the Gudda Mane family name to Somanna" : witnessAccountsCompared ? "Ask Rathnamma about the Gudda Mane family" : gurumurthyAccountKnown && rathnammaAccountKnown ? "Compare the two witness accounts" : templeLeadKnown ? "Speak to Gurumurthy and Rathnamma at the northern stop" :
+        public string Objective => trailPermission ? "Checked ridge approach available - review the trailhead" : trailInstructionsUnderstood ? "Wait for Kencha to confirm the ridge is checked" : checkpostAccountKnown ? "Review Kencha\u0027s safe ridge directions" : checkpostVisited ? "Ask Kencha about Ananya and the road closure" : checkpostDestinationKnown ? "Ask Raghavendra for a ride to the forest checkpost" : deadlineKnown ? "Compare the archive reference with the notice checklist" : noticeIdentified ? "Read the clearance day and time" : thursdayStarted ? "Read the public panchayat notice" : deedReferenceFound ? "Return to Somanna when ready to rest" : libraryAccessGranted ? "Read the catalogue inside the library" : guddaFamilyLeadKnown ? "Bring the Gudda Mane family name to Somanna" : witnessAccountsCompared ? "Ask Rathnamma about the Gudda Mane family" : gurumurthyAccountKnown && rathnammaAccountKnown ? "Compare the two witness accounts" : templeLeadKnown ? "Speak to Gurumurthy and Rathnamma at the northern stop" :
             riverDeductionKnown ? "Ask Giri about witnesses near the northern stop" :
             RiverInvestigation.CanDeduce(this) ? "Compare the bicycle and booking evidence with Giri" :
             bookingSlipFound && !bookingSlipRead ? "Read the advance booking slip" :
@@ -69,6 +70,8 @@ namespace Paridhwani
             error = "The saved visit could not be read. Starting at the bus stand.";
             return new TeaProgress();
         }
+        public static bool SupportedPosition(Vector3 v) => float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z) && v.y>=-1 && v.y<=4 &&
+            ((v.x>=-30 && v.x<=13 && v.z>=-13 && v.z<=34) || CheckpostInvestigation.IsCheckpostPosition(v));
         static bool TryRead(string file, out TeaProgress p)
         {
             p = null;
@@ -79,9 +82,7 @@ namespace Paridhwani
                 if (!json.TrimStart().StartsWith("{") || !json.Contains("\"version\"")) return false;
                 p = JsonUtility.FromJson<TeaProgress>(json);
                 if (p == null || p.version != 1) return false;
-                if (!float.IsFinite(p.position.x) || !float.IsFinite(p.position.y) ||
-                    !float.IsFinite(p.position.z) || p.position.x < -30 || p.position.x > 13 ||
-                    p.position.z < -13 || p.position.z > 34 || p.position.y < -1 || p.position.y > 4)
+                if (!SupportedPosition(p.position))
                     p.position = new Vector3(2.1f, .2f, -5.7f);
                 if (!float.IsFinite(p.heading)) p.heading = -18;
                 p.textScale = float.IsFinite(p.textScale) ? Mathf.Clamp(p.textScale, .85f, 1.3f) : 1;

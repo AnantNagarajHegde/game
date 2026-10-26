@@ -283,9 +283,37 @@ namespace Paridhwani
             session.Choose(1); session.Save(); session.Load();
             Check(session.Progress.noticeIdentified && session.Progress.deadlineKnown && session.Progress.deedRequired && session.Progress.checkpostDestinationKnown,"panchayat evidence survives restore");
             session.OpenNotebook(); yield return Shot("30-panchayat-notebook"); session.Close();
+            player.Restore(new Vector3(6.5f,.15f,-5.8f),24); player.blocked=true;
+            yield return new WaitForSecondsRealtime(.8f); Check(session.Nearby=="Talk to Raghavendra","town pickup reachable");
+            session.Interact(); yield return new WaitForSecondsRealtime(.9f); session.Choose(0);
+            Check(!session.Progress.checkpostVisited,"travel requires confirmation"); session.Close();
+            Check(session.ui.Mode=="conversation" && !session.Progress.checkpostVisited,"cancelled journey returns to driver");
+            session.Choose(0); session.ConfirmTravel();
+            Check(session.Progress.checkpostVisited && player.transform.position.x>40 && session.ui.Mode=="travel-arrival","confirmed trip reaches safe approach");
+            yield return Shot("31-checkpost-arrival"); session.Close(); player.blocked=true;
+            yield return WalkTo(new Vector3(55,0,-.8f)); player.SetLookAngles(0,17); yield return new WaitForSecondsRealtime(.8f);
+            Check(session.Nearby=="Read the road closure and ridge directions","public closure board reachable"); session.Interact();
+            Check(!session.Progress.checkpostAccountKnown && session.ridgeGate.activeSelf,"closure alone grants no route access"); session.Close();
+            player.blocked=true; yield return WalkTo(new Vector3(51,0,1.1f)); player.SetLookAngles(0,17);
+            yield return new WaitForSecondsRealtime(.8f); Check(session.Nearby=="Talk to Kencha","shelter reaches Kencha");
+            session.Interact(); yield return new WaitForSecondsRealtime(.9f); Check(player.ConversationBlend>.99f,"guard uses FPP transition");
+            session.Choose(1); session.Choose(0); Check(session.Progress.ananyaLocationReported && !session.Progress.trailPermission,"reported location is not trail permission");
+            yield return Shot("32-kencha-account"); session.Choose(0); session.Choose(0);
+            session.SubmitInvestigationAnswer(0); Check(!session.Progress.trailPermission,"unsafe road choice rejected");
+            session.OpenNotebook(); session.Close(); Check(session.ActiveActivity==VillageActivity.CheckpostDirections,"notebook preserves directions task");
+            session.SubmitInvestigationAnswer(1); Check(session.Progress.trailPermission && !session.ridgeGate.activeSelf,"checked ridge gate opens after understanding");
+            yield return Shot("33-ridge-directions"); session.Close(); Check(session.Turn.Id=="ready","directions resume guard at ready turn");
+            session.Choose(1); yield return new WaitForSecondsRealtime(.9f); player.blocked=true;
+            yield return WalkTo(new Vector3(47.5f,0,1.1f)); yield return WalkTo(new Vector3(48,0,6.8f)); yield return WalkTo(new Vector3(48,0,10));
+            Check(Physics.CheckCapsule(new Vector3(60.5f,.4f,5),new Vector3(60.5f,1.3f,5),.25f,~(1<<2)),"road closure stays solid after ridge permission");
+            session.Save(); session.Load(); Check(player.transform.position.x>40 && session.Progress.trailPermission,"checkpost position and learned directions restore");
+            player.Restore(new Vector3(56.5f,.15f,-5.5f),0); player.blocked=true; yield return new WaitForSecondsRealtime(.8f);
+            session.Interact(); yield return new WaitForSecondsRealtime(.9f); session.Choose(0); session.ConfirmTravel();
+            Check(player.transform.position.x<13 && session.Progress.checkpostVisited && session.Progress.trailPermission,"return trip preserves evidence");
+            yield return Shot("34-village-return"); session.Close();
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),
-                "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, eight NPCs, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
+                "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, eleven NPC instances, confirmed checkpost round-trip, route permission, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
             Debug.Log("VILLAGE_SMOKE_OK "+output+" Frames="+(Time.frameCount-startFrame));
             Application.Quit(0);
         }

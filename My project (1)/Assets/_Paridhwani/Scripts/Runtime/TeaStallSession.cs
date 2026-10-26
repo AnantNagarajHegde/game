@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 namespace Paridhwani
 {
-    public sealed class TeaStallSession : MonoBehaviour
+    public sealed partial class TeaStallSession : MonoBehaviour
     {
         public VillageWalker player;
         public Transform vendor,sign,libraryLane,busTimetable,bicycle,bicycleView,bicycleLookTarget;
@@ -29,6 +29,7 @@ namespace Paridhwani
             get
             {
                 if(Progress==null || ui.IsModal) return "";
+                string journeyHint=CheckpostHint(); if(journeyHint.Length>0) return journeyHint;
                 if(Progress.thursdayStarted && panchayatNotice)
                     return Progress.checkpostDestinationKnown?"Next chapter: safe travel via the forest checkpost":Mathf.CeilToInt(Vector3.Distance(player.transform.position,panchayatNotice.position))+" m / PANCHAYAT PUBLIC NOTICE";
                 if(Progress.templeLeadKnown)
@@ -89,6 +90,7 @@ namespace Paridhwani
         }
         void ApplyState()
         {
+            ApplyCheckpostState();
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
             if(servedMeal) servedMeal.SetActive(Progress.mealOrdered);
@@ -153,6 +155,7 @@ namespace Paridhwani
                     hit.collider.GetComponentInParent<VillageNpc>()!=npc) continue;
                 nearest=d; nearbyNpc=npc;
             }
+            if(FindCheckpostInteraction()) return;
             if(panchayatNotice && Vector3.Distance(player.transform.position,panchayatNotice.position)<2.3f && !nearbyNpc)
             { Nearby="Read the panchayat notice"; nearbyInspection=6; }
             else if(archiveDesk && Progress.libraryAccessGranted && Vector3.Distance(player.transform.position,archiveDesk.position)<2.3f && !nearbyNpc)
@@ -170,6 +173,8 @@ namespace Paridhwani
         public void Interact()
         {
             if(nearbyNpc) { StartConversation(nearbyNpc); return; }
+            if(nearbyInspection==7) { OpenActivity(VillageActivity.CheckpostDirections); return; }
+            if(nearbyInspection==8) { OpenActivity(VillageActivity.RidgeTrailhead); return; }
             if(nearbyInspection==6) { OpenActivity(VillageActivity.PanchayatNotice); return; }
             if(nearbyInspection==5) { OpenActivity(VillageActivity.ArchiveReference); return; }
             if(nearbyInspection==4) { OpenActivity(VillageActivity.BicycleInspection); return; }
@@ -190,7 +195,7 @@ namespace Paridhwani
         {
             if(!npc || !npc.eyes) return;
             activityHistory.Clear(); notebookActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false;
-            ActiveNpc=npc; Provider=npc.role==VillageNpcRole.Librarian && Progress.guddaFamilyLeadKnown ? new ArchiveConversation() : npc.CreateProvider(); Turn=Provider.Start(Progress);
+            ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
             player.BeginConversation(npc.eyes); ui.ShowConversation(); SetCursor(true);
         }
         public void Choose(int index)
@@ -216,7 +221,7 @@ namespace Paridhwani
             ActiveActivity=activity;
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();
-            if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
+            if(activity==VillageActivity.CheckpostTravel || activity==VillageActivity.VillageReturn || activity==VillageActivity.CheckpostDirections || activity==VillageActivity.RidgeTrailhead) ui.ShowCheckpostActivity(activity); else if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
             SetCursor(true);
         }
         public void SelectBicyclePart(BicyclePart part)
@@ -230,6 +235,7 @@ namespace Paridhwani
             bool correct=false;
             switch(ActiveActivity)
             {
+                case VillageActivity.CheckpostDirections: case VillageActivity.RidgeTrailhead: correct=CheckpostInvestigation.Answer(Progress,index,ridgeRouteChecked); break;
                 case VillageActivity.PanchayatNotice: correct=PanchayatInvestigation.Answer(Progress,index); break;
                 case VillageActivity.ArchiveReference: correct=Progress.archiveShelfLocated?ArchiveInvestigation.ReadReference(Progress,index):ArchiveInvestigation.FindShelf(Progress,index); break;
                 case VillageActivity.MarketReceipt: correct=MarketInvestigation.TryReadReceipt(Progress,index); break;
@@ -239,6 +245,7 @@ namespace Paridhwani
                 case VillageActivity.RiverDeduction: correct=RiverInvestigation.Deduce(Progress,index); break;
             }
             if(correct) { activityChanged=true; ApplyState(); Save(); }
+            if(ActiveActivity==VillageActivity.CheckpostDirections || ActiveActivity==VillageActivity.RidgeTrailhead) { ui.ShowCheckpostActivity(ActiveActivity,correct?"Directions recorded. Check the route status before proceeding.":"Edakke means left. Follow the fence; the damaged road and river are closed."); return; }
             if(ActiveActivity==VillageActivity.PanchayatNotice) { ui.ShowPanchayatActivity(correct?"Recorded with its source in your field notes.":!Progress.noticeIdentified?"Granthalaya means library. Match the named place.":!Progress.deadlineKnown?"Shukravaara is Friday; beligge means morning; ombattu is nine.":"Moola patra is the original document. The catalogue identifies it but cannot replace it."); return; }
             if(ActiveActivity==VillageActivity.ArchiveReference) { ui.ShowArchiveActivity(correct?"Recorded with its source.":Progress.archiveShelfLocated?"Moola patra means original document. A catalogue is not proof of arrival.":"Eradane means second; olage means inside. Try again."); return; }
             string hint=correct?"Recorded with its source in your field notes.":

@@ -29,6 +29,26 @@ public static class ChapterChecks {
  }
  public static int Main() {
  Witnesses(false); Witnesses(true);
+ var journey=new TeaProgress(); var driver=new TravelConversation(false); var guard=new CheckpostConversation(false);
+ Check(driver.Start(journey).Id=="early" && !CheckpostInvestigation.CanTravel(journey),"early travel blocked");
+ Check(!CheckpostInvestigation.Answer(journey,1,true),"public board alone grants no trail permission");
+ journey.thursdayStarted=true; journey.deedRequired=true; journey.checkpostDestinationKnown=true;
+ Check(CheckpostInvestigation.CanTravel(journey) && driver.Start(journey).Choices[0].Activity==VillageActivity.CheckpostTravel,"earned journey offers confirmation");
+ driver.Reply(driver.Start(journey),1,journey); Check(!journey.checkpostVisited,"declined trip grants no arrival");
+ Check(guard.Start(journey).Id=="early","guard requires arrival"); journey.checkpostVisited=true;
+ var jt=guard.Start(journey); jt=guard.Reply(jt,1,journey); Check(!journey.checkpostAccountKnown,"language help grants no account");
+ jt=guard.Reply(jt,0,journey); Check(journey.checkpostAccountKnown && journey.ananyaLocationReported && !journey.trailPermission,"account distinct from route permission");
+ Check(!CheckpostInvestigation.Answer(journey,0,false) && !journey.trailInstructionsUnderstood,"unsafe road answer rejected");
+ Check(CheckpostInvestigation.Answer(journey,1,false) && journey.trailInstructionsUnderstood && !journey.trailPermission,"correct language cannot clear an unchecked route");
+ guard=new CheckpostConversation(true); jt=guard.Start(journey); guard.Reply(jt,1,journey);
+ Check(journey.ridgeRouteOpen && journey.trailPermission,"physical clearance plus understood instructions grants entry");
+ CheckpostInvestigation.RefreshPermission(journey,false); Check(!journey.trailPermission && !journey.ridgeRouteOpen,"route closure revokes permission despite saved facts");
+ CheckpostInvestigation.RefreshPermission(journey,true); Check(journey.trailPermission,"reopening preserves understood directions");
+ Check(new TravelConversation(true).Start(journey).Choices[0].Activity==VillageActivity.VillageReturn,"return journey retained");
+ Check(TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(55,.15f,-5)),"checkpost arrival is saveable");
+ Check(TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(-26,.15f,2)),"river saves retained");
+ Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(30,0,0)),"empty gap between locations rejected");
+ Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(float.NaN,0,0)),"invalid coordinates rejected");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;

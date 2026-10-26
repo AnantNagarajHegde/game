@@ -43,6 +43,11 @@ namespace Paridhwani
         void Update()
         {
             if(!rainSource || !listener) return;
+            if(rain) {
+                var target=listener.position+Vector3.up*7;
+                if((rain.transform.position-target).sqrMagnitude>900) rain.Clear();
+                rain.transform.position=target;
+            }
             if(walker && walker.Speed>.15f && !walker.blocked && Time.time>nextStep)
             {
                 bool stone=listener.position.x<-.6f; footsteps.pitch=stone?1.25f:.72f;
