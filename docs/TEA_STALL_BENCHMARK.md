@@ -220,3 +220,11 @@ Runtime/editor source compilation and 87 executable logic assertions pass. These
 ## Story-loop progress estimate
 
 The source now covers approximately 11 of 15 major story beats (about 73% by equal milestone count): arrival/tea, library introduction, mess, market/timetable, river, temple witnesses, archive/rest, panchayat, checkpost, ridge, and reunion. This is not an estimate of total development effort or release readiness; beats differ in complexity. Trunk/deed, final return, public finale and epilogue remain. Current generated scene/build verification covers less than the latest source, and final environment art, characters, animation, external NLP integration and release QA are not included in this percentage.
+
+## Trunk and deed cycle
+
+At the farm archive trunk, use E for a stable inspection view. Enter 1207 from Kamalamma's twelve-month/seven-day reminder; the optional reminder fills the code without granting success until Try the lock is pressed beside the physical trunk. Attempts are unlimited. Opening changes the hinged lid and reveals the document but does not collect it.
+
+Read the original story deed through three supported clause tasks: education purpose, restricted commercial use, community beneficiary. Wrong answers give feedback and retry; Tab preserves the current page and lock attempt. The register/signatories are linked to the library catalogue. After all clauses, collect the original into its protective folder while beside the trunk. Council review remains necessary. Notebook rereading is supported. These are authored fictional clauses, not a real legal instrument.
+
+Runtime/editor compilation and 98 logic assertions pass. Unity scene generation, save serialization, physical trunk/camera review and rendering remain unverified in this session. The scene generator includes the hinged lid, paper and inspection anchors; regenerate before playing.

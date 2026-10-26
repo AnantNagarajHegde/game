@@ -92,6 +92,7 @@ namespace Paridhwani
         void ApplyState()
         {
             ApplyCheckpostState();
+            ApplyDeedState();
             if(farmGate) farmGate.SetActive(!Progress.ridgeWayfindingKnown || !Progress.trailPermission);
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
@@ -158,6 +159,7 @@ namespace Paridhwani
                     hit.collider.GetComponentInParent<VillageNpc>()!=npc) continue;
                 nearest=d; nearbyNpc=npc;
             }
+            if(FindDeedInteraction()) return;
             if(FindRidgeInteraction()) return;
             if(FindCheckpostInteraction()) return;
             if(panchayatNotice && Vector3.Distance(player.transform.position,panchayatNotice.position)<2.3f && !nearbyNpc)
@@ -177,6 +179,7 @@ namespace Paridhwani
         public void Interact()
         {
             if(nearbyNpc) { StartConversation(nearbyNpc); return; }
+            if(nearbyInspection==10) { OpenActivity(VillageActivity.TrunkLock); return; }
             if(nearbyInspection==9) { OpenActivity(VillageActivity.RidgeWayfinding); return; }
             if(nearbyInspection==7) { OpenActivity(VillageActivity.CheckpostDirections); return; }
             if(nearbyInspection==8) { OpenActivity(VillageActivity.RidgeTrailhead); return; }
@@ -224,6 +227,7 @@ namespace Paridhwani
             if(remember && ui.Mode=="evidence" && ActiveActivity!=VillageActivity.None && ActiveActivity!=activity) activityHistory.Push(ActiveActivity);
             if(activity==VillageActivity.BicycleInspection && remember && ui.Mode!="evidence") SelectedBicyclePart=BicyclePart.None;
             ActiveActivity=activity;
+            if(OpenDeedActivity(activity)) { SetCursor(true); return; }
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();
             if(activity==VillageActivity.RidgeWayfinding) ui.ShowRidgeActivity(); else if(activity==VillageActivity.CheckpostTravel || activity==VillageActivity.VillageReturn || activity==VillageActivity.CheckpostDirections || activity==VillageActivity.RidgeTrailhead) ui.ShowCheckpostActivity(activity); else if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
@@ -242,6 +246,7 @@ namespace Paridhwani
             {
                 case VillageActivity.CheckpostDirections: case VillageActivity.RidgeTrailhead: correct=CheckpostInvestigation.Answer(Progress,index,ridgeRouteChecked); break;
                 case VillageActivity.RidgeWayfinding: correct=RidgeInvestigation.Answer(Progress,index,ridgeRouteChecked,ridgeMarker && Vector3.Distance(player.transform.position,ridgeMarker.position)<3); break;
+                case VillageActivity.DeedReview: correct=DeedInvestigation.Answer(Progress,index); break;
                 case VillageActivity.PanchayatNotice: correct=PanchayatInvestigation.Answer(Progress,index); break;
                 case VillageActivity.ArchiveReference: correct=Progress.archiveShelfLocated?ArchiveInvestigation.ReadReference(Progress,index):ArchiveInvestigation.FindShelf(Progress,index); break;
                 case VillageActivity.MarketReceipt: correct=MarketInvestigation.TryReadReceipt(Progress,index); break;
@@ -253,6 +258,7 @@ namespace Paridhwani
             if(correct) { activityChanged=true; ApplyState(); Save(); }
             if(ActiveActivity==VillageActivity.CheckpostDirections || ActiveActivity==VillageActivity.RidgeTrailhead) { ui.ShowCheckpostActivity(ActiveActivity,correct?"Directions recorded. Check the route status before proceeding.":"Edakke means left. Follow the fence; the damaged road and river are closed."); return; }
             if(ActiveActivity==VillageActivity.RidgeWayfinding) { ui.ShowRidgeActivity(correct?"Direction recorded. Continue beside the fence.":"Edakke means left. Stay beside the fence; do not climb it or use the old road."); return; }
+            if(ActiveActivity==VillageActivity.DeedReview) { ui.ShowDeedActivity(ActiveActivity,correct?"Clause recorded with the original.":"Read the highlighted clause: education, restricted commercial use, or community beneficiary. Try again."); return; }
             if(ActiveActivity==VillageActivity.PanchayatNotice) { ui.ShowPanchayatActivity(correct?"Recorded with its source in your field notes.":!Progress.noticeIdentified?"Granthalaya means library. Match the named place.":!Progress.deadlineKnown?"Shukravaara is Friday; beligge means morning; ombattu is nine.":"Moola patra is the original document. The catalogue identifies it but cannot replace it."); return; }
             if(ActiveActivity==VillageActivity.ArchiveReference) { ui.ShowArchiveActivity(correct?"Recorded with its source.":Progress.archiveShelfLocated?"Moola patra means original document. A catalogue is not proof of arrival.":"Eradane means second; olage means inside. Try again."); return; }
             string hint=correct?"Recorded with its source in your field notes.":

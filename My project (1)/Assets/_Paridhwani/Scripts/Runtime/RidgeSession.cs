@@ -17,6 +17,8 @@ namespace Paridhwani
         string RidgeHint()
         {
             if(!AtCheckpost) return "";
+            if(Progress.deedRetrieved) return "ANANYA / RETURN TOGETHER";
+            if(Progress.trunkLocationKnown) return "FARM ARCHIVE / FAMILY TRUNK";
             if(Progress.guddaManeReached) return Progress.trunkLocationKnown?"Trunk recorded / lock and deed come next":Progress.disappearanceExplained?"KAMALAMMA / FAMILY RECORDS":"ANANYA / FARM VERANDA";
             if(Progress.ridgeWayfindingKnown && Progress.trailPermission) return "Follow the fenced ridge path to Gudda Mane";
             return Progress.trailPermission?"STONE MARKER / LEFT PATH / FOLLOW THE FENCE":"";

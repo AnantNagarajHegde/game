@@ -72,6 +72,17 @@ public static class ChapterChecks {
  ananya.Reply(ananya.Start(drink),choice,drink); Check(drink.farmHospitalityKnown,"kashaya, water and decline all accepted"); }
  Check(TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(48,.13f,41)),"farm position saveable");
  Check(!TeaSaveStore.SupportedPosition(new UnityEngine.Vector3(48,0,65)),"outside authored farm region rejected");
+ var locked=new TeaProgress(); Check(!DeedInvestigation.Unlock(locked,"1207",true) && !DeedInvestigation.Answer(locked,0),"early lock/document gates");
+ Check(!DeedInvestigation.Unlock(journey,"1207",false),"physical trunk proximity required");
+ Check(!DeedInvestigation.Unlock(journey,"127",true) && !DeedInvestigation.Unlock(journey,"xxxx",true),"invalid lock input grants nothing");
+ Check(DeedInvestigation.Unlock(journey,"1207",true) && !journey.deedRetrieved,"unlock does not collect original");
+ Check(!DeedInvestigation.Answer(journey,1) && !journey.deedPurposeKnown,"wrong purpose rejected");
+ Check(DeedInvestigation.Answer(journey,0) && !journey.deedConceptsReviewed,"purpose alone insufficient");
+ Check(!DeedInvestigation.Protect(journey,true),"unreviewed deed cannot be collected");
+ Check(!DeedInvestigation.Answer(journey,0) && DeedInvestigation.Answer(journey,2),"restriction retry");
+ Check(!DeedInvestigation.Answer(journey,0) && DeedInvestigation.Answer(journey,1) && journey.deedConceptsReviewed,"beneficiary completes review");
+ Check(!DeedInvestigation.Protect(journey,false) && DeedInvestigation.Protect(journey,true),"protect original at physical trunk");
+ Check(DeedInvestigation.Unlock(journey,"1207",true) && journey.deedRetrieved,"repeat inspection preserves evidence");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
