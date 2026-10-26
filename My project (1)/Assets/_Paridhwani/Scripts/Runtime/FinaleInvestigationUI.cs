@@ -5,7 +5,8 @@ namespace Paridhwani {
  var card=Card("evidence","paper"); Class(card,"evidence-card"); var header=new VisualElement(); Class(header,"row"); card.Add(header); Add(header,"LIBRARY COURT / COUNCIL REVIEW","eyebrow"); Button(header,session.EvidenceBackLabel+" [Esc]",session.Close,"quiet-button");
  var scroll=new ScrollView(); Class(scroll,"evidence-scroll"); card.Add(scroll); Add(scroll,"The original and its clauses","title"); if(feedback!="") Add(scroll,feedback,"feedback");
  if(!FinaleInvestigation.CanPresent(session.Progress)) { Add(scroll,"Return together with the protected and reviewed original, then confirm Friday preparations.","body"); return; }
- if(session.Progress.workSuspended) { Add(scroll,"Interim decision: clearance work is suspended while the council reviews the original. The community awaits the later review outcome.","success"); return; }
+ if(session.Progress.reviewOutcomeKnown) {Add(scroll,"Later review completed: the community library is protected. Friday's suspension was the interim step recorded in your notes.","success");return;}
+ if(session.Progress.workSuspended) { Add(scroll,"Interim decision: clearance work is suspended while the council reviews the original. The community awaits the later review outcome.","success"); Button(scroll,"Review the later council outcome",()=>session.OpenActivity(VillageActivity.ReviewOutcome)); return; }
  if(!session.AtCouncil) { Add(scroll,"Review your notes here; stand near the council president to present the original and explain its clauses.","body"); return; }
  Button(scroll,session.FinaleHelp?"Hide Ananya's explanation":"Ask Ananya for help",()=>{session.FinaleHelp=!session.FinaleHelp;ShowCouncilActivity();},"quiet-button");
  if(session.FinaleHelp) Add(scroll,"Ananya: present the original, explain education, identify commercial use as restricted, then name the community as beneficiary. Asking for help does not change the ending.","feedback");

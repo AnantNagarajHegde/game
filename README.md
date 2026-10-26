@@ -2,7 +2,7 @@
 
 Owns the learner-facing product experience: product concept, world and location design, story, characters, quests, game progression, and UI/UX coordination.
 
-This repository is part of the Paridhwani master workspace. It is an independent Git repository. The Unity 3D prototype includes the tea stall, library veranda, mess, market and river repair shed, with smooth first-person conversations, a 3D bicycle inspection, evidence-reading activities and saved progress. Source generators now also include the temple witnesses, an enterable library archive, the panchayat notice chapter, and confirmed forest-checkpost travel with Kencha, the marked ridge walk, and the Gudda Mane reunion/trunk-location lead. Regenerate the benchmark in Unity to include these latest changes; the checked-in scene and existing executable have not yet been rebuilt for them.
+This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. Regenerate the benchmark in a working Unity Editor to include the latest source: the checked-in generated scene and existing executable are older, and the latest engine-dependent tests remain unexecuted. The current art is procedural prototype work.
 
 
 ## Unity 3D implementation plan

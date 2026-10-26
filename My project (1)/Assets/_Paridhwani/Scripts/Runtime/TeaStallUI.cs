@@ -11,7 +11,7 @@ namespace Paridhwani
         public Font latinFont,kannadaFont;
         TeaStallSession session;
         VisualElement root,modal,prompt;
-        Label objective,saveStatus,promptText,routeHint;
+        Label objective,saveStatus,promptText,routeHint,storyDay,placeDay;
         FontAsset latinAsset,kannadaAsset;
         public string Mode { get; private set; } = "";
         public bool IsModal => Mode!="";
@@ -32,10 +32,10 @@ namespace Paridhwani
             Add(brand,"A language. A place. A way to belong.","tagline");
             var place=new VisualElement(); Class(place,"place"); top.Add(place);
             Add(place,"KALYANAPURA","eyebrow");
-            Add(place,"Wednesday  ·  09:00  ·  Monsoon","small");
+            placeDay=Add(place,"Wednesday / Monsoon","small");
 
             var task=new VisualElement(); Class(task,"task"); root.Add(task);
-            Add(task,"YOUR FIRST MORNING","eyebrow");
+            storyDay=Add(task,"YOUR FIRST MORNING","eyebrow");
             objective=Add(task,"","objective");
             routeHint=Add(task,"","small");
             saveStatus=Add(task,"","small");
@@ -53,6 +53,8 @@ namespace Paridhwani
             if(session==null || root==null) return;
             root.Q<VisualElement>(className:"task").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
             root.Q<VisualElement>(className:"controls").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
+            string day=session.Progress.epilogueStarted?"SOME WEEKS LATER":session.Progress.fridayFinaleStarted?"FRIDAY / BEFORE 09:00":session.Progress.thursdayStarted?"THURSDAY":"WEDNESDAY";
+            storyDay.text=(session.IsPracticeVisit?"PRACTICE / ":"")+day; placeDay.text=day+" / Monsoon";
             objective.text=session.Progress.Objective; saveStatus.text=session.SaveMessage;
             routeHint.text=session.NavigationHint;
             prompt.style.display=!IsModal && session.Nearby!=null ? DisplayStyle.Flex:DisplayStyle.None;
@@ -128,7 +130,7 @@ namespace Paridhwani
             var card=Card("notebook","notebook");
             var header=new VisualElement(); Class(header,"row"); card.Add(header);
             Add(header,"FIELD NOTES  /  KALYANAPURA","eyebrow"); Button(header,session.NotebookBackLabel+"  [Tab]",session.Close,"quiet-button");
-            Add(card,session.Progress.thursdayStarted?"Thursday morning":"The first morning","title");
+            Add(card,session.Progress.epilogueStarted?"The reopened library":session.Progress.fridayFinaleStarted?"Friday at the library court":session.Progress.thursdayStarted?"Thursday morning":"The first morning","title");
             var scroll=new ScrollView(); Class(scroll,"notebook-scroll"); card.Add(scroll);
             Add(scroll,"WORDS IN USE","section-title");
             if(session.Progress.greeted) Word(scroll,"ನಮಸ್ಕಾರ","Namaskara","Hello / a respectful greeting");
@@ -204,13 +206,15 @@ namespace Paridhwani
                 Add(scroll,"Giri’s notice beside the bus timetable reports a bicycle near the river weir. The notice alone does not prove an accident or Ananya’s whereabouts. See the direct observations below if you have inspected the bicycle.","body");
             }
             AddRiverNotebook(scroll);
+            if(session.Progress.reviewOutcomeKnown) { Add(scroll,"LATER COUNCIL REVIEW / OUTCOME","section-title"); Add(scroll,"After reviewing the original and records, the council confirmed protection for the community library. This later decision is separate from Friday's interim suspension.","body"); }
+            if(session.Progress.storyCompleted) Add(scroll,session.Progress.endingChoice==StoryEnding.Stay?"You chose to stay and help archive. The library is protected.":"You chose to depart with an invitation to return. The library is protected.","body");
             if(session.Progress.deedPresented) { Add(scroll,"LIBRARY COURT / ORIGINAL PRESENTED","section-title"); Button(scroll,"Review council evidence",()=>session.OpenActivity(VillageActivity.CouncilEvidence)); }
-            if(session.Progress.workSuspended) Add(scroll,"Council president: clearance works suspended pending review of the original, its educational purpose, commercial-use restriction and community beneficiary. Final protection is not yet confirmed.","body");
+            if(session.Progress.workSuspended) Add(scroll,"Council president: clearance works suspended pending review of the original, its educational purpose, commercial-use restriction and community beneficiary. That was the interim decision; any later outcome is recorded separately.","body");
             if(session.Progress.returnJourneyStarted) { Add(scroll,"RETURN / ORIGINAL PROTECTED","section-title"); Add(scroll,"Returning with Ananya by the checked ridge and open auto approach. Walking and skipping the familiar journey preserve the same evidence.","body"); }
             if(session.Progress.returnedWithAnanya) Add(scroll,"Returned safely to Kalyanapura with Ananya and the original. Friday begins only after confirming preparations with her.","body");
             if(session.Progress.fridayFinaleStarted) Add(scroll,"FRIDAY / BEFORE 09:00: meet the council at the library court. Work is not suspended until the evidence is presented and reviewed.","body");
             if(session.Progress.trunkOpened) { Add(scroll,"FAMILY TRUNK / OPENED","section-title"); Button(scroll,"Review the original deed",()=>session.OpenActivity(VillageActivity.DeedReview)); }
-            if(session.Progress.deedConceptsReviewed) Add(scroll,"Original / 1952: education purpose; restricted commercial use; community beneficiary. Family register/signatories match the catalogue reference. Council review is still required.","body");
+            if(session.Progress.deedConceptsReviewed) Add(scroll,"Original / 1952: education purpose; restricted commercial use; community beneficiary. Family register/signatories match the catalogue reference. These clauses provided the basis for council review.","body");
             if(session.Progress.deedRetrieved) Add(scroll,"Original deed protected in its folder. Assistance use does not alter its value or the story outcome.","body");
             if(session.Progress.ridgeWayfindingKnown) { Add(scroll,"RIDGE / STONE MARKER","section-title"); Add(scroll,"Turn left at the stone marker and stay beside the fence through the sheltered bend. The old road remains closed. Return by the same marked trail.","body"); }
             if(session.Progress.guddaManeReached) Add(scroll,"Reached Gudda Mane by the marked ridge. This is your own journey, distinct from earlier witness reports.","body");
@@ -228,7 +232,7 @@ namespace Paridhwani
             if(session.Progress.checkpostDestinationKnown) Add(scroll,"Route advisory: ask the forest checkpost about safe access before travelling to Gudda Mane. Do not bypass a closure. Ask Raghavendra at the auto pickup for a ride to the checkpost.","body");
             if(session.Progress.libraryAccessGranted) { Add(scroll,"SOMANNA / LIBRARY ACCESS","section-title"); Add(scroll,"Master-key access arranged. The catalogue points inside the second cupboard.","body"); Button(scroll,"Reopen archive catalogue",()=>session.OpenActivity(VillageActivity.ArchiveReference)); }
             if(session.Progress.deedReferenceFound) Add(scroll,"Catalogue / 1952 land record: original deed retained by Shankare Gowda's family at Gudda Mane. Ananya consulted the reference on Monday. This establishes her research target, not arrival or legal protection.","body");
-            if(session.Progress.thursdayStarted) Add(scroll,"THURSDAY MORNING: rested with evidence preserved. Next lead: read the panchayat clearance notice at the public counter.","section-title");
+            if(session.Progress.thursdayStarted) Add(scroll,"THURSDAY: rested with evidence preserved before the public panchayat notice investigation.","section-title");
             if(session.Progress.gurumurthyAccountKnown) { Add(scroll,"GURUMURTHY / TUESDAY MORNING","section-title"); Add(scroll,"Saw Ananya come alone towards the stop; went inside before the bus arrived. Did not see boarding.","body"); Word(scroll,"ಒಬ್ಬಳೇ ಬಂದಳು","Obbale bandalu","She came alone"); }
             if(session.Progress.rathnammaAccountKnown) { Add(scroll,"RATHNAMMA / TUESDAY MORNING","section-title"); Add(scroll,"Reports seeing Ananya board Route 14. Did not see where she got off.","body"); Word(scroll,"ಬಸ್ಸು ಹತ್ತಿದಳು","Bassu hattidalu","She boarded the bus"); }
             if(session.Progress.witnessAccountsCompared) Add(scroll,"Witness comparison: boarding had an eyewitness account; those witnesses could not establish arrival or present safety.","body");
@@ -257,7 +261,9 @@ namespace Paridhwani
             Add(card,"PAUSE  /  UNDER THE EAVES","eyebrow"); Add(card,"A moment to yourself","title");
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
             Button(card,"Return to the village",session.Close);
-            Button(card,"Open field notebook",ShowNotebook);
+            Button(card,"Open field notebook",session.OpenNotebook);
+            if(session.IsPracticeVisit) Button(card,"Return to the completed story",session.ReturnToCompletedStory);
+            if(session.Progress.storyCompleted) Button(card,"Credits and phrase recap",ShowCredits);
             Button(card,"Save this visit",()=>{session.Save(); ShowPause();});
             Button(card,"Restore saved visit",session.Load);
             var audio=new Toggle("Mute ambience"){value=session.Progress.muted};

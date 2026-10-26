@@ -1,5 +1,11 @@
 namespace Paridhwani {
  public static class DeedInvestigation {
+ public static string AdjustCode(string code,int index,int delta) {
+ if(index<0 || index>3) return code;
+ if(code==null || code.Length!=4) code="0000";
+ foreach(char digit in code) if(digit<'0' || digit>'9') {code="0000";break;}
+ var chars=code.ToCharArray();chars[index]=(char)('0'+((chars[index]-'0'+delta%10+10)%10));return new string(chars);
+ }
  public static bool CanInspect(TeaProgress p) => RidgeInvestigation.CanReunite(p) && p.disappearanceExplained && p.trunkLocationKnown;
  public static bool Unlock(TeaProgress p,string code,bool nearTrunk) { if(!CanInspect(p) || !nearTrunk || code!="1207") return false; p.trunkOpened=true; return true; }
  public static bool Answer(TeaProgress p,int answer) {

@@ -149,6 +149,13 @@ namespace Paridhwani.Editor
                 var fs=new TeaSaveStore(farmSave); Check(fs.Write(fp,out _),"farm save written"); var fr=fs.Read(out _);
                 Check(fr.position==fp.position && fr.ananyaFound && fr.disappearanceExplained && fr.trunkLocationKnown && fr.guddaManeReached,"farm position and direct evidence round-trip");
             } finally { if(File.Exists(farmSave)) File.Delete(farmSave); if(File.Exists(farmSave+".bak")) File.Delete(farmSave+".bak"); }
+            string endingDir=Path.Combine(Path.GetTempPath(),"ending-save-"+Guid.NewGuid().ToString("N"));
+            try {
+                var main=new TeaSaveStore(Path.Combine(endingDir,"main.json"));var practice=new TeaSaveStore(Path.Combine(endingDir,"practice.json"));
+                var ending=new TeaProgress {deedRetrieved=true,deedConceptsReviewed=true,workSuspended=true,reviewOutcomeKnown=true,libraryProtected=true,epilogueStarted=true,endingChoice=StoryEnding.Depart,storyCompleted=true};
+                Check(main.Write(ending,out _) && practice.Write(new TeaProgress(),out _),"distinct ending and practice saves written");
+                var saved=main.Read(out _);Check(saved.storyCompleted && saved.libraryProtected && saved.endingChoice==StoryEnding.Depart && !practice.Read(out _).storyCompleted,"practice storage leaves completed ending intact");
+            } finally {if(Directory.Exists(endingDir)) Directory.Delete(endingDir,true);}
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);
@@ -162,6 +169,8 @@ namespace Paridhwani.Editor
             Check(session.checkpostArrival && session.villageArrival && session.checkpostBoard && session.ridgeEntrance && session.ridgeGate,"checkpost travel and gate references");
             Check(session.ridgeMarker && session.farmArrival && session.farmGate,"ridge and farm progression anchors");
             Check(session.councilPresident && session.finaleSet && session.worksPendingMarker && session.worksSuspendedMarker,"finale staging references");
+            Check(session.trunkAnchor && session.trunkView && session.trunkLookTarget && session.trunkLid && session.deedPaper,"trunk inspection references");
+            Check(session.returnCompanion && session.returnWait && session.fridayArrival && session.fridayCompanion && session.epilogueSet,"return and epilogue references");
             Check(session.panchayatNotice,"public notice anchor");
             Check(session.archiveDoor && session.archiveDesk,"archive room references");
             Check(session.busTimetable,"public timetable interaction anchor");
@@ -185,7 +194,7 @@ namespace Paridhwani.Editor
             Check(UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None).Length==1,"one camera");
             Check(session.offeredTea && session.offeredWater,"drink props");
             Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/Village Surface")),"village shader compile");
-            Debug.Log("PARIDHWANI_CHECKS_OK: five NPCs, river inspection, booking/deduction and market evidence gates, retry/revisit, saves, recovery and scene references.");
+            Debug.Log("PARIDHWANI_CHECKS_OK: story source gates, fourteen NPC instances, evidence, ending/practice saves, recovery and generated scene references.");
         }
     }
 }

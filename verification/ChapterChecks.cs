@@ -104,6 +104,25 @@ public static class ChapterChecks {
  Check(!FinaleInvestigation.Answer(journey,0,true) && FinaleInvestigation.Answer(journey,2,true),"beneficiary restated");
  Check(!FinaleInvestigation.Decide(journey,false) && FinaleInvestigation.Decide(journey,true) && journey.workSuspended,"council decision suspends works after full evidence");
  Check(new CouncilConversation().Start(journey).Id=="decision","revisit preserves decision");
+ Check(!EpilogueInvestigation.Review(locked) && !EpilogueInvestigation.Choose(locked,StoryEnding.Stay),"no early protection or ending");
+ Check(new EpilogueConversation("Somanna").Start(locked).Id=="pending","early epilogue dialogue reveals no ending");
+ var incomplete=new TeaProgress {workSuspended=true}; Check(!EpilogueInvestigation.Review(incomplete),"suspension flag alone insufficient for later review");
+ Check(EpilogueInvestigation.Review(journey) && journey.libraryProtected && journey.reviewOutcomeKnown && journey.epilogueStarted,"later explicit review confirms protection");
+ Check(!journey.storyCompleted && journey.endingChoice==StoryEnding.None,"review does not choose personal ending");
+ Check(!EpilogueInvestigation.Choose(journey,StoryEnding.None) && !EpilogueInvestigation.Choose(journey,(StoryEnding)99),"invalid ending rejected");
+ Check(EpilogueInvestigation.Choose(journey,StoryEnding.Stay) && !journey.storyCompleted,"personal choice distinct from finishing");
+ Check(EpilogueInvestigation.Complete(journey) && journey.storyCompleted,"explicit credits completion");
+ Check(!EpilogueInvestigation.Choose(journey,StoryEnding.Depart) && journey.endingChoice==StoryEnding.Stay,"completed ending not overwritten by revisit");
+ var depart=new TeaProgress {reviewOutcomeKnown=true,libraryProtected=true,epilogueStarted=true};
+ Check(EpilogueInvestigation.Choose(depart,StoryEnding.Depart) && EpilogueInvestigation.Complete(depart) && depart.libraryProtected,"departure preserves same community outcome");
+ var aided=new TeaProgress {reviewOutcomeKnown=true,libraryProtected=true,epilogueStarted=true,english=true,roman=true};
+ var unaided=new TeaProgress {reviewOutcomeKnown=true,libraryProtected=true,epilogueStarted=true,english=false,roman=false};
+ Check(EpilogueInvestigation.Choose(aided,StoryEnding.Stay) && EpilogueInvestigation.Choose(unaided,StoryEnding.Stay) && EpilogueInvestigation.Complete(aided) && EpilogueInvestigation.Complete(unaided),"assistance independent of story ending");
+ Check(new EpilogueConversation("Ananya").Start(journey).Choices[0].Activity==VillageActivity.EndingReflection,"completed ending recap remains available");
+ Check(DeedInvestigation.AdjustCode("9999",0,1)=="0999","lock digit increments wrap");
+ Check(DeedInvestigation.AdjustCode("0000",3,-1)=="0009","lock digit decrements wrap");
+ Check(DeedInvestigation.AdjustCode("oops",2,1)=="0010","invalid dial input normalizes without unlocking");
+ Check(!ReturnInvestigation.Begin(journey,true),"completed return cannot restart from stale choice");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
@@ -119,6 +138,6 @@ public static class ChapterChecks {
  Check(PanchayatInvestigation.Answer(notice,2) && notice.deadlineKnown,"repeated reading preserves facts");
  var p=new TeaProgress(); Check(!ArchiveInvestigation.FindShelf(p,1) && !ArchiveInvestigation.ReadReference(p,0),"early archive tasks blocked");
  Check(!RiverInvestigation.Deduce(p,2) && !MarketInvestigation.TryReadTimetable(p,0),"earlier evidence gates retained");
- Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; both witness orders, retries, access, research inference explicit rest, panchayat notice, deadline, ridge arrival and reunion gates."); return 0;
+ Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; arrival through ending, source gates, retries, lock, return, council review and assistance-independent outcomes."); return 0;
  }
 }

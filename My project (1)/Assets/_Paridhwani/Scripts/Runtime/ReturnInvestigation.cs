@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Paridhwani {
  public static class ReturnInvestigation {
  public static bool CanReturn(TeaProgress p,bool routeChecked) => p.deedRetrieved && p.deedConceptsReviewed && p.ananyaFound && p.disappearanceExplained && p.ridgeCrossed && CheckpostInvestigation.CanPermit(p,routeChecked);
- public static bool Begin(TeaProgress p,bool routeChecked) { if(!CanReturn(p,routeChecked)) return false; p.returnJourneyStarted=true; return true; }
+ public static bool Begin(TeaProgress p,bool routeChecked) { if(p.returnedWithAnanya || p.fridayFinaleStarted || !CanReturn(p,routeChecked)) return false; p.returnJourneyStarted=true; return true; }
  public static bool Complete(TeaProgress p,bool routeChecked,bool atVillage) { if(!p.returnJourneyStarted || !CanReturn(p,routeChecked) || !atVillage) return false; p.returnedWithAnanya=true; return true; }
  public static bool Friday(TeaProgress p) { if(!p.returnedWithAnanya || !p.deedRetrieved || !p.deedConceptsReviewed) return false; p.fridayFinaleStarted=true; return true; }
  }
@@ -36,7 +36,7 @@ namespace Paridhwani {
  var target=returnSteps.Peek();
  if(Vector3.Distance(returnCompanion.position,player.transform.position)>10) returnCompanion.position=target;
  var direction=target-returnCompanion.position;
- if(direction.sqrMagnitude>.01f) returnCompanion.rotation=Quaternion.Slerp(returnCompanion.rotation,Quaternion.LookRotation(new Vector3(direction.x,0,direction.z)),Time.deltaTime*6);
+ var flatDirection=new Vector3(direction.x,0,direction.z); if(flatDirection.sqrMagnitude>.01f) returnCompanion.rotation=Quaternion.Slerp(returnCompanion.rotation,Quaternion.LookRotation(flatDirection),Time.deltaTime*6);
  returnCompanion.position=Vector3.MoveTowards(returnCompanion.position,target,4*Time.deltaTime);
  if(Vector3.Distance(returnCompanion.position,target)<.12f) returnSteps.Dequeue();
  }

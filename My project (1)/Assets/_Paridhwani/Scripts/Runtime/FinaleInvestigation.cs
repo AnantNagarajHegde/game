@@ -17,7 +17,7 @@ namespace Paridhwani {
  }
  }
  public sealed class CouncilConversation : ITeaConversationProvider,IActivityConversationProvider {
- public TeaTurn Start(TeaProgress p) => !FinaleInvestigation.CanPresent(p)?T("early","Bring the reviewed original and return together before the council meeting.",C("ಸರಿ.","Sari.","All right.","close")):p.workSuspended?T("decision","The original and your explanation warrant review. I am suspending clearance work while the council examines the records. This is an interim decision; protection is not yet finally confirmed.",C("ಧನ್ಯವಾದಗಳು.","Dhanyavadagalu.","Thank you. We will await the review.","close")):T("evidence","We have the clearance notice and the catalogue. Show the original, then explain its purpose, restriction and beneficiary. You may consult your notebook or ask Ananya for help.",C("ಮೂಲ ಪತ್ರವನ್ನು ನೋಡಿ.","Moola patravannu nodi.","Please review the original deed.","evidence",VillageActivity.CouncilEvidence),C("ಮತ್ತೆ ಬರುತ್ತೇನೆ.","Matte baruttene.","I will review my notes first.","close"));
+ public TeaTurn Start(TeaProgress p) => !FinaleInvestigation.CanPresent(p)?T("early","Bring the reviewed original and return together before the council meeting.",C("ಸರಿ.","Sari.","All right.","close")):p.workSuspended?T("decision","The original and your explanation warrant review. I am suspending clearance work while the council examines the records. This is an interim decision; protection is not yet finally confirmed.",C("ಮುಂದೆ ಹೋಗೋಣ.","Munde hogona.","Review the later council outcome.","decision",VillageActivity.ReviewOutcome),C("ಧನ್ಯವಾದಗಳು.","Dhanyavadagalu.","Thank you. I will keep exploring for now.","close")):T("evidence","We have the clearance notice and the catalogue. Show the original, then explain its purpose, restriction and beneficiary. You may consult your notebook or ask Ananya for help.",C("ಮೂಲ ಪತ್ರವನ್ನು ನೋಡಿ.","Moola patravannu nodi.","Please review the original deed.","evidence",VillageActivity.CouncilEvidence),C("ಮತ್ತೆ ಬರುತ್ತೇನೆ.","Matte baruttene.","I will review my notes first.","close"));
  static TeaTurn T(string id,string en,params TeaChoice[] c) => new TeaTurn(id,"ಪತ್ರವನ್ನು ಪರಿಶೀಲಿಸೋಣ.","Patravannu parisheelisona.",en,c){Speaker="Council president"};
  static TeaChoice C(string k,string r,string e,string next,VillageActivity a=VillageActivity.None) => new TeaChoice(k,r,e,next){Activity=a};
  public TeaTurn Reply(TeaTurn t,int i,TeaProgress p) { if(i<0 || i>=t.Choices.Count) throw new ArgumentOutOfRangeException(nameof(i)); return null; }
@@ -35,10 +35,10 @@ namespace Paridhwani {
  public bool AtCouncil => councilPresident && Vector3.Distance(player.transform.position,councilPresident.position)<3.5f;
  public bool FinaleHelp {get;set;}
  void ApplyFinaleState() {
- if(finaleSet) finaleSet.SetActive(Progress.fridayFinaleStarted);
+ if(finaleSet) finaleSet.SetActive(Progress.fridayFinaleStarted && !Progress.epilogueStarted);
  if(worksPendingMarker) worksPendingMarker.SetActive(Progress.fridayFinaleStarted && !Progress.workSuspended);
  if(worksSuspendedMarker) worksSuspendedMarker.SetActive(Progress.workSuspended);
- if(Progress.fridayFinaleStarted && finaleCast!=null && finaleCastPositions!=null) for(int i=0;i<Math.Min(finaleCast.Length,finaleCastPositions.Length);i++) if(finaleCast[i] && finaleCastPositions[i]) { finaleCast[i].position=finaleCastPositions[i].position; finaleCast[i].rotation=finaleCastPositions[i].rotation; }
+ if(Progress.fridayFinaleStarted && !Progress.epilogueStarted && finaleCast!=null && finaleCastPositions!=null) for(int i=0;i<Math.Min(finaleCast.Length,finaleCastPositions.Length);i++) if(finaleCast[i] && finaleCastPositions[i]) { finaleCast[i].position=finaleCastPositions[i].position; finaleCast[i].rotation=finaleCastPositions[i].rotation; }
  }
  public void RequestCouncilDecision() {
  if(ui.Mode!="evidence" || ActiveActivity!=VillageActivity.CouncilEvidence) return;

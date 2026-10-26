@@ -29,6 +29,8 @@ namespace Paridhwani
             get
             {
                 if(Progress==null || ui.IsModal) return "";
+                if(Progress.epilogueStarted) return "REOPENED LIBRARY / SOMANNA OR ANANYA";
+                if(Progress.workSuspended) return "COUNCIL PRESIDENT / LATER REVIEW OUTCOME";
                 if(Progress.fridayFinaleStarted) return "LIBRARY COURT / COUNCIL REVIEW";
                 if(Progress.returnedWithAnanya) return "ANANYA / VILLAGE PICKUP / FRIDAY PREPARATIONS";
                 if(Progress.returnJourneyStarted) return AtCheckpost?"RETURN WITH ANANYA / CHECKPOST AUTO":"ANANYA / VILLAGE PICKUP";
@@ -85,7 +87,7 @@ namespace Paridhwani
             Progress=saves.Read(out string notice);
             if(notice!=null) SaveMessage=notice;
             player.Restore(Progress.position,Progress.heading);
-            ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
+            CaptureActorOrigins(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
             if(!Progress.arrivalAcknowledged && !smoke) { ui.ShowArrival(); SetCursor(true); }
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -98,6 +100,7 @@ namespace Paridhwani
             ApplyDeedState();
             ApplyReturnState();
             ApplyFinaleState();
+            ApplyEpilogueState();
             if(farmGate) farmGate.SetActive(!Progress.ridgeWayfindingKnown || !Progress.trailPermission);
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
@@ -235,6 +238,7 @@ namespace Paridhwani
             ActiveActivity=activity;
             if(activity==VillageActivity.ReturnTogether || activity==VillageActivity.FridayPreparation) { player.EndConversation(); ui.ShowReturnActivity(activity); SetCursor(true); return; }
             if(activity==VillageActivity.CouncilEvidence) { player.EndConversation(); ui.ShowCouncilActivity(); SetCursor(true); return; }
+            if(activity==VillageActivity.ReviewOutcome || activity==VillageActivity.EndingReflection) { player.EndConversation(); if(activity==VillageActivity.ReviewOutcome) ui.ShowReviewOutcome(); else ui.ShowEndingReflection(); SetCursor(true); return; }
             if(OpenDeedActivity(activity)) { SetCursor(true); return; }
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();

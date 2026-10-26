@@ -1,6 +1,6 @@
-# Playable village slice — tea, library, mess, market and river
+# Paridhwani village prototype - main story source
 
-This Unity 3D prototype now covers five story locations: Manjunatha's tea stall, Somanna's library veranda, Shanthakka's mess, Basavaraju's market stall, and Giri's river repair shed. It includes third-person exploration, smooth first-person conversations, Kannada/Roman/English presentation, inspected signs, a resumable notebook, settings and saved progress. It is a compact playable prototype, not the final 25–35 minute polished slice. Characters and vegetation remain original procedural stand-ins; dialogue still needs fluent-speaker review.
+The source now contains the main story from arrival through the later council review and epilogue, with generated village/river, checkpost/ridge and farmhouse environments. It includes third-person exploration, first-person conversations, evidence tasks, notebook, settings, saved progress and a separate practice visit. The latest source has not yet been regenerated, built or visually verified in Unity. Characters and environments remain procedural prototypes; final art, animation, fluent Kannada review, external NLP integration and release QA are pending.
 
 ## Open and play
 
@@ -246,3 +246,19 @@ Present the protected original while near the president, then restate education 
 After all evidence, explicitly request the council's decision. Works are suspended pending review; the original does not instantly grant permanent protection. The works-status sign changes while the vehicle remains parked. Later protection is a separate epilogue transition.
 
 Source compilation and 116 executable logic assertions pass. Friday staging, council framing, physics, Kannada text, native save serialization and the final built-player sequence still require Unity verification.
+
+## Later review, endings and isolated practice cycle
+
+After the interim suspension, explicitly advance to the later council review outcome. Some weeks later the council confirms protection after examining the original and records; this is separate from Friday's temporary suspension. The Friday works staging is replaced by reopened-library props and later community dialogue.
+
+Speak to Somanna or Ananya to choose staying with the archive or departing with an invitation to return. Both preserve the same protected-library outcome, regardless of assistance use. The choice is saved separately from explicitly finishing the story. Credits and a phrase recap remain available through Pause; completed endings cannot be overwritten by revisiting a choice. The recap records encounters and does not claim independent Kannada proficiency.
+
+Replay starts a full, separate practice visit at the tea stall. It saves the main completed story first, switches to a uniquely named temporary save and restores initial NPC/prop staging. Pause offers Return to the completed story; quitting/reopening also returns to the persistent main story. This is full-visit replay, not per-chapter selection. Tests for native serialization and practice isolation are authored for Unity and remain pending execution; no player save is used by the smoke sequence.
+
+The trunk now supports large +/- digit controls as well as typed four-digit input and the reminder option. The HUD and notebook headings distinguish Wednesday, Thursday, Friday and the later epilogue. Council history distinguishes the interim suspension from the later protection result.
+
+Runtime and editor sources compile, and 132 executable logic assertions pass for progression gates, retries, the lock, return equivalence, council review, valid endings and assistance-independent outcomes. The isolated-save built-player smoke sequence has been extended through the trunk, return confirmation, Friday, council tasks, later outcome, credits and practice-return restoration. Editor checks cover final-save fields and distinct ending/practice stores. These engine-dependent checks are authored but unexecuted: Unity's licensing initialization remains blocked in this session. The checked-in generated scene and existing Windows build are older and must be regenerated before this source is playable.
+
+## Current completion boundary
+
+All 15 major story beats now have authored source implementations. This means the planned main story has an end-to-end code path, not that the game is release-ready or fully verified. Remaining work includes in-engine compilation/import and generation, full route/camera/Kannada/save testing, resolving any resulting defects, the finished tea-stall visual benchmark, production assets/materials/animation/audio, external NLP integration, accessibility/performance work and release QA. Separate additive scenes and per-chapter replay are also still future work.
