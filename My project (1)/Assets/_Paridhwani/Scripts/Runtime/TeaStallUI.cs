@@ -267,17 +267,21 @@ namespace Paridhwani
             var card=new ScrollView();Class(card,"evidence-scroll");shell.Add(card);
             Add(card,"PAUSE  /  UNDER THE EAVES","eyebrow"); Add(card,"A moment to yourself","title");
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
-            Button(card,"Return to the village",session.Close);
+            Button(card,session.TitleSettings?"Back to title":"Return to the village",session.Close);
+            if(!session.TitleSettings){
+            Button(card,"Title menu",session.OpenTitle,"quiet-button");
+            Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
             Button(card,"Open field notebook",session.OpenNotebook);
             if(session.IsPracticeVisit) Button(card,"Return to the main visit",session.ReturnToCompletedStory);
             else Button(card,"Practise an earlier chapter",ShowChapterReplay);
             if(session.Progress.storyCompleted) Button(card,"Credits and phrase recap",ShowCredits);
             Button(card,"Save this visit",()=>{session.Save(); ShowPause();});
             Button(card,"Restore saved visit",session.Load);
+            }
             var audio=new Toggle("Mute ambience"){value=session.Progress.muted};
             audio.RegisterValueChangedCallback(e=>{session.Progress.muted=e.newValue;session.SettingsChanged();}); card.Add(audio);
             var size=new Slider("Text size",.85f,1.3f){value=session.Progress.textScale};
-            size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;card.style.scale=new Scale(Vector3.one*e.newValue);card.style.maxHeight=Length.Percent(85/e.newValue);session.SettingsChanged();}); card.Add(size);
+            size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;shell.style.scale=new Scale(Vector3.one*e.newValue);shell.style.maxHeight=Length.Percent(85/e.newValue);session.SettingsChanged();}); card.Add(size);
             var sensitivity=new Slider("Look sensitivity",.05f,.3f){value=session.Progress.sensitivity};
             sensitivity.RegisterValueChangedCallback(e=>{session.Progress.sensitivity=e.newValue;session.SettingsChanged();}); card.Add(sensitivity);
             var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);

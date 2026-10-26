@@ -90,7 +90,7 @@ namespace Paridhwani
             player.Restore(Progress.position,Progress.heading);
             CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
-            if(!Progress.arrivalAcknowledged && !smoke) { ui.ShowArrival(); SetCursor(true); }
+            if(!smoke) { ui.ShowMainMenu(); SetCursor(true); }
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
             if(smoke) { Application.runInBackground=true; gameObject.AddComponent<VillageSmokeCheck>().Begin(this); }
@@ -151,11 +151,11 @@ namespace Paridhwani
                     else if(keys.digit2Key.wasPressedThisFrame) SelectBicyclePart(BicyclePart.Stand);
                     else if(keys.digit3Key.wasPressedThisFrame) SelectBicyclePart(BicyclePart.CarrierPocket);
                 }
-                if(keys.f5Key.wasPressedThisFrame) Save();
-                if(keys.f9Key.wasPressedThisFrame) Load();
+                if(keys.f5Key.wasPressedThisFrame && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) Save();
+                if(keys.f9Key.wasPressedThisFrame && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) Load();
             }
             ui.RefreshHUD();
-            if(Time.unscaledTime>nextSave) { Save(); nextSave=Time.unscaledTime+15; }
+            if(Time.unscaledTime>nextSave && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) { Save(); nextSave=Time.unscaledTime+15; }
         }
         void FindInteraction()
         {
@@ -297,6 +297,9 @@ namespace Paridhwani
         }
         public void Close()
         {
+            if(ui.Mode=="main-menu"){if(Progress.arrivalAcknowledged)ContinueMainVisit();return;}
+            if(ui.Mode=="new-visit-confirm"){ui.ShowMainMenu();return;}
+            if(ui.Mode=="pause" && TitleSettings){TitleSettings=false;ui.ShowMainMenu();return;}
             if(ui.Mode=="notebook" && notebookActivity!=VillageActivity.None)
             { var previous=notebookActivity; notebookActivity=VillageActivity.None; OpenActivity(previous,false); return; }
             if(ui.Mode=="evidence" && returnToNotebook)

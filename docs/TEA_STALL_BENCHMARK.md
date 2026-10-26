@@ -303,3 +303,11 @@ verification/Verify-Unity.ps1 runs real Editor generation/checks, optionally bui
     ./game/verification/Verify-Unity.ps1 -Layout Additive -Build -Smoke
 
 Close this project's Editor first. Run from a normal desktop shell with the project's licensed Unity installation. The smoke flag opts into a visible game window. This session retried Legacy generation on the latest source, but Unity timed out waiting for licensing after 60 seconds and crashed before compilation. No new scene/build/rendering success is claimed; the desktop helper also failed to launch its app server.
+
+## Title, new-story and exit flow
+
+The normal launch now opens a scrollable title menu with Continue, new story, reached-chapter practice, settings and exit. The isolated smoke path skips the title so its existing progression tests remain deterministic. Settings opened from the title return to the title; the first introduction is not bypassed by Escape or restore shortcuts.
+
+Starting a new main story explicitly confirms the reset and writes the previous visit into ArchivedVisits before saving the new one. If saving/archiving fails, the new story does not start. Accessibility/display preferences are retained. Pause offers return to title and save-and-exit. A failed exit save offers returning to the visit or explicitly leaving without the latest changes. The rendered smoke sequence now includes title/settings return, chapter practice and a new main visit using its isolated save.
+
+Runtime/editor compilation and 209 assertions pass, including real archive-file creation with the injected storage codec. Native menu layout, interaction, archives with Unity serialization and the whole newly generated game still require the engine run.

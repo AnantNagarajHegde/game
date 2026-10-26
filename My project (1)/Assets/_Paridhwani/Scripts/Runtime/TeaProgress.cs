@@ -90,6 +90,10 @@ namespace Paridhwani
             catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
             {LastFailureDetail=operation+" / "+e.GetType().Name+": "+e.Message;error="Progress could not be saved. Please try again.";return false;}
         }
+        public bool Archive(TeaProgress progress,out string error) {
+            try {string directory=Path.Combine(Path.GetDirectoryName(path),"ArchivedVisits");Directory.CreateDirectory(directory);string target=Path.Combine(directory,"visit-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N")+".json");File.WriteAllText(target,codec.Encode(progress));error=null;return true;}
+            catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException){LastFailureDetail="archive / "+e.Message;error="Your current visit could not be archived. The new story was not started.";return false;}
+        }
         public TeaProgress Read(out string error)
         {
             error=null; preserveBeforeWrite=false; recoveredBackup=false;

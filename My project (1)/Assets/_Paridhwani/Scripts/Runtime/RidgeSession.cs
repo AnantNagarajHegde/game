@@ -7,7 +7,7 @@ namespace Paridhwani
         public GameObject farmGate;
         void UpdateFarmArrival()
         {
-            if(!Progress.guddaManeReached && farmArrival && RidgeInvestigation.Arrive(Progress,ridgeRouteChecked,Vector3.Distance(player.transform.position,farmArrival.position)<2)) { ApplyState(); Save(); }
+            if(!ui.IsModal && !Progress.guddaManeReached && farmArrival && RidgeInvestigation.Arrive(Progress,ridgeRouteChecked,Vector3.Distance(player.transform.position,farmArrival.position)<2)) { ApplyState(); Save(); }
         }
         bool FindRidgeInteraction()
         {
