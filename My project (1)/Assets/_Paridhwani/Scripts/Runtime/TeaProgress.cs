@@ -14,12 +14,13 @@ namespace Paridhwani
         public bool giriAccountKnown,bicycleFrameObserved,bicycleStandObserved,bookingSlipFound,bookingSlipRead,riverDeductionKnown,templeLeadKnown;
         public bool gurumurthyAccountKnown,rathnammaAccountKnown,witnessAccountsCompared,guddaFamilyLeadKnown;
         public bool libraryAccessGranted,archiveShelfLocated,deedReferenceFound,thursdayStarted;
+        public bool noticeIdentified,deadlineKnown,deedRequired,checkpostDestinationKnown;
         public string drink = "";
         public bool english = true, roman = true, muted;
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
-        public string Objective => thursdayStarted ? "Thursday - panchayat notice is the next chapter" : deedReferenceFound ? "Return to Somanna when ready to rest" : libraryAccessGranted ? "Read the catalogue inside the library" : guddaFamilyLeadKnown ? "Bring the Gudda Mane family name to Somanna" : witnessAccountsCompared ? "Ask Rathnamma about the Gudda Mane family" : gurumurthyAccountKnown && rathnammaAccountKnown ? "Compare the two witness accounts" : templeLeadKnown ? "Speak to Gurumurthy and Rathnamma at the northern stop" :
+        public string Objective => checkpostDestinationKnown ? "Panchayat evidence complete - forest checkpost journey comes next" : deadlineKnown ? "Compare the archive reference with the notice checklist" : noticeIdentified ? "Read the clearance day and time" : thursdayStarted ? "Read the public panchayat notice" : deedReferenceFound ? "Return to Somanna when ready to rest" : libraryAccessGranted ? "Read the catalogue inside the library" : guddaFamilyLeadKnown ? "Bring the Gudda Mane family name to Somanna" : witnessAccountsCompared ? "Ask Rathnamma about the Gudda Mane family" : gurumurthyAccountKnown && rathnammaAccountKnown ? "Compare the two witness accounts" : templeLeadKnown ? "Speak to Gurumurthy and Rathnamma at the northern stop" :
             riverDeductionKnown ? "Ask Giri about witnesses near the northern stop" :
             RiverInvestigation.CanDeduce(this) ? "Compare the bicycle and booking evidence with Giri" :
             bookingSlipFound && !bookingSlipRead ? "Read the advance booking slip" :
@@ -93,6 +94,3 @@ namespace Paridhwani
         }
     }
 }
-
-
-

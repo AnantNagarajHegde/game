@@ -130,6 +130,13 @@ namespace Paridhwani.Editor
             at=archivist.ResumeAfterActivity(at,a); Check(at.Id=="rest","evidence resumes relevant dialogue");
             archivist.Reply(at,1,a); Check(!a.thursdayStarted,"declining rest preserves day");
             archivist.Reply(archivist.Start(a),0,a); Check(a.thursdayStarted,"rest requires explicit choice");
+            var pc=new TeaProgress(); Check(!PanchayatInvestigation.Answer(pc,0),"early notice grants no investigation fact");
+            pc.deedReferenceFound=true; pc.thursdayStarted=true;
+            Check(!PanchayatInvestigation.Answer(pc,1) && !pc.noticeIdentified,"wrong subject grants nothing");
+            Check(PanchayatInvestigation.Answer(pc,0) && pc.noticeIdentified && !pc.deadlineKnown,"subject precedes deadline");
+            Check(!PanchayatInvestigation.Answer(pc,0) && PanchayatInvestigation.Answer(pc,1) && pc.deadlineKnown,"deadline retry");
+            Check(!PanchayatInvestigation.Answer(pc,1) && !pc.deedRequired,"catalogue is not original deed");
+            Check(PanchayatInvestigation.Answer(pc,2) && pc.deedRequired && pc.checkpostDestinationKnown,"public checklist supplies safe next lead");
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);
@@ -138,8 +145,9 @@ namespace Paridhwani.Editor
                 Check(entry.guid.ToString()==sceneGuid,"Build Settings uses imported scene GUID");
             var session=UnityEngine.Object.FindFirstObjectByType<TeaStallSession>();
             Check(session && session.player && session.vendor && session.ui && session.ambience,"scene references");
-            Check(session.villagers!=null && session.villagers.Length==7,"seven NPCs share interaction system");
+            Check(session.villagers!=null && session.villagers.Length==8,"eight NPCs share interaction system");
             foreach(var npc in session.villagers) Check(npc && npc.eyes,"NPC eye anchors");
+            Check(session.panchayatNotice,"public notice anchor");
             Check(session.archiveDoor && session.archiveDesk,"archive room references");
             Check(session.busTimetable,"public timetable interaction anchor");
             Check(session.bicycle && session.bicycleView && session.bicycleLookTarget && session.bookingPaper,"bicycle and inspection references");
@@ -166,6 +174,3 @@ namespace Paridhwani.Editor
         }
     }
 }
-
-
-

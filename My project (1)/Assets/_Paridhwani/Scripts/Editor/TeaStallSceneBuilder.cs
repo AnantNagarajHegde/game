@@ -105,6 +105,7 @@ namespace Paridhwani.Editor
             AddRiverChapter(session);
             AddTempleChapter(session);
             AddArchiveChapter(session);
+            AddPanchayatChapter(session);
             ConfigureBenchmarkRendering();
             Lighting();
             EditorSceneManager.SaveScene(scene,ScenePath);
@@ -537,5 +538,3 @@ namespace Paridhwani.Editor
             c.GetUniversalAdditionalCameraData();
     }
 }
-
-

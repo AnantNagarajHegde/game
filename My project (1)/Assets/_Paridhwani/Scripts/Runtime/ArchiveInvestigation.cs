@@ -20,11 +20,10 @@ namespace Paridhwani {
  case "welcome": t=new TeaTurn(id,"ಒಳಗೆ ಬನ್ನಿ.","Olage banni.","You found a family name, not proof of arrival. I have arranged access with my master key. Let's check Ananya's catalogue reference.",C("ಬಾಗಿಲು ತೆರೆಯಿರಿ.","Baagilu tereyiri.","Please open the reading room.","search","access"),C("ಮತ್ತೆ ಬರುತ್ತೇನೆ.","Matte baruttene.","I will return shortly.","close")); break;
  case "search": t=new TeaTurn(id,"ಎರಡನೇ ಕಪಾಟಿನ ಒಳಗೆ ನೋಡಿ.","Eradane kapaatina olage nodi.","Look inside the second cupboard. The catalogue points to a land-record reference. Read it with me, or at the desk inside.",C("ಕಡತವನ್ನು ನೋಡೋಣ.","Kadatavannu nodona.","Read the catalogue with Somanna.","search",activity:VillageActivity.ArchiveReference),C("ಒಳಗೆ ಹೋಗುತ್ತೇನೆ.","Olage hoguttene.","I will look inside the reading room.","close")); break;
  case "rest": t=new TeaTurn(id,"ನಾಳೆ ಬೆಳಿಗ್ಗೆ ಹೋಗೋಣ.","Naale beligge hogona.","The reference points to the original 1952 deed held by Shankare Gowda's family at Gudda Mane. It explains Ananya's research, not her arrival. Tomorrow we should ask at the panchayat. Ready to rest in the guest room?",C("ಸರಿ. ನಾಳೆ ಬೆಳಿಗ್ಗೆ.","Sari. Naale beligge.","Yes. Rest until Thursday morning.","morning","rest"),C("ಇನ್ನೂ ಸ್ವಲ್ಪ ಸಮಯ ಬೇಕು.","Innu swalpa samaya beku.","Not yet. I want to keep exploring.","close")); break;
- case "morning": t=new TeaTurn(id,"ಶುಭೋದಯ.","Shubhodaya.","Thursday morning. Your evidence is safe. The panchayat clearance notice is the next lead. That office is the next production chapter.",C("ಕಡತವನ್ನು ಮತ್ತೆ ನೋಡೋಣ.","Kadatavannu matte nodona.","Read the archive reference again.","morning",activity:VillageActivity.ArchiveReference),C("ಧನ್ಯವಾದಗಳು.","Dhanyavadagalu.","Thank you.","close")); break;
+ case "morning": t=new TeaTurn(id,"ಶುಭೋದಯ.","Shubhodaya.","Thursday morning. Your evidence is safe. Read the panchayat clearance notice at the public counter along the northern lane. Bring the archive reference.",C("ಕಡತವನ್ನು ಮತ್ತೆ ನೋಡೋಣ.","Kadatavannu matte nodona.","Read the archive reference again.","morning",activity:VillageActivity.ArchiveReference),C("ಧನ್ಯವಾದಗಳು.","Dhanyavadagalu.","Thank you.","close")); break;
  default: throw new ArgumentException(id);
  }
  t.Speaker="Somanna"; return t;
  }
  }
 }
-

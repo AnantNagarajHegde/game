@@ -204,9 +204,13 @@ namespace Paridhwani
                 Add(scroll,"Giri’s notice beside the bus timetable reports a bicycle near the river weir. The notice alone does not prove an accident or Ananya’s whereabouts. See the direct observations below if you have inspected the bicycle.","body");
             }
             AddRiverNotebook(scroll);
+            if(session.Progress.noticeIdentified) { Add(scroll,"PANCHAYAT / PUBLIC NOTICE","section-title"); Add(scroll,"Signed by Shresthi: community library site listed for clearance. Proposed use: warehouse. This is a posted administrative claim, not a final ownership ruling.","body"); Button(scroll,"Reopen panchayat notice",()=>session.OpenActivity(VillageActivity.PanchayatNotice)); }
+            if(session.Progress.deadlineKnown) { Word(scroll,"ಶುಕ್ರವಾರ ಬೆಳಿಗ್ಗೆ ಒಂಬತ್ತು ಗಂಟೆ","Shukravaara beligge ombattu gante","Friday at 09:00"); Add(scroll,"Source: public clearance notice. Submit original ownership documentation to the council before scheduled work begins. Reading and conversations have no countdown.","body"); }
+            if(session.Progress.deedRequired) Add(scroll,"Checklist + library catalogue: seek the family's original 1952 deed at Gudda Mane for council review. A catalogue or bus booking cannot substitute for it; protection is not yet secured.","body");
+            if(session.Progress.checkpostDestinationKnown) Add(scroll,"Route advisory: ask the forest checkpost about safe access before travelling to Gudda Mane. Do not bypass a closure. The checkpost journey is not yet implemented.","body");
             if(session.Progress.libraryAccessGranted) { Add(scroll,"SOMANNA / LIBRARY ACCESS","section-title"); Add(scroll,"Master-key access arranged. The catalogue points inside the second cupboard.","body"); Button(scroll,"Reopen archive catalogue",()=>session.OpenActivity(VillageActivity.ArchiveReference)); }
             if(session.Progress.deedReferenceFound) Add(scroll,"Catalogue / 1952 land record: original deed retained by Shankare Gowda's family at Gudda Mane. Ananya consulted the reference on Monday. This establishes her research target, not arrival or legal protection.","body");
-            if(session.Progress.thursdayStarted) Add(scroll,"THURSDAY MORNING: rested with evidence preserved. Next lead: panchayat clearance notice.","section-title");
+            if(session.Progress.thursdayStarted) Add(scroll,"THURSDAY MORNING: rested with evidence preserved. Next lead: read the panchayat clearance notice at the public counter.","section-title");
             if(session.Progress.gurumurthyAccountKnown) { Add(scroll,"GURUMURTHY / TUESDAY MORNING","section-title"); Add(scroll,"Saw Ananya come alone towards the stop; went inside before the bus arrived. Did not see boarding.","body"); Word(scroll,"ಒಬ್ಬಳೇ ಬಂದಳು","Obbale bandalu","She came alone"); }
             if(session.Progress.rathnammaAccountKnown) { Add(scroll,"RATHNAMMA / TUESDAY MORNING","section-title"); Add(scroll,"Reports seeing Ananya board Route 14. Did not see where she got off.","body"); Word(scroll,"ಬಸ್ಸು ಹತ್ತಿದಳು","Bassu hattidalu","She boarded the bus"); }
             if(session.Progress.witnessAccountsCompared) Add(scroll,"Comparison: boarding has an eyewitness account. Arrival and present safety remain unknown.","body");
@@ -250,6 +254,3 @@ namespace Paridhwani
         void OnDestroy() { if(latinAsset) Destroy(latinAsset); if(kannadaAsset) Destroy(kannadaAsset); }
     }
 }
-
-
-

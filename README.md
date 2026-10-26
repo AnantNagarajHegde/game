@@ -2,7 +2,7 @@
 
 Owns the learner-facing product experience: product concept, world and location design, story, characters, quests, game progression, and UI/UX coordination.
 
-This repository is part of the Paridhwani master workspace. It is an independent Git repository. The Unity 3D prototype includes the tea stall, library veranda, mess, market and river repair shed, with smooth first-person conversations, a 3D bicycle inspection, evidence-reading activities and saved progress.
+This repository is part of the Paridhwani master workspace. It is an independent Git repository. The Unity 3D prototype includes the tea stall, library veranda, mess, market and river repair shed, with smooth first-person conversations, a 3D bicycle inspection, evidence-reading activities and saved progress. Source generators now also include the temple witnesses, an enterable library archive, and the panchayat notice chapter. Regenerate the benchmark in Unity to include these latest changes; the checked-in scene and existing executable have not yet been rebuilt for them.
 
 
 ## Unity 3D implementation plan

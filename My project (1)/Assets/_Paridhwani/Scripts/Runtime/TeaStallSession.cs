@@ -11,7 +11,7 @@ namespace Paridhwani
         public VillageWalker player;
         public Transform vendor,sign,libraryLane,busTimetable,bicycle,bicycleView,bicycleLookTarget;
         public GameObject bookingPaper,archiveDoor;
-        public Transform archiveDesk;
+        public Transform archiveDesk,panchayatNotice;
         public VillageNpc[] villagers;
         public GameObject offeredTea,offeredWater,servedMeal;
         public TeaStallUI ui;
@@ -29,6 +29,8 @@ namespace Paridhwani
             get
             {
                 if(Progress==null || ui.IsModal) return "";
+                if(Progress.thursdayStarted && panchayatNotice)
+                    return Progress.checkpostDestinationKnown?"Next chapter: safe travel via the forest checkpost":Mathf.CeilToInt(Vector3.Distance(player.transform.position,panchayatNotice.position))+" m / PANCHAYAT PUBLIC NOTICE";
                 if(Progress.templeLeadKnown)
                 {
                     var target=Progress.guddaFamilyLeadKnown?VillageNpcRole.Librarian:!Progress.gurumurthyAccountKnown?VillageNpcRole.TempleKeeper:VillageNpcRole.FlowerSeller;
@@ -151,7 +153,9 @@ namespace Paridhwani
                     hit.collider.GetComponentInParent<VillageNpc>()!=npc) continue;
                 nearest=d; nearbyNpc=npc;
             }
-            if(archiveDesk && Progress.libraryAccessGranted && Vector3.Distance(player.transform.position,archiveDesk.position)<2.3f && !nearbyNpc)
+            if(panchayatNotice && Vector3.Distance(player.transform.position,panchayatNotice.position)<2.3f && !nearbyNpc)
+            { Nearby="Read the panchayat notice"; nearbyInspection=6; }
+            else if(archiveDesk && Progress.libraryAccessGranted && Vector3.Distance(player.transform.position,archiveDesk.position)<2.3f && !nearbyNpc)
             { Nearby="Read the archive catalogue"; nearbyInspection=5; }
             else if(bicycle && Vector3.Distance(player.transform.position,bicycle.position)<2.5f && !nearbyNpc)
             { Nearby="Inspect the bicycle"; nearbyInspection=4; }
@@ -166,6 +170,7 @@ namespace Paridhwani
         public void Interact()
         {
             if(nearbyNpc) { StartConversation(nearbyNpc); return; }
+            if(nearbyInspection==6) { OpenActivity(VillageActivity.PanchayatNotice); return; }
             if(nearbyInspection==5) { OpenActivity(VillageActivity.ArchiveReference); return; }
             if(nearbyInspection==4) { OpenActivity(VillageActivity.BicycleInspection); return; }
             if(nearbyInspection==3) { OpenActivity(VillageActivity.BusTimetable); return; }
@@ -211,7 +216,7 @@ namespace Paridhwani
             ActiveActivity=activity;
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();
-            if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
+            if(activity==VillageActivity.PanchayatNotice) ui.ShowPanchayatActivity(); else if(activity==VillageActivity.ArchiveReference) ui.ShowArchiveActivity(); else if(RiverActivity(activity)) ui.ShowRiverActivity(activity); else ui.ShowInvestigation(activity);
             SetCursor(true);
         }
         public void SelectBicyclePart(BicyclePart part)
@@ -225,6 +230,7 @@ namespace Paridhwani
             bool correct=false;
             switch(ActiveActivity)
             {
+                case VillageActivity.PanchayatNotice: correct=PanchayatInvestigation.Answer(Progress,index); break;
                 case VillageActivity.ArchiveReference: correct=Progress.archiveShelfLocated?ArchiveInvestigation.ReadReference(Progress,index):ArchiveInvestigation.FindShelf(Progress,index); break;
                 case VillageActivity.MarketReceipt: correct=MarketInvestigation.TryReadReceipt(Progress,index); break;
                 case VillageActivity.BusTimetable: correct=MarketInvestigation.TryReadTimetable(Progress,index); break;
@@ -233,6 +239,7 @@ namespace Paridhwani
                 case VillageActivity.RiverDeduction: correct=RiverInvestigation.Deduce(Progress,index); break;
             }
             if(correct) { activityChanged=true; ApplyState(); Save(); }
+            if(ActiveActivity==VillageActivity.PanchayatNotice) { ui.ShowPanchayatActivity(correct?"Recorded with its source in your field notes.":!Progress.noticeIdentified?"Granthalaya means library. Match the named place.":!Progress.deadlineKnown?"Shukravaara is Friday; beligge means morning; ombattu is nine.":"Moola patra is the original document. The catalogue identifies it but cannot replace it."); return; }
             if(ActiveActivity==VillageActivity.ArchiveReference) { ui.ShowArchiveActivity(correct?"Recorded with its source.":Progress.archiveShelfLocated?"Moola patra means original document. A catalogue is not proof of arrival.":"Eradane means second; olage means inside. Try again."); return; }
             string hint=correct?"Recorded with its source in your field notes.":
                 ActiveActivity==VillageActivity.MarketReceipt?"Check the weekday and sanje (evening). This is the purchase, not the departure.":
@@ -293,6 +300,3 @@ namespace Paridhwani
         void OnApplicationQuit() { Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }
     }
 }
-
-
-

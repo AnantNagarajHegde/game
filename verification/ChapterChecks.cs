@@ -29,8 +29,21 @@ public static class ChapterChecks {
  }
  public static int Main() {
  Witnesses(false); Witnesses(true);
+ var notice=new TeaProgress(); var clerk=new PanchayatConversation();
+ Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
+ notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
+ var nt=clerk.Start(notice); nt=clerk.Reply(nt,1,notice); Check(!notice.noticeIdentified && nt.Id=="question","optional evasion grants no facts");
+ Check(nt.Choices[0].Activity==VillageActivity.PanchayatNotice,"evasion leaves public notice readable");
+ Check(!PanchayatInvestigation.Answer(notice,1),"wrong site rejected");
+ Check(PanchayatInvestigation.Answer(notice,0) && !notice.deadlineKnown,"site recorded independently");
+ Check(!PanchayatInvestigation.Answer(notice,2) && !notice.deadlineKnown,"wrong time rejected");
+ Check(PanchayatInvestigation.Answer(notice,1) && !notice.deedRequired,"deadline recorded without document inference");
+ Check(!PanchayatInvestigation.Answer(notice,1) && !notice.checkpostDestinationKnown,"catalogue alone insufficient");
+ Check(PanchayatInvestigation.Answer(notice,2) && notice.deedRequired && notice.checkpostDestinationKnown,"public route and document checklist sufficient without optional testimony");
+ Check(clerk.ResumeAfterActivity(nt,notice).Id=="return","notice resumes relevant clerk turn");
+ Check(PanchayatInvestigation.Answer(notice,2) && notice.deadlineKnown,"repeated reading preserves facts");
  var p=new TeaProgress(); Check(!ArchiveInvestigation.FindShelf(p,1) && !ArchiveInvestigation.ReadReference(p,0),"early archive tasks blocked");
  Check(!RiverInvestigation.Deduce(p,2) && !MarketInvestigation.TryReadTimetable(p,0),"earlier evidence gates retained");
- Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; both witness orders, retries, access, research inference and explicit rest."); return 0;
+ Console.WriteLine("CHAPTER_CHECKS_OK: "+checks+" assertions; both witness orders, retries, access, research inference explicit rest, panchayat notice, deadline and document prerequisites."); return 0;
  }
 }

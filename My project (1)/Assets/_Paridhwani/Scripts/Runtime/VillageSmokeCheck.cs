@@ -264,13 +264,31 @@ namespace Paridhwani
             yield return Shot("26-thursday-transition"); session.ui.ShowConversation(); session.Choose(1); session.Save(); session.Load();
             Check(session.Progress.thursdayStarted && session.Progress.deedReferenceFound && !session.archiveDoor.activeSelf,"archive access, evidence and day survive save");
             session.OpenNotebook(); yield return Shot("27-archive-notebook"); session.Close();
+            player.blocked=true;
+            yield return WalkTo(new Vector3(1,0,12.3f)); yield return WalkTo(new Vector3(1,0,19.8f));
+            player.SetLookAngles(90,17); yield return new WaitForSecondsRealtime(.8f);
+            Check(session.Nearby=="Read the panchayat notice","public notice reachable independently of clerk");
+            session.Interact(); session.SubmitInvestigationAnswer(1); Check(!session.Progress.noticeIdentified,"wrong notice subject rejected");
+            session.SubmitInvestigationAnswer(0); session.SubmitInvestigationAnswer(2); Check(!session.Progress.deadlineKnown,"wrong deadline rejected");
+            session.OpenNotebook(); session.Close(); Check(session.ActiveActivity==VillageActivity.PanchayatNotice,"notebook restores public notice task");
+            session.SubmitInvestigationAnswer(1); session.SubmitInvestigationAnswer(1); Check(!session.Progress.deedRequired,"catalogue alone insufficient");
+            session.SubmitInvestigationAnswer(2); Check(session.Progress.checkpostDestinationKnown,"public checklist yields safe route lead");
+            yield return Shot("28-panchayat-notice"); session.Close(); yield return new WaitForSecondsRealtime(.9f);
+            player.blocked=true; yield return WalkTo(new Vector3(5,0,18.8f)); player.SetLookAngles(0,17);
+            yield return new WaitForSecondsRealtime(.8f); Check(session.Nearby=="Talk to Shresthi","public counter reaches clerk without entering office");
+            session.Interact(); yield return new WaitForSecondsRealtime(.9f);
+            Check(player.ConversationBlend>.99f && session.Turn.Id=="return","clerk uses shared FPP and earned evidence");
+            yield return Shot("29-shresthi"); session.Choose(0); session.Close();
+            Check(session.ui.Mode=="conversation" && session.Turn.Id=="return","notice returns to clerk");
+            session.Choose(1); session.Save(); session.Load();
+            Check(session.Progress.noticeIdentified && session.Progress.deadlineKnown && session.Progress.deedRequired && session.Progress.checkpostDestinationKnown,"panchayat evidence survives restore");
+            session.OpenNotebook(); yield return Shot("30-panchayat-notebook"); session.Close();
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),
-                "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, seven NPCs, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
+                "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, eight NPCs, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
             Debug.Log("VILLAGE_SMOKE_OK "+output+" Frames="+(Time.frameCount-startFrame));
             Application.Quit(0);
         }
     }
 }
 #endif
-

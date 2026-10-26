@@ -170,3 +170,13 @@ To reproduce the available source/logic checks from the repository root:
 It uses the installed editor's compiler and existing Library/Bee response files, writes temporary outputs under the Unity project's Temp folder, and never launches Unity or touches the player's save. The runner is `game/verification/ChapterChecks.cs`. It does not replace the real Editor checks.
 
 Before playing this updated chapter, regenerate with **Paridhwani > Create Tea Stall Benchmark**, then run **Paridhwani > Run Benchmark Checks** or **Validate and Build Benchmark** in a working licensed Editor. The shipped/generated scene and executable remain from the earlier iteration until regeneration succeeds.
+
+## Panchayat notice iteration
+
+After accepting rest and entering Thursday, follow the northern lane to the panchayat public counter east of the temple. Read the public board with E or talk to Shresthi. Early visitors can read the displayed notice, but investigation facts require the archive reference and Thursday progression.
+
+Interpret the named community library, Friday at 09:00, and the required original ownership document. Each wrong answer supplies a contextual hint and allows retry. Compare the library catalogue to the checklist: the family's original deed at Gudda Mane is needed for council review. The notice is a posted clearance claim, not a final ownership ruling, and submitting a document does not guarantee protection. The public route advisory supplies the forest checkpost lead without requiring optional questioning of the clerk. There is no real-time countdown while reading or exploring.
+
+The notebook saves the notice source, deadline, required deed and safe-route lead and supports reopening the notice. Notebook suspension and return to Shresthi use the shared modal and TPP/FPP camera system. The public counter contains files, a stamp, a proposed warehouse drawing, notice board, tiled shelter and damp masonry. Its geometry is generated alongside the other benchmark locations. The checkpost journey is not implemented yet.
+
+Source validation passed using `verification/Verify-Sources.ps1`: runtime/editor compilation and 48 behavior assertions. The development-player smoke sequence now includes the independent public-board approach, retries, notebook return, Shresthi's FPP interaction and evidence save/restore. Those engine-dependent tests remain unexecuted because this session cannot initialize Unity licensing. Regenerate the benchmark in a working Editor before playing these source changes; no new Windows build or updated generated scene is claimed.
