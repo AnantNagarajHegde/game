@@ -292,3 +292,14 @@ Both regional scenes load at startup in this first modular package; this is addi
 Development builds accept -village-profile to write an opt-in local report after warm-up: 600 frame intervals, mean/p95/max interval and allocated/reserved memory. The report records resolution and quality and makes no minimum-spec certification. No telemetry is transmitted. Actual performance results remain pending.
 
 Runtime/editor source compilation and 200 assertions pass, including binding-field ownership/type policy. Engine-dependent additive loading, exports, shader imports and performance capture still require a licensed Unity run.
+
+## Optional dialogue adapter and reproducible native checks
+
+The local story remains the default. A transport-independent optional text adapter supports bounded prompts/responses, cancellation, timeout, stale-reply rejection and authored fallback. It is disabled until an integration explicitly assigns it. External text cannot grant quest effects; no backend endpoint/model/secret or service protocol is invented. See NLP_UNITY_BOUNDARY.md. Source compilation and 208 assertions pass.
+
+verification/Verify-Unity.ps1 runs real Editor generation/checks, optionally builds, and optionally launches a visible isolated-save smoke player. It checks both process exit codes and explicit completion markers, writes a local result report, and does not call an old executable a new verification. Examples from the master workspace root:
+
+    ./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke
+    ./game/verification/Verify-Unity.ps1 -Layout Additive -Build -Smoke
+
+Close this project's Editor first. Run from a normal desktop shell with the project's licensed Unity installation. The smoke flag opts into a visible game window. This session retried Legacy generation on the latest source, but Unity timed out waiting for licensing after 60 seconds and crashed before compilation. No new scene/build/rendering success is claimed; the desktop helper also failed to launch its app server.

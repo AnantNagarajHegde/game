@@ -216,14 +216,14 @@ namespace Paridhwani
         {
             if(!npc || !npc.eyes) return;
             activityHistory.Clear(); notebookActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false;
-            ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
+            NewDialogueTurn(); ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
             player.BeginConversation(npc.eyes); ui.ShowConversation(); SetCursor(true);
         }
         public void Choose(int index)
         {
             if(Turn==null || index<0 || index>=Turn.Choices.Count) return;
             if(Turn.Choices[index].Activity!=VillageActivity.None) { OpenActivity(Turn.Choices[index].Activity); return; }
-            bool wasThursday=Progress.thursdayStarted;
+            NewDialogueTurn(); bool wasThursday=Progress.thursdayStarted;
             Turn=Provider.Reply(Turn,index,Progress); ApplyState(); Save();
             if(!wasThursday && Progress.thursdayStarted) { ui.ShowRestTransition(); return; }
             if(Turn==null) Close(); else ui.ShowConversation();
@@ -239,7 +239,7 @@ namespace Paridhwani
             if(ui.Mode=="notebook" && remember) returnToNotebook=true;
             if(remember && ui.Mode=="evidence" && ActiveActivity!=VillageActivity.None && ActiveActivity!=activity) activityHistory.Push(ActiveActivity);
             if(activity==VillageActivity.BicycleInspection && remember && ui.Mode!="evidence") SelectedBicyclePart=BicyclePart.None;
-            ActiveActivity=activity;
+            SuspendDialogueText(); ActiveActivity=activity;
             if(activity==VillageActivity.ReturnTogether || activity==VillageActivity.FridayPreparation) { player.EndConversation(); ui.ShowReturnActivity(activity); SetCursor(true); return; }
             if(activity==VillageActivity.CouncilEvidence) { player.EndConversation(); ui.ShowCouncilActivity(); SetCursor(true); return; }
             if(activity==VillageActivity.ReviewOutcome || activity==VillageActivity.EndingReflection) { player.EndConversation(); if(activity==VillageActivity.ReviewOutcome) ui.ShowReviewOutcome(); else ui.ShowEndingReflection(); SetCursor(true); return; }
@@ -291,6 +291,7 @@ namespace Paridhwani
         { if(!MarketInvestigation.ReadRiverNotice(Progress)) return; Save(); ui.ShowRiverNotice(); }
         public void OpenNotebook()
         {
+            SuspendDialogueText();
             notebookActivity=ui.Mode=="evidence"?ActiveActivity:VillageActivity.None;
             player.EndConversation(); ui.ShowNotebook(); SetCursor(true);
         }
@@ -305,14 +306,14 @@ namespace Paridhwani
             if((ui.Mode=="notebook" || ui.Mode=="evidence") && ResumeAvailable)
             {
                 if((ui.Mode=="evidence" || activityChanged) && Provider is IActivityConversationProvider activityProvider)
-                    Turn=activityProvider.ResumeAfterActivity(Turn,Progress);
+                    {Turn=activityProvider.ResumeAfterActivity(Turn,Progress);NewDialogueTurn();}
                 ActiveActivity=VillageActivity.None; activityChanged=false;
                 player.BeginConversation(ActiveNpc.eyes); ui.ShowConversation(); SetCursor(true); return;
             }
             ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation(); ui.HideModal(); SetCursor(false);
         }
         void ResetModalContext()
-        { activityHistory.Clear(); notebookActivity=VillageActivity.None; ActiveActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false; }
+        { NewDialogueTurn(); activityHistory.Clear(); notebookActivity=VillageActivity.None; ActiveActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false; }
         void SetCursor(bool free)
         {
             player.blocked=free; player.SuppressLook();

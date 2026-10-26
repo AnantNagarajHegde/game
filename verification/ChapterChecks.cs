@@ -49,7 +49,19 @@ public static class ChapterChecks {
  Check(!System.IO.File.Exists(file+".tmp"),"atomic write leaves no temp file");
  } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
  }
- public static int Main() { FileChecks();
+ static void AsyncDialogueChecks() {
+ using(var requests=new DialogueTextRequests()) {
+ Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","",new string('x',4097)))).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"oversized external response rejected");
+ var turn=new LocalTeaConversation().Start(new TeaProgress());var prompt=new DialoguePrompt("Manjunatha",turn,new string('x',600));prompt.AvailableReplies[0].English="changed";Check(turn.Choices[0].Line.English!="changed" && prompt.LearnerText.Length==512,"optional request is bounded and copies authored choices without effects");
+ Check(requests.Send(null).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"missing optional service falls back");
+ Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","","A bounded reply"))).GetAwaiter().GetResult().Status==DialogueTextStatus.Ready,"optional text returns without quest effects");
+ Check(requests.Send(token=>throw new InvalidOperationException()).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"service failure falls back");
+ var never=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();Check(requests.Send(token=>never.Task,10).GetAwaiter().GetResult().Status==DialogueTextStatus.TimedOut && !requests.Busy,"ignored cancellation cannot trap a request");
+ var late=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();var old=requests.Send(token=>late.Task);requests.Cancel();late.SetResult(new TeaLine("","","Late reply"));Check(old.GetAwaiter().GetResult().Status==DialogueTextStatus.Superseded,"late replies after exit ignored");
+ Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
+ }
+ }
+ public static int Main() { FileChecks(); AsyncDialogueChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

@@ -95,7 +95,13 @@ namespace Paridhwani
             var header=new VisualElement(); Class(header,"row"); card.Add(header);
             Add(header,session.ConversationTitle,"eyebrow");
             Button(header,"Leave  [Esc]",session.Close,"quiet-button");
-            var speech=new VisualElement(); Class(speech,"speech"); card.Add(speech); Line(speech,t.Line);
+            var speech=new VisualElement(); Class(speech,"speech"); card.Add(speech); Line(speech,session.VisibleConversationLine);
+            if(session.OptionalDialogueText!=null) {
+                var input=new TextField("Ask in your own words"){value=session.OptionalDialogueInput,maxLength=512};input.RegisterValueChangedCallback(e=>session.OptionalDialogueInput=e.newValue);card.Add(input);
+                var ask=Button(card,"Ask",session.AskOptionalDialogue,"quiet-button");ask.SetEnabled(!session.OptionalDialogueBusy);
+                if(session.OptionalDialogueBusy)Button(card,"Cancel reply",session.CancelOptionalDialogue,"quiet-button");
+                if(session.OptionalDialogueStatus.Length>0)Add(card,session.OptionalDialogueStatus,"small");
+            }
             Add(card,"YOUR REPLY","eyebrow");
             var choices=new VisualElement(); Class(choices,"choices"); card.Add(choices);
             for(int i=0;i<t.Choices.Count;i++)
