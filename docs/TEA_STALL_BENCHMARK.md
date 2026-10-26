@@ -228,3 +228,11 @@ At the farm archive trunk, use E for a stable inspection view. Enter 1207 from K
 Read the original story deed through three supported clause tasks: education purpose, restricted commercial use, community beneficiary. Wrong answers give feedback and retry; Tab preserves the current page and lock attempt. The register/signatories are linked to the library catalogue. After all clauses, collect the original into its protective folder while beside the trunk. Council review remains necessary. Notebook rereading is supported. These are authored fictional clauses, not a real legal instrument.
 
 Runtime/editor compilation and 98 logic assertions pass. Unity scene generation, save serialization, physical trunk/camera review and rendering remain unverified in this session. The scene generator includes the hinged lid, paper and inspection anchors; regenerate before playing.
+
+## Return and Friday preparation cycle
+
+After protecting the reviewed deed, speak to Ananya. Confirm either walking back together or skipping the already explored return; neither option changes evidence or the ending. Walking uses the player's recent path points for the placeholder companion, with catch-up so she cannot block progression. Her walking collider is disabled; this is not final navigation, locomotion animation or an escort challenge. On save restoration she can catch up to the player. Return via the same ridge and Raghavendra's auto. The skip reaches the same village arrival and story flags.
+
+Safe return records Ananya and the original back in the village but does not automatically advance the day. Speak to Ananya at the village pickup and explicitly confirm rest/Friday preparations. Friday begins at the library court before 09:00, with the original still protected and work not yet suspended. The transition saves immediately. Reading and exploration do not consume the deadline.
+
+Source compilation and 106 logic assertions pass, including unavailable-route gates, beginning versus completing a return, walk/skip state equivalence, and explicit Friday progression. Companion motion, collisions, travel framing, serialization and in-engine scene/build checks remain pending Unity verification.

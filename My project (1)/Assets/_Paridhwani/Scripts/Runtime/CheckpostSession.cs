@@ -9,6 +9,7 @@ namespace Paridhwani
         ITeaConversationProvider CreateConversation(VillageNpc npc)
         {
             if(npc.role==VillageNpcRole.AutoDriver || npc.role==VillageNpcRole.CheckpostDriver) return new TravelConversation(AtCheckpost);
+            if(npc.role==VillageNpcRole.Ananya && Progress.deedRetrieved) return new ReturnConversation();
             if(npc.role==VillageNpcRole.ForestGuard) return new CheckpostConversation(ridgeRouteChecked);
             return npc.role==VillageNpcRole.Librarian && Progress.guddaFamilyLeadKnown?new ArchiveConversation():npc.CreateProvider();
         }
@@ -35,7 +36,7 @@ namespace Paridhwani
             if(!target || (outward && !CheckpostInvestigation.CanTravel(Progress))) return;
             ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation();
             if(outward) Progress.checkpostVisited=true;
-            player.Restore(target.position,target.eulerAngles.y); ApplyState(); Save();
+            player.Restore(target.position,target.eulerAngles.y); ApplyState(); if(!outward) CompleteReturnAtVillage(); Save();
             ui.ShowTravelArrival(outward); SetCursor(true);
         }
         string CheckpostHint()

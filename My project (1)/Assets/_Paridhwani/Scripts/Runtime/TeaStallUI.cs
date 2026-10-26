@@ -204,6 +204,9 @@ namespace Paridhwani
                 Add(scroll,"Giri’s notice beside the bus timetable reports a bicycle near the river weir. The notice alone does not prove an accident or Ananya’s whereabouts. See the direct observations below if you have inspected the bicycle.","body");
             }
             AddRiverNotebook(scroll);
+            if(session.Progress.returnJourneyStarted) { Add(scroll,"RETURN / ORIGINAL PROTECTED","section-title"); Add(scroll,"Returning with Ananya by the checked ridge and open auto approach. Walking and skipping the familiar journey preserve the same evidence.","body"); }
+            if(session.Progress.returnedWithAnanya) Add(scroll,"Returned safely to Kalyanapura with Ananya and the original. Friday begins only after confirming preparations with her.","body");
+            if(session.Progress.fridayFinaleStarted) Add(scroll,"FRIDAY / BEFORE 09:00: meet the council at the library court. Work is not suspended until the evidence is presented and reviewed.","body");
             if(session.Progress.trunkOpened) { Add(scroll,"FAMILY TRUNK / OPENED","section-title"); Button(scroll,"Review the original deed",()=>session.OpenActivity(VillageActivity.DeedReview)); }
             if(session.Progress.deedConceptsReviewed) Add(scroll,"Original / 1952: education purpose; restricted commercial use; community beneficiary. Family register/signatories match the catalogue reference. Council review is still required.","body");
             if(session.Progress.deedRetrieved) Add(scroll,"Original deed protected in its folder. Assistance use does not alter its value or the story outcome.","body");

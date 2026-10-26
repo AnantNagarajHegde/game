@@ -29,6 +29,9 @@ namespace Paridhwani
             get
             {
                 if(Progress==null || ui.IsModal) return "";
+                if(Progress.fridayFinaleStarted) return "LIBRARY COURT / COUNCIL REVIEW";
+                if(Progress.returnedWithAnanya) return "ANANYA / VILLAGE PICKUP / FRIDAY PREPARATIONS";
+                if(Progress.returnJourneyStarted) return AtCheckpost?"RETURN WITH ANANYA / CHECKPOST AUTO":"ANANYA / VILLAGE PICKUP";
                 string ridgeHint=RidgeHint(); if(ridgeHint.Length>0) return ridgeHint;
                 string journeyHint=CheckpostHint(); if(journeyHint.Length>0) return journeyHint;
                 if(Progress.thursdayStarted && panchayatNotice)
@@ -93,6 +96,7 @@ namespace Paridhwani
         {
             ApplyCheckpostState();
             ApplyDeedState();
+            ApplyReturnState();
             if(farmGate) farmGate.SetActive(!Progress.ridgeWayfindingKnown || !Progress.trailPermission);
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
@@ -104,6 +108,7 @@ namespace Paridhwani
         void Update()
         {
             if(!ready) return;
+            UpdateReturnJourney();
             UpdateFarmArrival();
             FindInteraction();
             var keys=Keyboard.current;
@@ -227,6 +232,7 @@ namespace Paridhwani
             if(remember && ui.Mode=="evidence" && ActiveActivity!=VillageActivity.None && ActiveActivity!=activity) activityHistory.Push(ActiveActivity);
             if(activity==VillageActivity.BicycleInspection && remember && ui.Mode!="evidence") SelectedBicyclePart=BicyclePart.None;
             ActiveActivity=activity;
+            if(activity==VillageActivity.ReturnTogether || activity==VillageActivity.FridayPreparation) { player.EndConversation(); ui.ShowReturnActivity(activity); SetCursor(true); return; }
             if(OpenDeedActivity(activity)) { SetCursor(true); return; }
             if(activity==VillageActivity.BicycleInspection) player.BeginInspection(bicycleView,bicycleLookTarget);
             else player.EndConversation();

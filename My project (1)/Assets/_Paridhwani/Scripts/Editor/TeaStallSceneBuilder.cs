@@ -109,6 +109,7 @@ namespace Paridhwani.Editor
             AddCheckpostChapter(session);
             AddRidgeChapter(session);
             AddDeedChapter(session);
+            AddReturnChapter(session);
             ConfigureBenchmarkRendering();
             Lighting();
             EditorSceneManager.SaveScene(scene,ScenePath);

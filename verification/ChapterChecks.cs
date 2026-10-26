@@ -83,6 +83,17 @@ public static class ChapterChecks {
  Check(!DeedInvestigation.Answer(journey,0) && DeedInvestigation.Answer(journey,1) && journey.deedConceptsReviewed,"beneficiary completes review");
  Check(!DeedInvestigation.Protect(journey,false) && DeedInvestigation.Protect(journey,true),"protect original at physical trunk");
  Check(DeedInvestigation.Unlock(journey,"1207",true) && journey.deedRetrieved,"repeat inspection preserves evidence");
+ Check(!ReturnInvestigation.Begin(locked,true) && !ReturnInvestigation.Friday(locked),"no return or Friday before original");
+ Check(!ReturnInvestigation.Begin(journey,false),"unchecked route prevents return preparation");
+ Check(ReturnInvestigation.Begin(journey,true) && !journey.returnedWithAnanya,"begin return is not arrival");
+ Check(!ReturnInvestigation.Complete(journey,true,false) && !ReturnInvestigation.Friday(journey),"no remote arrival or premature day transition");
+ Check(ReturnInvestigation.Complete(journey,true,true) && journey.returnedWithAnanya && !journey.fridayFinaleStarted,"return completion does not consume day");
+ Check(ReturnInvestigation.Friday(journey) && journey.fridayFinaleStarted,"explicit Friday after safe return");
+ Check(ReturnInvestigation.Complete(journey,true,true) && journey.deedRetrieved,"return revisit preserves protected deed");
+ var walk=new TeaProgress {deedRetrieved=true,deedConceptsReviewed=true,ananyaFound=true,disappearanceExplained=true,ridgeCrossed=true,thursdayStarted=true,deedRequired=true,checkpostDestinationKnown=true,checkpostVisited=true,checkpostAccountKnown=true,trailInstructionsUnderstood=true};
+ var skip=new TeaProgress {deedRetrieved=true,deedConceptsReviewed=true,ananyaFound=true,disappearanceExplained=true,ridgeCrossed=true,thursdayStarted=true,deedRequired=true,checkpostDestinationKnown=true,checkpostVisited=true,checkpostAccountKnown=true,trailInstructionsUnderstood=true};
+ ReturnInvestigation.Begin(walk,true); ReturnInvestigation.Complete(walk,true,true); ReturnInvestigation.Begin(skip,true); ReturnInvestigation.Complete(skip,true,true);
+ Check(walk.returnedWithAnanya==skip.returnedWithAnanya && walk.fridayFinaleStarted==skip.fridayFinaleStarted,"walk and skip share story result");
  var notice=new TeaProgress(); var clerk=new PanchayatConversation();
  Check(clerk.Start(notice).Id=="early" && !PanchayatInvestigation.Answer(notice,0),"early public board grants no story progression");
  notice.deedReferenceFound=true; Check(!PanchayatInvestigation.CanInvestigate(notice),"rest precedes office investigation"); notice.thursdayStarted=true;
