@@ -1,0 +1,106 @@
+.root {
+    color: rgb(235,229,213); font-size: 16px; -unity-text-generator: advanced;
+}
+Label { white-space: normal; }
+.top { position: absolute; left: 44px; top: 30px; right: 44px; flex-direction: row; justify-content: space-between; }
+.brand { font-size: 24px; letter-spacing: 5px; color: rgb(245,236,209); }
+.tagline { font-size: 12px; margin-top: 7px; color: rgb(190,193,179); letter-spacing: 1px; }
+.place { align-items: flex-end; }
+.eyebrow { font-size: 11px; letter-spacing: 2px; color: rgb(207,176,114); margin-bottom: 9px; }
+.small { font-size: 12px; color: rgb(178,186,175); margin-top: 4px; white-space: normal; }
+.task { position: absolute; bottom: 40px; left: 44px; width: 365px; border-left-width: 2px; border-left-color: rgb(178,148,91); padding-left: 17px; padding-top: 8px; padding-bottom: 8px; background-color: rgba(17,26,23,.82); }
+.objective { font-size: 17px; margin-bottom: 8px; }
+.controls { position: absolute; bottom: 43px; right: 44px; align-items: flex-end; }
+.prompt { position: absolute; bottom: 147px; align-self: center; flex-direction: row; align-items: center; background-color: rgba(18,29,25,.94); padding: 10px 20px; border-radius: 3px; }
+.keycap { border-width: 1px; border-color: rgb(169,156,120); padding: 3px 9px; margin-right: 13px; color: rgb(241,223,177); }
+.prompt-text { font-size: 14px; }
+.modal-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; justify-content: center; align-items: center; background-color: rgba(9,17,15,.25); }
+.conversation { position: absolute; bottom: 28px; width: 900px; max-width: 94%; padding: 23px 29px 18px 29px; background-color: rgba(16,28,24,.97); border-top-width: 2px; border-top-color: rgb(182,153,98); }
+.row { flex-direction: row; justify-content: space-between; align-items: center; }
+.speech { padding-bottom: 14px; margin-bottom: 11px; border-bottom-width: 1px; border-bottom-color: rgba(172,165,137,.22); }
+.kannada { font-size: 26px; margin-bottom: 5px; white-space: normal; }
+.roman { font-size: 15px; color: rgb(219,198,150); margin-top: 3px; margin-bottom: 5px; }
+.meaning { font-size: 14px; color: rgb(181,190,177); margin-top: 3px; }
+.choices { flex-direction: row; }
+.choice { flex-grow: 1; flex-basis: 0; margin-right: 9px; padding: 12px; background-color: rgb(34,48,40); border-width: 1px; border-color: rgb(73,85,65); flex-direction: row; border-radius: 2px; color: rgb(236,232,212); }
+.choice:hover, .choice:focus { background-color: rgb(54,68,48); border-color: rgb(190,158,94); }
+.choice-number { font-size: 11px; color: rgb(184,158,106); margin-right: 10px; }
+.choice-lines { flex-grow: 1; flex-shrink: 1; }
+.choice-kn { font-size: 19px; white-space: normal; }
+.choice-ro { font-size: 12px; color: rgb(211,189,145); white-space: normal; margin-top: 6px; }
+.choice-en { font-size: 12px; color: rgb(180,188,174); white-space: normal; margin-top: 5px; }
+.aids { flex-direction: row; align-items: center; justify-content: space-between; margin-top: 15px; }
+Toggle { flex-direction: row; align-items: center; margin-top: 6px; margin-bottom: 6px; font-size: 12px; }
+.unity-toggle__input { width: 15px; height: 15px; margin-right: 7px; border-width: 1px; border-color: rgb(183,158,107); background-color: rgb(26,38,29); }
+.unity-toggle__input:checked { background-color: rgb(183,158,107); }
+.unity-toggle__checkmark { width: 9px; height: 9px; }
+.paper, .notebook { width: 630px; max-width: 92%; max-height: 87%; padding: 29px 34px; background-color: rgb(26,38,31); border-top-width: 2px; border-top-color: rgb(191,159,99); }
+.notebook { width: 760px; }
+.title { font-size: 29px; margin-top: 4px; margin-bottom: 20px; color: rgb(241,226,190); }
+.body { font-size: 15px; white-space: normal; margin-top: 6px; margin-bottom: 18px; }
+.button { background-color: rgb(49,64,45); border-width: 1px; border-color: rgb(95,104,75); color: rgb(239,228,198); margin-bottom: 10px; padding: 10px 14px; -unity-text-align: middle-left; }
+.button:hover, .button:focus { background-color: rgb(67,80,53); border-color: rgb(196,164,104); }
+.quiet-button { background-color: rgba(0,0,0,0); color: rgb(184,192,175); padding: 4px 8px; border-width: 0; margin-bottom: 8px; font-size: 12px; }
+.section-title { font-size: 11px; letter-spacing: 2px; color: rgb(202,176,121); margin-top: 20px; margin-bottom: 10px; }
+.word-row { flex-direction: row; padding: 8px 0; border-bottom-width: 1px; border-bottom-color: rgba(180,174,142,.16); }
+.word-kn { font-size: 23px; min-width: 220px; }
+.word-ro { font-size: 15px; color: rgb(227,209,168); }
+.notebook-scroll { flex-grow: 1; flex-shrink: 1; min-height: 150px; }
+Slider { margin-top: 12px; margin-bottom: 12px; }
+.unity-base-slider__input { min-width: 150px; min-height: 18px; flex-grow: 1; }
+.unity-base-slider__tracker { background-color: rgb(88,99,77); height: 3px; top: 8px; }
+.unity-base-slider__dragger { width: 12px; height: 16px; background-color: rgb(196,166,107); }
+
+/* Keep the speaker visible above a compact conversation card. */
+.conversation { padding: 14px 26px 13px 26px; bottom: 20px; }
+.conversation .speech { padding-bottom: 8px; margin-bottom: 7px; }
+.conversation .kannada { font-size: 23px; margin-bottom: 1px; }
+.conversation .roman { font-size: 14px; margin-top: 1px; margin-bottom: 2px; }
+.conversation .meaning { font-size: 13px; margin-top: 1px; }
+.conversation .choice { padding: 8px 11px; }
+.conversation .choice-kn { font-size: 18px; }
+.conversation .choice-ro, .conversation .choice-en { margin-top: 2px; }
+.conversation .aids { margin-top: 9px; }
+
+/* Evidence tasks use the same language layers and interaction vocabulary as conversations. */
+.evidence-card { width: 820px; }
+.evidence-scroll { flex-grow: 1; flex-shrink: 1; min-height: 150px; }
+.ledger-entry { flex-direction: row; align-items: center; justify-content: space-between; margin: 14px 0; padding: 16px; background-color: rgb(40,51,37); border-left-width: 2px; border-left-color: rgb(184,156,104); }
+.ledger-writing { flex-grow: 1; }
+.clock { width: 140px; height: 140px; flex-shrink: 0; position: relative; border-width: 2px; border-color: rgb(187,166,123); border-radius: 70px; margin: 4px 16px; }
+.clock Label { position: absolute; font-size: 13px; color: rgb(223,210,176); }
+.clock-twelve { top: 4px; left: 56px; }
+.clock-three { right: 9px; top: 56px; }
+.clock-six { bottom: 5px; left: 61px; }
+.clock-nine { left: 9px; top: 56px; }
+.clock-minute { position: absolute; top: 25px; left: 67px; width: 2px; height: 43px; background-color: rgb(232,221,190); }
+.clock-hour { position: absolute; top: 68px; left: 66px; width: 4px; height: 29px; background-color: rgb(202,171,108); }
+.clock-pin { position: absolute; top: 64px; left: 63px; width: 9px; height: 9px; border-radius: 5px; background-color: rgb(232,221,190); }
+.evidence-answer { flex-direction: row; align-items: center; padding: 8px 13px; margin: 5px 0; background-color: rgb(39,54,43); border-width: 1px; border-color: rgb(79,95,70); color: rgb(235,228,208); }
+.evidence-answer:hover, .evidence-answer:focus { background-color: rgb(61,75,46); border-color: rgb(192,161,100); }
+.schedule-row { flex-direction: row; align-items: center; padding: 9px 12px; border-bottom-width: 1px; border-bottom-color: rgb(78,90,69); }
+.route-number { width: 55px; font-size: 26px; color: rgb(219,187,125); }
+.schedule-destination { flex-grow: 1; }
+.schedule-time { font-size: 16px; color: rgb(219,210,184); }
+.feedback { color: rgb(231,192,126); font-size: 14px; margin: 14px 0; white-space: normal; }
+.success { color: rgb(200,214,167); font-size: 15px; margin: 18px 0; white-space: normal; }
+
+/* Reserve header/actions; let only document contents scroll. */
+.evidence-card { width: 880px; height: 84%; }
+.evidence-card > .row, .evidence-card > .aids, .evidence-card > .small, .evidence-card > .button { flex-shrink: 0; }
+.evidence-card > .aids { min-height: 30px; }
+.evidence-card .title { font-size: 25px; margin-bottom: 10px; }
+.evidence-card .ledger-entry { padding: 9px 13px; margin: 8px 0; }
+.evidence-card .evidence-answer { padding: 5px 11px; margin: 3px 0; }
+.evidence-card .choice-kn { font-size: 17px; }
+.evidence-card .choice-ro, .evidence-card .choice-en { margin-top: 1px; }
+.evidence-card .section-title { margin-top: 12px; margin-bottom: 6px; }
+.evidence-card .feedback { margin: 7px 0; font-size: 13px; }
+
+.bicycle-panel .body { margin-bottom: 10px; font-size: 14px; }
+.bicycle-panel .kannada { font-size: 22px; }
+.bicycle-panel .evidence-answer { padding: 4px 10px; }
+.bicycle-panel .aids { margin-top: 7px; }
+
+.bicycle-panel .evidence-answer { flex-grow: 1; flex-basis: 0; margin-right: 8px; }
+.bicycle-panel .feedback { margin: 7px 0; font-size: 13px; }
