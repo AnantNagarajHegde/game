@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 namespace Paridhwani
 {
@@ -384,7 +385,28 @@ namespace Paridhwani
             Check(Mathf.Abs(player.view.fieldOfView-53)<.1f,"reduced motion keeps a stable conversation FOV");
             session.OptionalDialogueText=(prompt,token)=>System.Threading.Tasks.Task.FromResult(new TeaLine("ನಮಸ್ಕಾರ.","Namaskara.","Hello. Use a supported reply when ready."));session.OptionalDialogueInput="How do I greet you?";session.AskOptionalDialogue();yield return null;
             Check(!session.OptionalDialogueBusy && !session.Progress.greeted && !session.Progress.deedRetrieved,"optional text grants no quest effects");yield return Shot("48-optional-text-and-settings");
-            session.OptionalDialogueText=null;session.Choose(0);Check(session.Progress.greeted,"authored reply retains quest authority");session.Close();session.Save();session.Load();
+            var authoredTurn=session.Turn;
+            Check(session.HasOptionalDialogueLine,"optional reply identifies its separate presentation state");
+            session.UseAuthoredDialogue();
+            Check(!session.HasOptionalDialogueLine && session.VisibleConversationLine==authoredTurn.Line && session.Turn==authoredTurn && !session.Progress.greeted,"original line restores without advancing the story");
+            int oldWidth=Screen.width,oldHeight=Screen.height;var oldMode=Screen.fullScreenMode;float oldTextScale=session.Progress.textScale;
+            var longReply=new System.Text.StringBuilder("<b>These characters are plain dialogue text.</b> ");for(int i=0;i<65;i++)longReply.Append("Read this reply at your own pace. The original line remains available. ");
+            // Keep this response inside the external response limit while forcing real scrolling.
+            string replyText=longReply.ToString().Substring(0,3800);
+            session.OptionalDialogueText=(prompt,token)=>System.Threading.Tasks.Task.FromResult(new TeaLine("","",replyText));
+            session.OptionalDialogueInput="Please explain that again.";session.AskOptionalDialogue();yield return null;
+            session.Progress.textScale=1.3f;session.SettingsChanged();session.ui.ShowConversation();
+            Screen.SetResolution(960,540,FullScreenMode.Windowed);yield return new WaitForSecondsRealtime(.5f);
+            var uiRoot=session.ui.GetComponent<UIDocument>().rootVisualElement;var dialogueScroll=uiRoot.Q<ScrollView>("dialogue-scroll");
+            Check(dialogueScroll!=null && dialogueScroll.contentViewport.worldBound.height>0 && dialogueScroll.verticalScroller.highValue>0,"long response scrolls in a short window at maximum text size");
+            foreach(string action in new[]{"dialogue-leave","dialogue-notebook","dialogue-original"}) {
+                var control=uiRoot.Q(action);var bounds=control.worldBound;var screen=uiRoot.worldBound;
+                Check(bounds.width>0 && bounds.height>0 && bounds.xMin>=screen.xMin-1 && bounds.xMax<=screen.xMax+1 && bounds.yMin>=screen.yMin-1 && bounds.yMax<=screen.yMax+1,"fixed dialogue action remains inside the viewport: "+action);
+            }
+            foreach(var label in dialogueScroll.Query<Label>().ToList())Check(!label.enableRichText,"external dialogue remains literal text");
+            yield return Shot("49-long-response-large-text");session.UseAuthoredDialogue();
+            session.Progress.textScale=oldTextScale;session.SettingsChanged();session.ui.ShowConversation();Screen.SetResolution(oldWidth,oldHeight,oldMode);yield return new WaitForSecondsRealtime(.5f);
+            session.OptionalDialogueText=null;session.Choose(0);Check(session.Progress.greeted && session.OptionalDialogueInput=="","authored reply retains quest authority and clears the previous draft");session.Close();session.Save();session.Load();
             Check(session.Progress.reducedMotion && session.Progress.invertY && session.Progress.quality==VillageQuality.Low && Mathf.Abs(session.Progress.ambienceVolume-.4f)<.01f && Mathf.Abs(session.Progress.footstepVolume-.2f)<.01f,"presentation and audio preferences survive restoration");
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),

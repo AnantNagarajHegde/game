@@ -353,3 +353,17 @@ Source compilation and 212 assertions pass. The current checked-in scene is inte
 - Companion breadcrumbs now have a bounded 128-point history, reset on visit replacement and transport, and reject cross-world discontinuities. Old walking history cannot survive a load into another chapter. Returning from practice switches save ownership only after reading a valid main visit; failure keeps practice isolated.
 - World revision is now 3 because regenerated collider audio metadata is required. The old checked-in scene remains deliberately guarded; no fresh scene/player is claimed.
 - Added storage-status and companion lifecycle checks plus a native actor-displacement restore regression. Runtime/editor compilation and 259 executable assertions pass; scene assertions remain pending the licensed Unity gate.
+
+
+## Conversation readability follow-up (27 October 2026)
+
+- Conversation cards use a bounded, scrollable reading/reply area. Leave and notebook/language controls stay outside the scroll area. Text scaling also limits the card's width; narrower cards stack replies. The card remains below the speaker's face region by design, pending rendered acceptance.
+- Same-turn language toggles and optional-reply refreshes retain reading position and available control focus. New turns clear stale learner drafts. The Original line action cancels pending optional text and restores the authored line without quest effects.
+- Dialogue labels render literal text, including any markup characters returned by the optional service. No actual NLP service is added.
+- Native smoke assertions now exercise a long response at 960x540 and 1.3 text scale, pinned action bounds, literal labels, original-line restoration and draft clearing. These are authored but cannot be executed through the current restricted Editor connection.
+- Runtime/editor source compilation and all 259 standalone assertions pass. Actual layout and Kannada shaping remain in-engine review gates.
+
+
+## Unity availability clarification (27 October 2026)
+
+Earlier successful builds/rendered tests remain valid for their historical revisions. The old licensing timeout was a real automated-launch failure. A fresh desktop log now shows successful licensing; the exact project is open and has imported assets. The CLI batch attempt refuses the open project, while live discovery returns STATUS_NO_INSTANCES plus a running-process-inspection warning. No Pipeline package is installed in the project; no license, account, sandbox or package setting was changed. The shell's LocalApplicationData path is sandbox-specific. The current limitation is control of the running Editor, with regeneration/native acceptance still pending, rather than a proven ongoing license failure on the desktop. See PRODUCTION_STATUS.md for the current manual/closed-Editor verification routes.

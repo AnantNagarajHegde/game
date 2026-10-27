@@ -1,6 +1,6 @@
 # Current production status
 
-The main story is authored from arrival to epilogue. This is the current status; older iteration reports in TEA_STALL_BENCHMARK.md are historical. The game is not release-ready and the latest generated world/player has not been produced in this session.
+The main story is authored from arrival to epilogue. This is the current status; older iteration reports in TEA_STALL_BENCHMARK.md are historical. The game is not release-ready. No newly generated world/player or complete native verification has been confirmed in this implementation session.
 
 ## Implementation delivered
 
@@ -16,7 +16,7 @@ The main story is authored from arrival to epilogue. This is the current status;
 | Rendering | Runtime Low/Balanced/High profiles, distance culling, seven periodic material maps, restrained wind | Shader compilation, representative visual/performance capture |
 | Characters | Corrected female variants; procedural idle/work/talk/follow motion | Production models/rigs, animation and visual review |
 | Scene packaging | Optional persistent Bootstrap + village + forest/farm additive exporter/loader | Execute export, bind/load validation and modular smoke player |
-| Dialogue boundary | Optional text-only delegate, cancellation, timeout, stale rejection, authored quest authority | Actual separate NLP service/contract and language behavior |
+| Dialogue boundary | Optional text-only delegate, cancellation/timeout, stale rejection, literal text, original-line restore, scrollable conversation and scaled-width controls | Actual separate NLP service/contract and language behavior |
 | Verification | Source, storage, texture, editor/built-player checks and profiling scripts | Successful licensed Unity build and rendered execution |
 
 The surface maps, synthesized footsteps and procedural rigs improve the prototype. They do not establish the intended final Karnataka village art standard. Production models, terrain/vegetation refinement, authored audio and final scene composition remain unfinished.
@@ -30,18 +30,22 @@ The surface maps, synthesized footsteps and procedural rigs improve the prototyp
 - The native verification PowerShell script parses successfully and was actually retried on the latest source. It correctly reported failure rather than success.
 - Local commits are created after passing source checks. No GitHub push was attempted in this pass.
 
-## Blocked engine gate
+## Current native verification boundary
 
-The latest real Editor retry connected to Package Manager, timed out after 60 seconds waiting for licensing, then crashed before compilation. The Windows computer-use helper also failed to launch its app server. This session therefore cannot claim scene regeneration, a new Windows player, native serialization/collision/camera checks, rendered Kannada acceptance or measured performance.
+Earlier iterations did compile, build and run visible smoke tests (1,226 and 1,709 advancing frames). The later batch launch in `game/temple-verification.log` refused the LicenseClient-amogh IPC connection, launched a replacement client, timed out after 60 seconds, and crashed before the project checks. That records an automated-launch failure, not proof of an invalid license or a game-script defect.
 
-The checked-in scene/build predates the latest source. The revision-3 schema/recipe guard stops a stale world before reading or changing a visit. Regenerate before playing.
+A fresh read on 27 October found successful desktop licensing handshakes and a successfully updated license in the desktop Editor log. The project log shows asset imports and a stale-world guard from Play mode. The exact project is now open: `unity run` refuses a second launch for that reason. Meanwhile `unity status` reports no connected Pipeline instance and warns it could not inspect running Editors. The project has no Pipeline dependency. The shell also uses a sandbox-specific LocalApplicationData directory; a session/access difference remains the likely explanation for the earlier automated connection failure, but the exact root cause is unproven. The CLI update check also failed DNS resolution; no update or license/configuration change was made.
 
-From a normal desktop shell at the master repository root, with this project's Editor closed:
+Current status: desktop Unity can initialize licensing; this session cannot drive its open Editor or claim completed regeneration/playtesting. Imported texture metadata and ShaderGraph settings changed outside this implementation and are left intact/uncommitted. No rendered UI acceptance or new complete player is claimed.
+
+In the already-open Editor, run **Paridhwani > Create Tea Stall Benchmark**, then **Paridhwani > Run Benchmark Checks**, then Play. The current revision-3 world guard intentionally rejects the old generated scene before opening or writing a visit. The project log's stale-world message is expected until regeneration succeeds.
+
+Alternatively, with this project's Editor closed, run the batch workflow from a normal desktop shell at the master repository root:
 
     ./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke
     ./game/verification/Verify-Unity.ps1 -Layout Additive -Build -Smoke
 
-`-Smoke` explicitly opens a visible isolated-save test player after a successful fresh build. Logs and JSON result reports are written under the Unity project's Temp/UnityVerification directory. Only newly built players are accepted by this workflow.
+`-Smoke` opens a visible isolated-save test player only after a successful fresh build. Logs and JSON result reports are written under the Unity project's Temp/UnityVerification directory. Only newly built players are accepted by this workflow.
 
 Source checks can run here or locally:
 
@@ -63,3 +67,8 @@ These gates prevent an honest claim that every pending implementation/production
 ## Latest local implementation pass (27 October 2026)
 
 Three cycles address text-entry safety and real movement speed; grounded surface audio and per-channel volume; and safe restore, NPC staging and companion-path lifecycle. The story content is unchanged. The native smoke runner now acknowledges arrival, verifies restored actor origins, and checks the new volume channels through Unity serialization. These native assertions are authored, not executed here. Source compilation and 259 standalone assertions passed after the final changes. No percentage increase is claimed without completing production/engine gates.
+
+
+## Conversation usability pass (27 October 2026)
+
+Conversation speech/choices now scroll under fixed actions, narrower cards stack replies, and scaled cards respect viewport width. Same-turn refreshes preserve reading position/control focus. Optional replies can return to the original authored line without story effects, and dialogue labels interpret service text literally. Native smoke coverage includes long replies at 960x540 with maximum text scale. All runtime/editor sources compile and 259 standalone assertions pass; those new layout checks remain authored but unexecuted through this session.

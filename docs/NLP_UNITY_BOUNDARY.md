@@ -8,7 +8,7 @@ The full story runs through authored local conversation providers. Unity owns tu
 
 A prompt contains copied current-turn text, copied available reply text, speaker/turn identity and bounded learner input. It exposes no quest-effect commands or full hidden story state. A reply supplies text only. Authored reply selection remains responsible for all consequences. Recognised intents and any future backend API must be agreed with the engine team before replacing that flow.
 
-When no adapter is installed, the free-text controls are hidden and the entire authored story remains playable. When configured, the UI offers free text, a thinking state, cancellation and retry/fallback through the supported replies. Requests time out, observe late task faults and ignore replies after exit, notebook/activity changes or a newer turn/request. Input/reply lengths are bounded. A displayed reply never invokes a quest command.
+When no adapter is installed, the free-text controls are hidden and the entire authored story remains playable. When configured, the UI offers free text, a thinking state, cancellation and retry/fallback through the supported replies. Requests time out, observe late task faults and ignore replies after exit, notebook/activity changes or a newer turn/request. Input/reply lengths are bounded. A displayed reply never invokes a quest command. Optional text is rendered literally with rich-text interpretation disabled. The Original line action restores the authored line without choosing a reply or changing story facts. Draft input clears on a new turn; same-turn refreshes retain the current input and reading position. Long speech and choices scroll beneath fixed leave/notebook controls.
 
 ## Checks
 

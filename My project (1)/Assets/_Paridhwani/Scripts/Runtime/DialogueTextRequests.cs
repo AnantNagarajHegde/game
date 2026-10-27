@@ -41,7 +41,12 @@ namespace Paridhwani {
  public string OptionalDialogueStatus {get;private set;}="";
  public bool OptionalDialogueBusy => textRequests.Busy;
  public TeaLine VisibleConversationLine => optionalLine??Turn?.Line;
- void NewDialogueTurn(){textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="";}
+ public bool HasOptionalDialogueLine => optionalLine!=null;
+ public void UseAuthoredDialogue() {
+ if(ui.Mode!="conversation" || Turn==null)return;
+ textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="Original conversation line. Your supported replies are unchanged.";ui.ShowConversation();
+ }
+ void NewDialogueTurn(){textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="";OptionalDialogueInput="";}
  void SuspendDialogueText(){bool waiting=textRequests.Busy;textRequests.Cancel();if(waiting)OptionalDialogueStatus="Reply cancelled. Your conversation is still here.";}
  public void CancelOptionalDialogue(){textRequests.Cancel();OptionalDialogueStatus="You can continue with the supported replies.";if(ui.Mode=="conversation")ui.ShowConversation();}
  public async void AskOptionalDialogue() {

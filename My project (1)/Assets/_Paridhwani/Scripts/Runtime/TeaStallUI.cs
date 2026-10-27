@@ -11,6 +11,7 @@ namespace Paridhwani
         public Font latinFont,kannadaFont;
         TeaStallSession session;
         VisualElement root,modal,prompt;
+        TeaTurn displayedTurn;
         Label objective,saveStatus,promptText,routeHint,storyDay,placeDay;
         FontAsset latinAsset,kannadaAsset;
         public string Mode { get; private set; } = "";
@@ -72,7 +73,7 @@ namespace Paridhwani
         }
         Label Add(VisualElement parent,string text,string cls="")
         {
-            var label=new Label(text); if(cls!="") Class(label,cls);
+            var label=new Label(text){enableRichText=false}; if(cls!="") Class(label,cls);
             parent.Add(label); return label;
         }
         Label Kannada(VisualElement parent,string text,string cls="kannada")
@@ -90,6 +91,7 @@ namespace Paridhwani
             Mode=mode; modal.Clear(); modal.style.display=DisplayStyle.Flex;
             var card=new VisualElement(); Class(card,cls); modal.Add(card);
             card.style.scale=new Scale(Vector3.one*session.Progress.textScale);
+            card.style.maxWidth=Length.Percent((mode=="conversation"?94:92)/session.Progress.textScale);
             card.style.maxHeight=Length.Percent(85/session.Progress.textScale); RefreshHUD(); return card;
         }
         void Line(VisualElement parent,TeaLine line,bool choice=false)
@@ -101,36 +103,56 @@ namespace Paridhwani
         public void ShowConversation()
         {
             TeaTurn t=session.Turn; if(t==null) return;
-            var card=Card("conversation","conversation");
-            var header=new VisualElement(); Class(header,"row"); card.Add(header);
+            bool sameTurn=Mode=="conversation" && object.ReferenceEquals(displayedTurn,t);
+            var previous=root.Q<ScrollView>("dialogue-scroll");
+            Vector2 offset=sameTurn && previous!=null ? previous.scrollOffset : Vector2.zero;
+            string focusKey="";
+            if(sameTurn) for(var e=root.focusController?.focusedElement as VisualElement;e!=null;e=e.parent)
+                if(!string.IsNullOrEmpty(e.name) && e.name.StartsWith("dialogue-")) {focusKey=e.name;break;}
+            displayedTurn=t;
+            var card=Card("conversation","conversation");card.name="dialogue-card";
+            card.style.height=Length.Percent(55/session.Progress.textScale);
+            card.style.maxHeight=Length.Percent(55/session.Progress.textScale);
+            card.style.transformOrigin=new TransformOrigin(Length.Percent(50),Length.Percent(100),0);
+            var header=new VisualElement(); Class(header,"row");Class(header,"dialogue-header");card.Add(header);
             Add(header,session.ConversationTitle,"eyebrow");
-            Button(header,"Leave  [Esc]",session.Close,"quiet-button");
-            var speech=new VisualElement(); Class(speech,"speech"); card.Add(speech); Line(speech,session.VisibleConversationLine);
+            Button(header,"Leave  [Esc]",session.Close,"quiet-button").name="dialogue-leave";
+            var scroll=new ScrollView(ScrollViewMode.Vertical){name="dialogue-scroll"};Class(scroll,"dialogue-scroll");card.Add(scroll);
+            scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;
+            var speech=new VisualElement(); Class(speech,"speech"); scroll.Add(speech); Line(speech,session.VisibleConversationLine);
             if(session.OptionalDialogueText!=null) {
-                var input=new TextField("Ask in your own words"){value=session.OptionalDialogueInput,maxLength=512};input.RegisterValueChangedCallback(e=>session.OptionalDialogueInput=e.newValue);card.Add(input);
-                var ask=Button(card,"Ask",session.AskOptionalDialogue,"quiet-button");ask.SetEnabled(!session.OptionalDialogueBusy);
-                if(session.OptionalDialogueBusy)Button(card,"Cancel reply",session.CancelOptionalDialogue,"quiet-button");
-                if(session.OptionalDialogueStatus.Length>0)Add(card,session.OptionalDialogueStatus,"small");
+                var input=new TextField("Ask in your own words"){name="dialogue-input",value=session.OptionalDialogueInput,maxLength=512};input.RegisterValueChangedCallback(e=>session.OptionalDialogueInput=e.newValue);scroll.Add(input);
+                var ask=Button(scroll,"Ask",session.AskOptionalDialogue,"quiet-button");ask.name="dialogue-ask";ask.SetEnabled(!session.OptionalDialogueBusy);
+                if(session.OptionalDialogueBusy)Button(scroll,"Cancel reply",session.CancelOptionalDialogue,"quiet-button").name="dialogue-cancel";
+                if(session.OptionalDialogueStatus.Length>0)Add(scroll,session.OptionalDialogueStatus,"small");
             }
-            Add(card,"YOUR REPLY","eyebrow");
-            var choices=new VisualElement(); Class(choices,"choices"); card.Add(choices);
+            Add(scroll,"YOUR REPLY","eyebrow");
+            var choices=new VisualElement(); Class(choices,"choices"); scroll.Add(choices);
             for(int i=0;i<t.Choices.Count;i++)
             {
                 int index=i;
-                var b=new Button(()=>session.Choose(index)); Class(b,"choice");
-                var num=Add(b,(i+1).ToString("00"),"choice-number");
-                var lines=new VisualElement(); Class(lines,"choice-lines"); b.Add(lines); Line(lines,t.Choices[i].Line,true);
-                choices.Add(b);
+                var button=new Button(()=>session.Choose(index)){name="dialogue-choice-"+index};Class(button,"choice");
+                Add(button,(i+1).ToString("00"),"choice-number");
+                var lines=new VisualElement(); Class(lines,"choice-lines");button.Add(lines);Line(lines,t.Choices[i].Line,true);
+                choices.Add(button);
             }
-            var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
-            var english=new Toggle("English meaning"){value=session.Progress.english};
-            english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue; session.SettingsChanged(); ShowConversation();});
-            aids.Add(english);
-            var roman=new Toggle("Roman letters"){value=session.Progress.roman};
-            roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue; session.SettingsChanged(); ShowConversation();});
-            aids.Add(roman);
-            Add(aids,"Use 1–3 or choose a reply. Take your time.","small");
-            choices.Q<Button>()?.Focus();
+            card.RegisterCallback<GeometryChangedEvent>(_=>choices.style.flexDirection=card.resolvedStyle.width<680?FlexDirection.Column:FlexDirection.Row);
+            var aids=new VisualElement(); Class(aids,"aids");Class(aids,"dialogue-footer");card.Add(aids);
+            var english=new Toggle("English meaning"){name="dialogue-english",value=session.Progress.english};
+            english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowConversation();});aids.Add(english);
+            var roman=new Toggle("Roman letters"){name="dialogue-roman",value=session.Progress.roman};
+            roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowConversation();});aids.Add(roman);
+            Button(aids,"Field notebook",session.OpenNotebook,"quiet-button").name="dialogue-notebook";
+            if(session.HasOptionalDialogueLine)Button(aids,"Original line",session.UseAuthoredDialogue,"quiet-button").name="dialogue-original";
+            Add(card,"Use 1-3 or choose a reply. Tab moves between controls; Esc leaves.","small").style.flexShrink=0;
+            card.schedule.Execute(()=> {
+                if(Mode!="conversation" || root.Q("dialogue-card")!=card) return;
+                scroll.scrollOffset=offset;
+                VisualElement focus=string.IsNullOrEmpty(focusKey)?null:card.Q(focusKey);
+                // A response refresh must not pull focus away from the input or current aid.
+                if(focus!=null && focus.enabledInHierarchy)focus.Focus();
+                else if(!sameTurn)choices.Q<Button>()?.Focus();
+            });
         }
         public void ShowInspection(string title,string kn,string ro,string body)
         {

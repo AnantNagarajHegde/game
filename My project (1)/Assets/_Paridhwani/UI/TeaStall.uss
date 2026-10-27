@@ -104,3 +104,14 @@ Slider { margin-top: 12px; margin-bottom: 12px; }
 
 .bicycle-panel .evidence-answer { flex-grow: 1; flex-basis: 0; margin-right: 8px; }
 .bicycle-panel .feedback { margin: 7px 0; font-size: 13px; }
+
+/* Keep fixed actions reachable while long speech and replies scroll together. */
+.conversation > .dialogue-header, .conversation > .dialogue-footer { flex-shrink: 0; }
+.dialogue-header > .eyebrow { flex-grow: 1; flex-shrink: 1; margin-right: 12px; }
+.dialogue-header > .quiet-button { flex-shrink: 0; }
+.dialogue-scroll { flex-grow: 1; flex-shrink: 1; min-height: 48px; }
+.dialogue-scroll .unity-scroll-view__content-container { flex-shrink: 0; padding-right: 8px; }
+.dialogue-scroll .choices { flex-shrink: 0; }
+.dialogue-scroll .choice { flex-shrink: 0; flex-basis: auto; margin-bottom: 6px; }
+.conversation .dialogue-footer { flex-wrap: wrap; justify-content: flex-start; }
+.dialogue-footer > * { margin-right: 12px; }
