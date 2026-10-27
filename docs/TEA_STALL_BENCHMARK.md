@@ -327,3 +327,11 @@ A valid backup now also blocks the old-product migration path, so a missing curr
 Generated worlds now carry a schema revision and a fingerprint of the editor world recipes. In Editor play, changed recipes require regeneration. Standalone validates the authored world revision and essential late-story bindings. If the checked-in older benchmark is opened against newer scripts, play stops before reading or writing the visit and explains how to regenerate, rather than allowing progress into missing locations. Generator fingerprints ignore checkout line endings and detect changed recipe content.
 
 Source compilation and 212 assertions pass. The current checked-in scene is intentionally treated as stale until a licensed Unity generation succeeds.
+
+
+## Input and movement follow-up (27 October 2026)
+
+- Optional dialogue text and lock-entry focus suppress story number shortcuts and save/restore hotkeys. Modal Tab navigation stays with UI controls; conversation now offers a notebook button. World/notebook Tab remains available.
+- Keyboard handling executes one command per frame so closing/restoring cannot also select the newly displayed reply. Protected title/confirmation modes reject F5/F9. Losing focus from exploration saves and opens pause before returning control.
+- Walking normalizes diagonal input while retaining analogue magnitude. Animation/footstep speed now uses actual planar controller displacement, so holding movement against a wall does not keep reporting walking speed.
+- Runtime/editor sources compile and 229 executable assertions pass. Actual UI Toolkit focus dispatch, collision movement and focus-loss behavior still require the licensed Unity gate.

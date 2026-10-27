@@ -15,6 +15,16 @@ namespace Paridhwani
         FontAsset latinAsset,kannadaAsset;
         public string Mode { get; private set; } = "";
         public bool IsModal => Mode!="";
+        public bool HasTextEntryFocus
+        {
+            get
+            {
+                var focused=root?.focusController?.focusedElement as VisualElement;
+                for(var element=focused;element!=null;element=element.parent)
+                    if(element is TextField) return true;
+                return false;
+            }
+        }
         static void Class(VisualElement e,string name) { e.AddToClassList(name); }
         public void Bind(TeaStallSession value)
         {

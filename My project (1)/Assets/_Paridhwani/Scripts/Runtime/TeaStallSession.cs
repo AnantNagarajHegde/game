@@ -122,43 +122,37 @@ namespace Paridhwani
             UpdateReturnJourney();
             UpdateFarmArrival();
             FindInteraction();
-            var keys=Keyboard.current;
-            if(keys!=null && Application.isFocused)
-            {
-                if(ui.Mode=="arrival" && keys.enterKey.wasPressedThisFrame) AcknowledgeArrival();
-                if(keys.escapeKey.wasPressedThisFrame)
-                {
-                    if(ui.IsModal) Close(); else {ui.ShowPause(); SetCursor(true);}
-                }
-                else if(keys.tabKey.wasPressedThisFrame)
-                {
-                    if(ui.Mode=="notebook") Close();
-                    else OpenNotebook();
-                }
-                else if(keys.eKey.wasPressedThisFrame && !ui.IsModal) Interact();
-                if(ui.Mode=="conversation" && Turn!=null)
-                {
-                    if(keys.digit1Key.wasPressedThisFrame) Choose(0);
-                    else if(keys.digit2Key.wasPressedThisFrame) Choose(1);
-                    else if(keys.digit3Key.wasPressedThisFrame) Choose(2);
-                }
-                else if(ui.Mode=="evidence" && ui.AcceptingEvidenceAnswers)
-                {
-                    if(keys.digit1Key.wasPressedThisFrame) SubmitInvestigationAnswer(0);
-                    else if(keys.digit2Key.wasPressedThisFrame) SubmitInvestigationAnswer(1);
-                    else if(keys.digit3Key.wasPressedThisFrame) SubmitInvestigationAnswer(2);
-                }
-                else if(ui.Mode=="evidence" && ui.SelectingBicycleParts)
-                {
-                    if(keys.digit1Key.wasPressedThisFrame) SelectBicyclePart(BicyclePart.Frame);
-                    else if(keys.digit2Key.wasPressedThisFrame) SelectBicyclePart(BicyclePart.Stand);
-                    else if(keys.digit3Key.wasPressedThisFrame) SelectBicyclePart(BicyclePart.CarrierPocket);
-                }
-                if(keys.f5Key.wasPressedThisFrame && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) Save();
-                if(keys.f9Key.wasPressedThisFrame && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) Load();
-            }
+            HandleKeyboard();
             ui.RefreshHUD();
             if(Time.unscaledTime>nextSave && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) { Save(); nextSave=Time.unscaledTime+15; }
+        }
+        void HandleKeyboard()
+        {
+            var keys=Keyboard.current;
+            if(keys==null || !Application.isFocused) return;
+            // One command per frame: a close/restore must not also answer a newly shown turn.
+            if(keys.escapeKey.wasPressedThisFrame)
+            {
+                if(ui.IsModal) Close(); else { ui.ShowPause(); SetCursor(true); }
+                return;
+            }
+            bool editing=ui.HasTextEntryFocus;
+            if(ui.Mode=="arrival" && keys.enterKey.wasPressedThisFrame && !editing)
+            { AcknowledgeArrival(); return; }
+            if(keys.tabKey.wasPressedThisFrame && VillageInputPolicy.NotebookShortcut(ui.Mode,editing))
+            { if(ui.Mode=="notebook") Close(); else OpenNotebook(); return; }
+            if(VillageInputPolicy.SaveShortcut(ui.Mode,editing,TitleSettings))
+            {
+                if(keys.f5Key.wasPressedThisFrame) { Save(); return; }
+                if(keys.f9Key.wasPressedThisFrame) { Load(); return; }
+            }
+            if(keys.eKey.wasPressedThisFrame && !ui.IsModal) { Interact(); return; }
+            if(!VillageInputPolicy.ChoiceShortcut(ui.Mode,editing)) return;
+            int choice=keys.digit1Key.wasPressedThisFrame?0:keys.digit2Key.wasPressedThisFrame?1:keys.digit3Key.wasPressedThisFrame?2:-1;
+            if(choice<0) return;
+            if(ui.Mode=="conversation" && Turn!=null) Choose(choice);
+            else if(ui.AcceptingEvidenceAnswers) SubmitInvestigationAnswer(choice);
+            else if(ui.SelectingBicycleParts) SelectBicyclePart(choice==0?BicyclePart.Frame:choice==1?BicyclePart.Stand:BicyclePart.CarrierPocket);
         }
         void FindInteraction()
         {
@@ -341,7 +335,12 @@ namespace Paridhwani
             player.Restore(Progress.position,Progress.heading); ApplyState();
             SaveMessage=notice??"Saved visit restored"; ui.HideModal(); SetCursor(false);
         }
-        void OnApplicationFocus(bool focused) { if(!focused && ready) Save(); }
+        void OnApplicationFocus(bool focused)
+        {
+            if(focused || !ready) return;
+            Save();
+            if(!ui.IsModal) { ui.ShowPause(); SetCursor(true); }
+        }
         void OnApplicationPause(bool paused) { if(paused) Save(); }
         void OnApplicationQuit() { Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }
     }

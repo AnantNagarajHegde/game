@@ -75,17 +75,20 @@ namespace Paridhwani
         void Update()
         {
             bool canMove=!blocked && !IsTransitioning && Application.isFocused;
-            Vector2 input=canMove?move.ReadValue<Vector2>():Vector2.zero;
+            Vector2 input=canMove?VillageInputPolicy.WalkInput(move.ReadValue<Vector2>()):Vector2.zero;
             if(canMove && Time.unscaledTime>suppressLookUntil && Cursor.lockState==CursorLockMode.Locked)
             {
                 Vector2 delta=Vector2.ClampMagnitude(look.ReadValue<Vector2>(),200);
                 yaw+=delta.x*sensitivity; pitch=Mathf.Clamp(pitch-delta.y*sensitivity*(invertY?-1:1),-50,65);
             }
             Vector3 direction=Quaternion.Euler(0,yaw,0)*new Vector3(input.x,0,input.y);
-            float speed=sprint.IsPressed()?3.6f:2.15f; Speed=direction.magnitude*speed;
+            float speed=sprint.IsPressed()?3.6f:2.15f;
             if(controller.isGrounded && gravity<0) gravity=-2;
             gravity=Mathf.Max(gravity+Physics.gravity.y*Time.deltaTime,-25);
+            Vector3 before=transform.position;
             controller.Move((direction*speed+Vector3.up*gravity)*Time.deltaTime);
+            Vector3 travelled=transform.position-before; travelled.y=0;
+            Speed=Time.deltaTime>0 ? Mathf.Min(travelled.magnitude/Time.deltaTime,direction.magnitude*speed) : 0;
             if(direction.sqrMagnitude>.001f)
                 visual.rotation=Quaternion.Slerp(visual.rotation,Quaternion.LookRotation(direction),12*Time.deltaTime);
         }

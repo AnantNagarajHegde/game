@@ -31,6 +31,22 @@ public static class ChapterChecks {
  public string Encode(TeaProgress p) => "{\"version\":"+p.version+",\"sign\":"+(p.signRead?"true":"false")+"}";
  public TeaProgress Decode(string json) => new TeaProgress {version=json.Contains("\"version\":99")?99:1,signRead=json.Contains("\"sign\":true")};
  }
+ static void InputChecks() {
+ Check(!VillageInputPolicy.ChoiceShortcut("conversation",true),"typing digits cannot choose dialogue");
+ Check(!VillageInputPolicy.ChoiceShortcut("evidence",true),"typing lock digits cannot choose evidence");
+ Check(VillageInputPolicy.ChoiceShortcut("conversation",false) && VillageInputPolicy.ChoiceShortcut("evidence",false),"authored numeric shortcuts retained");
+ Check(!VillageInputPolicy.NotebookShortcut("conversation",false) && !VillageInputPolicy.NotebookShortcut("pause",false),"Tab traverses modal controls");
+ Check(VillageInputPolicy.NotebookShortcut("",false) && VillageInputPolicy.NotebookShortcut("notebook",false),"world notebook toggle retained");
+ Check(!VillageInputPolicy.NotebookShortcut("",true),"typing cannot toggle notebook");
+ foreach(string mode in new[]{"main-menu","new-visit-confirm","arrival","quit-failed","world-update","chapter-replay"})
+ Check(!VillageInputPolicy.SaveShortcut(mode,false,false),"save hotkeys cannot bypass protected modal: "+mode);
+ Check(!VillageInputPolicy.SaveShortcut("pause",false,true) && !VillageInputPolicy.SaveShortcut("conversation",true,false),"title settings and text entry suppress save hotkeys");
+ Check(VillageInputPolicy.SaveShortcut("pause",false,false),"pause keeps explicit save/restore shortcuts");
+ var diagonal=VillageInputPolicy.WalkInput(new UnityEngine.Vector2(1,1));
+ Check(Math.Abs(diagonal.x*diagonal.x+diagonal.y*diagonal.y-1)<.0001,"diagonal movement cannot exceed forward speed");
+ var analogue=VillageInputPolicy.WalkInput(new UnityEngine.Vector2(.2f,.3f));Check(analogue.x==.2f && analogue.y==.3f,"analogue walk magnitude preserved");
+ var invalid=VillageInputPolicy.WalkInput(new UnityEngine.Vector2(float.NaN,1));Check(invalid.x==0 && invalid.y==0,"invalid input safely stops movement");
+ }
  static void FileChecks() {
  string directory=System.IO.Path.Combine(Environment.CurrentDirectory,"Temp","IterationVerification","ParidhwaniStore-"+Guid.NewGuid().ToString("N"));
  string file=System.IO.Path.Combine(directory,"visit.json");var codec=new StorageCodec();var store=new TeaSaveStore(file,codec);
@@ -63,7 +79,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { FileChecks(); AsyncDialogueChecks();
+ public static int Main() { InputChecks(); FileChecks(); AsyncDialogueChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");
