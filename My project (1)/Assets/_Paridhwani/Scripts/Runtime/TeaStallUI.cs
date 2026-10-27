@@ -288,7 +288,7 @@ namespace Paridhwani
             Button(card,"Save this visit",()=>{session.Save(); ShowPause();});
             Button(card,"Restore saved visit",session.Load);
             }
-            var audio=new Toggle("Mute ambience"){value=session.Progress.muted};
+            var audio=new Toggle("Mute rain and river"){value=session.Progress.muted};
             audio.RegisterValueChangedCallback(e=>{session.Progress.muted=e.newValue;session.SettingsChanged();}); card.Add(audio);
             var size=new Slider("Text size",.85f,1.3f){value=session.Progress.textScale};
             size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;shell.style.scale=new Scale(Vector3.one*e.newValue);shell.style.maxHeight=Length.Percent(85/e.newValue);session.SettingsChanged();}); card.Add(size);
@@ -297,6 +297,8 @@ namespace Paridhwani
             var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);
             var invert=new Toggle("Invert vertical mouse look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
             var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
+            var environmentVolume=new Slider("Rain and river volume",0,1){value=session.Progress.ambienceVolume};environmentVolume.RegisterValueChangedCallback(e=>{session.Progress.ambienceVolume=e.newValue;session.SettingsChanged();});card.Add(environmentVolume);
+            var stepsVolume=new Slider("Footstep volume",0,1){value=session.Progress.footstepVolume};stepsVolume.RegisterValueChangedCallback(e=>{session.Progress.footstepVolume=e.newValue;session.SettingsChanged();});card.Add(stepsVolume);
             var quality=new DropdownField("Rendering quality",new System.Collections.Generic.List<string>{"Balanced","Low","High"},(int)PresentationPolicy.ValidQuality(session.Progress.quality));quality.RegisterValueChangedCallback(e=>{session.Progress.quality=(VillageQuality)quality.index;session.SettingsChanged();});card.Add(quality);
             Add(card,"Low reduces resolution, shadows and distant scenery; High uses full resolution and more antialiasing.","small");
             Add(card,"F5  Save visit    F9  Restore visit","small");

@@ -25,7 +25,7 @@ namespace Paridhwani
         public string drink = "";
         public bool english = true, roman = true, muted;
         public bool reducedMotion,invertY;
-        public float masterVolume=1;
+        public float masterVolume=1,ambienceVolume=1,footstepVolume=1;
         public VillageQuality quality;
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
@@ -120,6 +120,8 @@ namespace Paridhwani
                 if(!SupportedPosition(p.position)) p.position=new Vector3(2.1f,.2f,-5.7f);
                 if(p.endingChoice!=StoryEnding.None && p.endingChoice!=StoryEnding.Stay && p.endingChoice!=StoryEnding.Depart) {p.endingChoice=StoryEnding.None;p.storyCompleted=false;}
                 p.masterVolume=json.Contains("\"masterVolume\"")?PresentationPolicy.Volume(p.masterVolume):1;
+                p.ambienceVolume=json.Contains("\"ambienceVolume\"")?PresentationPolicy.Volume(p.ambienceVolume):1;
+                p.footstepVolume=json.Contains("\"footstepVolume\"")?PresentationPolicy.Volume(p.footstepVolume):1;
                 p.quality=PresentationPolicy.ValidQuality(p.quality);
                 if(!float.IsFinite(p.heading)) p.heading=-18;
                 // Avoid native engine calls during file recovery and clamp old/new preferences consistently.

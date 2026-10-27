@@ -335,3 +335,12 @@ Source compilation and 212 assertions pass. The current checked-in scene is inte
 - Keyboard handling executes one command per frame so closing/restoring cannot also select the newly displayed reply. Protected title/confirmation modes reject F5/F9. Losing focus from exploration saves and opens pause before returning control.
 - Walking normalizes diagonal input while retaining analogue magnitude. Animation/footstep speed now uses actual planar controller displacement, so holding movement against a wall does not keep reporting walking speed.
 - Runtime/editor sources compile and 229 executable assertions pass. Actual UI Toolkit focus dispatch, collision movement and focus-loss behavior still require the licensed Unity gate.
+
+
+## Ground contact audio follow-up (27 October 2026)
+
+- Replaced the map-x footstep rule with authored collider surface metadata for earth/lane, stone and timber. The generated world exports these local tags with each additive scene.
+- Nine original synthesized transient variants use travelled distance and grounded contact. Blocked, stationary, airborne, unfocused and muted footsteps reset cadence; restores reset reported speed. These remain audio placeholders pending listening/production review.
+- Added persistent rain/river and footstep volume channels, copied into practice/new-story preferences with backwards-compatible full-volume defaults for older saves. The existing ambience toggle is now labelled rain/river; footsteps have their own slider. Master volume controls both.
+- Rain and river start at zero gain, mute immediately, and silence on focus loss. Shelter transitions still blend. No recorded/third-party audio was added.
+- Runtime/editor compilation and 247 executable assertions pass. Generated-world checks cover all three collider tags; native smoke checks cover mix application and Unity JSON round-trip. Those native checks remain authored but unexecuted because of the existing Unity startup gate.

@@ -173,6 +173,7 @@ namespace Paridhwani.Editor
             var o=GameObject.CreatePrimitive(type); o.name=name; o.transform.SetParent(parent?parent:environment,false);
             o.transform.localPosition=position; o.transform.localScale=scale; o.GetComponent<Renderer>().sharedMaterial=mats[material];
             if(!collision) UnityEngine.Object.DestroyImmediate(o.GetComponent<Collider>());
+            else if(FootstepPolicy.TryMaterial(material,out var surface)) o.AddComponent<VillageFootstepSurface>().kind=surface;
             return o;
         }
         static GameObject Box(string n,Vector3 p,Vector3 s,string m,bool collision=true,Transform parent=null) =>

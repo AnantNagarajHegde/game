@@ -372,15 +372,17 @@ namespace Paridhwani
             session.OpenTitle();Check(session.ui.Mode=="main-menu","title available from completed visit");session.OpenTitleSettings();session.Close();Check(session.ui.Mode=="main-menu","title settings return to title");session.ContinueMainVisit();Check(!session.ui.IsModal,"continue returns to saved visit");
             session.StartChapterPractice(ReplayChapter.Deed);Check(session.IsPracticeVisit && session.Progress.trunkLocationKnown && !session.Progress.trunkOpened && player.transform.position.z>40,"chapter-select practice reaches unopened trunk");session.ReturnToCompletedStory();Check(session.Progress.storyCompleted,"chapter practice preserves main ending");
             session.BeginNewMainVisit();Check(!session.Progress.storyCompleted && !session.Progress.trunkOpened && session.ui.Mode=="arrival","explicit new main visit resets story after archive");
-            session.Progress.reducedMotion=true;session.Progress.invertY=true;session.Progress.masterVolume=.35f;session.Progress.quality=VillageQuality.Low;session.SettingsChanged();
+            session.Progress.reducedMotion=true;session.Progress.invertY=true;session.Progress.masterVolume=.35f;session.Progress.ambienceVolume=.4f;session.Progress.footstepVolume=.2f;session.Progress.quality=VillageQuality.Low;session.SettingsChanged();
             Check(player.reducedMotion && player.invertY && Mathf.Abs(AudioListener.volume-.35f)<.01f,"accessibility and audio preferences applied");
+            yield return null;
+            Check(Mathf.Abs(session.ambience.volume-.4f)<.01f && Mathf.Abs(player.GetComponent<VillageFootsteps>().volume-.2f)<.01f,"ambience and footstep channels applied");
             session.AcknowledgeArrival();player.Restore(new Vector3(-4.3f,.2f,-1.1f),0);player.blocked=true;
             var vendor=Array.Find(session.villagers,n=>n.role==VillageNpcRole.TeaVendor);session.StartConversation(vendor);yield return new WaitForSecondsRealtime(.4f);
             Check(Mathf.Abs(player.view.fieldOfView-53)<.1f,"reduced motion keeps a stable conversation FOV");
             session.OptionalDialogueText=(prompt,token)=>System.Threading.Tasks.Task.FromResult(new TeaLine("ನಮಸ್ಕಾರ.","Namaskara.","Hello. Use a supported reply when ready."));session.OptionalDialogueInput="How do I greet you?";session.AskOptionalDialogue();yield return null;
             Check(!session.OptionalDialogueBusy && !session.Progress.greeted && !session.Progress.deedRetrieved,"optional text grants no quest effects");yield return Shot("48-optional-text-and-settings");
             session.OptionalDialogueText=null;session.Choose(0);Check(session.Progress.greeted,"authored reply retains quest authority");session.Close();session.Save();session.Load();
-            Check(session.Progress.reducedMotion && session.Progress.invertY && session.Progress.quality==VillageQuality.Low,"presentation preferences survive restoration");
+            Check(session.Progress.reducedMotion && session.Progress.invertY && session.Progress.quality==VillageQuality.Low && Mathf.Abs(session.Progress.ambienceVolume-.4f)<.01f && Mathf.Abs(session.Progress.footstepVolume-.2f)<.01f,"presentation and audio preferences survive restoration");
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),
                 "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, fourteen NPC instances, complete story through protected deed, return, council decision, later review, credits and isolated practice, ridge walking, direct reunion and trunk lead, confirmed checkpost round-trip, route permission, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));

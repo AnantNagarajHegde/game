@@ -6,8 +6,9 @@ namespace Paridhwani
         public Transform listener;
         public ParticleSystem rain;
         public bool muted;
-        AudioSource rainSource, shelterSource, footsteps;
-        VillageWalker walker; float nextStep; AudioClip stepClip;
+        AudioSource rainSource, shelterSource;
+        VillageFootsteps footsteps;
+        public float volume=1,footstepVolume=1;
         AudioClip noiseClip, dripClip;
         void Start()
         {
@@ -16,11 +17,9 @@ namespace Paridhwani
             noiseClip=Noise("Monsoon rainfall",6,173,.95f);
             dripClip=Noise("Eaves and roof",8,94,.97f);
             rainSource.clip=noiseClip; shelterSource.clip=dripClip;
-            walker=listener.GetComponent<VillageWalker>();
-            footsteps=gameObject.AddComponent<AudioSource>();
-            var samples=new float[3307]; var rng=new System.Random(18);
-            for(int i=0;i<samples.Length;i++) samples[i]=(float)(rng.NextDouble()*2-1)*Mathf.Exp(-i/450f)*.3f;
-            stepClip=AudioClip.Create("Soft wet footsteps",samples.Length,1,22050,false); stepClip.SetData(samples,0);
+            footsteps=listener.gameObject.AddComponent<VillageFootsteps>();
+            rainSource.playOnAwake=shelterSource.playOnAwake=false;
+            rainSource.volume=shelterSource.volume=0;
             rainSource.loop=shelterSource.loop=true;
             rainSource.Play(); shelterSource.Play();
         }
@@ -48,16 +47,13 @@ namespace Paridhwani
                 if((rain.transform.position-target).sqrMagnitude>900) rain.Clear();
                 rain.transform.position=target;
             }
-            if(walker && walker.Speed>.15f && !walker.blocked && Time.time>nextStep)
-            {
-                bool stone=listener.position.x<-.6f; footsteps.pitch=stone?1.25f:.72f;
-                if(!muted) footsteps.PlayOneShot(stepClip,stone?.3f:.22f);
-                nextStep=Time.time+(walker.Speed>3?.31f:.46f);
-            }
+            if(footsteps) footsteps.volume=footstepVolume;
             bool sheltered=Physics.Raycast(listener.position+Vector3.up*1.5f,Vector3.up,4,~(1<<2));
-            rainSource.volume=Mathf.MoveTowards(rainSource.volume,muted?0:(sheltered?.13f:.34f),Time.deltaTime*.2f);
-            shelterSource.volume=Mathf.MoveTowards(shelterSource.volume,muted?0:(sheltered?.16f:.03f),Time.deltaTime*.2f);
+            float gain=PresentationPolicy.Volume(volume);
+            if(muted || !Application.isFocused || gain<=0) {rainSource.volume=shelterSource.volume=0;return;}
+            rainSource.volume=Mathf.MoveTowards(rainSource.volume,(sheltered?.13f:.34f)*gain,Time.deltaTime*.2f);
+            shelterSource.volume=Mathf.MoveTowards(shelterSource.volume,(sheltered?.16f:.03f)*gain,Time.deltaTime*.2f);
         }
-        void OnDestroy() { if(noiseClip) Destroy(noiseClip); if(dripClip) Destroy(dripClip); if(stepClip) Destroy(stepClip); }
+        void OnDestroy() { if(noiseClip) Destroy(noiseClip); if(dripClip) Destroy(dripClip); if(footsteps) Destroy(footsteps); }
     }
 }

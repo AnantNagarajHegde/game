@@ -6,7 +6,7 @@ namespace Paridhwani {
  public static class PresentationPolicy {
  public static VillageQuality ValidQuality(VillageQuality q) => q==VillageQuality.Low || q==VillageQuality.High?q:VillageQuality.Balanced;
  public static float Volume(float value) => !float.IsFinite(value)?1:System.Math.Min(1,System.Math.Max(0,value));
- public static void Copy(TeaProgress source,TeaProgress target) {target.english=source.english;target.roman=source.roman;target.muted=source.muted;target.textScale=source.textScale;target.sensitivity=source.sensitivity;target.reducedMotion=source.reducedMotion;target.invertY=source.invertY;target.masterVolume=source.masterVolume;target.quality=source.quality;}
+ public static void Copy(TeaProgress source,TeaProgress target) {target.english=source.english;target.roman=source.roman;target.muted=source.muted;target.textScale=source.textScale;target.sensitivity=source.sensitivity;target.reducedMotion=source.reducedMotion;target.invertY=source.invertY;target.masterVolume=source.masterVolume;target.ambienceVolume=source.ambienceVolume;target.footstepVolume=source.footstepVolume;target.quality=source.quality;}
  }
  public sealed class VillagePresentationSettings : MonoBehaviour {
  RenderPipelineAsset originalDefault,originalQuality;UniversalRenderPipelineAsset owned;

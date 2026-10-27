@@ -47,6 +47,25 @@ public static class ChapterChecks {
  var analogue=VillageInputPolicy.WalkInput(new UnityEngine.Vector2(.2f,.3f));Check(analogue.x==.2f && analogue.y==.3f,"analogue walk magnitude preserved");
  var invalid=VillageInputPolicy.WalkInput(new UnityEngine.Vector2(float.NaN,1));Check(invalid.x==0 && invalid.y==0,"invalid input safely stops movement");
  }
+ static void FootstepChecks() {
+ Check(FootstepPolicy.TryMaterial("StoneDark",out var stone) && stone==FootstepSurface.Stone,"stone surface metadata");
+ Check(FootstepPolicy.TryMaterial("WoodLight",out var wood) && wood==FootstepSurface.Timber,"timber surface metadata");
+ Check(FootstepPolicy.TryMaterial("Lane",out var earth) && earth==FootstepSurface.Earth,"lane surface metadata");
+ Check(!FootstepPolicy.TryMaterial("Skin",out _),"decorative character material has no ground tag");
+ var stride=new FootstepStride();Check(!stride.Travel(.5,true,false) && stride.Travel(.5,true,false),"steps follow travelled distance");
+ stride.Travel(0,false,false);Check(!stride.Travel(.5,true,false),"standing/blocked/airborne resets cadence");
+ Check(!stride.Travel(50,true,false) && !stride.Travel(.5,true,false),"teleports do not cause a footstep burst");
+ stride.Travel(double.NaN,true,false);Check(!stride.Travel(.5,true,false),"invalid distance resets cadence");
+ var copied=new TeaProgress();PresentationPolicy.Copy(new TeaProgress {ambienceVolume=.3f,footstepVolume=0},copied);Check(copied.ambienceVolume==.3f && copied.footstepVolume==0,"audio mix survives practice/new-story preference copy");
+ for(int surface=0;surface<3;surface++) {
+ var samples=FootstepPolicy.Samples((FootstepSurface)surface,0);var repeat=FootstepPolicy.Samples((FootstepSurface)surface,0);var alternate=FootstepPolicy.Samples((FootstepSurface)surface,1);
+ bool finite=true,deterministic=true,different=false;double energy=0;float peak=0;
+ for(int i=0;i<samples.Length;i++) {finite&=float.IsFinite(samples[i]);deterministic&=samples[i]==repeat[i];different|=samples[i]!=alternate[i];energy+=samples[i]*samples[i];peak=Math.Max(peak,Math.Abs(samples[i]));}
+ Check(finite && peak<1 && energy>0,"surface audio is finite, audible and bounded");
+ Check(deterministic && different,"surface variants repeat deterministically without identical footsteps");
+ Check(samples[0]==0 && samples[samples.Length-1]==0,"surface transient fades without hard endpoint clicks");
+ }
+ }
  static void FileChecks() {
  string directory=System.IO.Path.Combine(Environment.CurrentDirectory,"Temp","IterationVerification","ParidhwaniStore-"+Guid.NewGuid().ToString("N"));
  string file=System.IO.Path.Combine(directory,"visit.json");var codec=new StorageCodec();var store=new TeaSaveStore(file,codec);
@@ -79,7 +98,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { InputChecks(); FileChecks(); AsyncDialogueChecks();
+ public static int Main() { InputChecks(); FootstepChecks(); FileChecks(); AsyncDialogueChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

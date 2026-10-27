@@ -68,7 +68,7 @@ namespace Paridhwani
         public void Restore(Vector3 position,float heading)
         {
             controller.enabled=false; transform.position=position; controller.enabled=true;
-            yaw=Mathf.Repeat(heading+180,360)-180; gravity=0; cameraVelocity=Vector3.zero;
+            yaw=Mathf.Repeat(heading+180,360)-180; gravity=0; Speed=0; cameraVelocity=Vector3.zero;
             focus=null; inspectionPose=null; inspectionTarget=null; elapsed=TransitionDuration;
             returningFromInspection=false; ConversationBlend=0; ShowBody(true); SuppressLook(); UpdateView(true);
         }

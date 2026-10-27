@@ -111,7 +111,7 @@ namespace Paridhwani
             if(archiveDoor) archiveDoor.SetActive(!Progress.libraryAccessGranted);
             if(bookingPaper) bookingPaper.SetActive(!Progress.bookingSlipFound);
             if(servedMeal) servedMeal.SetActive(Progress.mealOrdered);
-            player.sensitivity=Progress.sensitivity; ambience.muted=Progress.muted;
+            player.sensitivity=Progress.sensitivity; ambience.muted=Progress.muted; ambience.volume=Progress.ambienceVolume; ambience.footstepVolume=Progress.footstepVolume;
             offeredTea.SetActive(Progress.drinkOrdered && Progress.drink=="tea");
             offeredWater.SetActive(Progress.drinkOrdered && Progress.drink=="water");
         }

@@ -157,6 +157,13 @@ namespace Paridhwani.Editor
                 var saved=main.Read(out _);Check(saved.storyCompleted && saved.libraryProtected && saved.endingChoice==StoryEnding.Depart && !practice.Read(out _).storyCompleted,"practice storage leaves completed ending intact");
             } finally {if(Directory.Exists(endingDir)) Directory.Delete(endingDir,true);}
             foreach(string texture in new[]{"WetEarth","WeatheredStone","LimePlaster","ClayTile","Timber","CottonWeave","Bark"}) {var asset=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Paridhwani/Art/Textures/Surfaces/"+texture+".png");Check(asset && asset.width==512 && asset.height==512,"source surface texture imported");}
+            var surfaces=UnityEngine.Object.FindObjectsByType<VillageFootstepSurface>();
+            bool earthAudio=false,stoneAudio=false,timberAudio=false;
+            foreach(var surface in surfaces) {
+                Check(surface.GetComponent<Collider>(),"footstep surface belongs to collidable geometry");
+                earthAudio|=surface.kind==FootstepSurface.Earth;stoneAudio|=surface.kind==FootstepSurface.Stone;timberAudio|=surface.kind==FootstepSurface.Timber;
+            }
+            Check(earthAudio && stoneAudio && timberAudio,"generated world provides earth, stone and timber contact metadata");
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);

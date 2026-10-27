@@ -15,11 +15,11 @@ namespace Paridhwani
             }
             for(int i=0;i<600;i++) { float f=i/600f; samples[i]*=f; samples[samples.Length-1-i]*=f; }
             clip=AudioClip.Create("River weir current",samples.Length,1,rate,false); clip.SetData(samples,0);
-            source=gameObject.AddComponent<AudioSource>(); source.clip=clip; source.loop=true;
+            source=gameObject.AddComponent<AudioSource>(); source.playOnAwake=false; source.volume=0; source.clip=clip; source.loop=true;
             source.spatialBlend=1; source.minDistance=5; source.maxDistance=34; source.rolloffMode=AudioRolloffMode.Linear;
             source.Play();
         }
-        void Update() { if(source) source.volume=!preferences || preferences.muted?0:.45f; }
+        void Update() { if(source) source.volume=!preferences || preferences.muted || !Application.isFocused?0:.45f*PresentationPolicy.Volume(preferences.volume); }
         void OnDestroy() { if(clip) Destroy(clip); }
     }
 }
