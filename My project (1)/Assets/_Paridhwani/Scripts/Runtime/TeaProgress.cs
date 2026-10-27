@@ -59,12 +59,14 @@ namespace Paridhwani
         public TeaProgress Decode(string json) => JsonUtility.FromJson<TeaProgress>(json);
     }
     // The codec is injectable for real filesystem tests without launching Unity.
+    public enum TeaSaveReadStatus { Missing,Primary,Backup,Unreadable }
     public sealed class TeaSaveStore
     {
         readonly string path;
         readonly ITeaProgressCodec codec;
         bool preserveBeforeWrite,recoveredBackup;
         public string LastFailureDetail {get;private set;}
+        public TeaSaveReadStatus LastReadStatus {get;private set;}
         public TeaSaveStore(string path,ITeaProgressCodec codec=null)
         { this.path=Path.GetFullPath(path); this.codec=codec??new UnityTeaProgressCodec(); }
         public bool HasAnySaveFiles => File.Exists(path) || File.Exists(path+".bak");
@@ -95,14 +97,21 @@ namespace Paridhwani
             try {string directory=Path.Combine(Path.GetDirectoryName(path),"ArchivedVisits");Directory.CreateDirectory(directory);string target=Path.Combine(directory,"visit-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N")+".json");File.WriteAllText(target,codec.Encode(progress));error=null;return true;}
             catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException){LastFailureDetail="archive / "+e.Message;error="Your current visit could not be archived. The new story was not started.";return false;}
         }
+        // Explicit restore never exposes fresh-start defaults as a successfully restored visit.
+        public bool TryRestore(out TeaProgress progress,out string error)
+        {
+            var candidate=Read(out error);
+            bool valid=LastReadStatus==TeaSaveReadStatus.Primary || LastReadStatus==TeaSaveReadStatus.Backup;
+            progress=valid?candidate:null;return valid;
+        }
         public TeaProgress Read(out string error)
         {
             error=null; preserveBeforeWrite=false; recoveredBackup=false;
-            if(TryRead(path,out var value)) return value;
+            if(TryRead(path,out var value)) {LastReadStatus=TeaSaveReadStatus.Primary;return value;}
             if(TryRead(path+".bak",out value))
-            {recoveredBackup=true;preserveBeforeWrite=File.Exists(path);error="Recovered your previous saved visit.";return value;}
-            if(!File.Exists(path) && !File.Exists(path+".bak")) return new TeaProgress();
-            preserveBeforeWrite=true;
+            {LastReadStatus=TeaSaveReadStatus.Backup;recoveredBackup=true;preserveBeforeWrite=File.Exists(path);error="Recovered your previous saved visit.";return value;}
+            if(!File.Exists(path) && !File.Exists(path+".bak")) {LastReadStatus=TeaSaveReadStatus.Missing;return new TeaProgress();}
+            LastReadStatus=TeaSaveReadStatus.Unreadable;preserveBeforeWrite=true;
             error="The visit could not be read. Its files will be preserved before saving a fresh visit.";
             return new TeaProgress();
         }

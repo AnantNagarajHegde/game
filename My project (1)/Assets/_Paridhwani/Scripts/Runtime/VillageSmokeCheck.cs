@@ -75,6 +75,7 @@ namespace Paridhwani
         {
             var player=session.player;
             yield return new WaitForSecondsRealtime(1);
+            session.AcknowledgeArrival();
             player.blocked=true;
             player.Restore(new Vector3(0,.2f,-4.8f),-32);
             yield return new WaitForSecondsRealtime(.8f);
@@ -133,7 +134,9 @@ namespace Paridhwani
             Check(session.Progress.shoppingNoteCollected,"shopping note earned");
             yield return Shot("05-first-person-mess");
             session.Choose(0); session.Choose(0);
-            session.Save(); session.Load();
+            Vector3 librarianHome=librarian.transform.position;
+            session.Save();librarian.transform.position+=Vector3.right*8;session.Load();
+            Check(Vector3.Distance(librarian.transform.position,librarianHome)<.01f,"restore removes stale actor staging before applying saved chapter");
             Check(session.Progress.shoppingNoteCollected && session.Progress.messLeadKnown,"expanded save round trip");
             yield return new WaitForSecondsRealtime(.9f);
             session.OpenNotebook(); yield return Shot("06-notebook");

@@ -38,7 +38,7 @@ namespace Paridhwani {
  Save();if(!LastSaveSucceeded)return;completedStoryStore=saves;
  var next=ChapterReplay.Seed(chapter,Progress);PracticeChapterName=ChapterReplay.Name(chapter);Progress=next;
  saves=new TeaSaveStore(System.IO.Path.Combine(Application.temporaryCachePath,"paridhwani-practice-"+System.Guid.NewGuid().ToString("N")+".json"));
- EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
+ EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
  }
  }
 }

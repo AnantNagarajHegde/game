@@ -17,7 +17,7 @@ namespace Paridhwani {
  }
  }
  public sealed partial class TeaStallSession {
- public const int RequiredWorldRevision=2;
+ public const int RequiredWorldRevision=3;
  [UnityEngine.HideInInspector] public int generatedWorldRevision;
  [UnityEngine.HideInInspector] public string generatedRecipeSignature;
  bool RuntimeWorldReady() {

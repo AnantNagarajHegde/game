@@ -1,6 +1,13 @@
 using UnityEngine.UIElements;
 namespace Paridhwani {
  public sealed partial class TeaStallUI {
+ public void ShowRestoreError(bool missing) {
+ var card=Card("restore-failed","paper");Add(card,"CURRENT VISIT KEPT","eyebrow");Add(card,"Could not restore the saved visit","title");
+ Add(card,missing?"No saved visit or backup was found. Your current story progress and position are still open.":"Neither the saved visit nor its backup could be read. Your current story progress and position are still open. The unreadable files will be preserved before any new save.","body");
+ Button(card,"Return to the current visit",session.Close);
+ Button(card,"Back to Pause",ShowPause,"quiet-button");
+ }
+
  public void ShowWorldUpdateRequired() {
  var card=Card("world-update-required","paper");Add(card,"This world needs regeneration","title");
  Add(card,"The scene was generated from an older world recipe. Your saved visit has not been opened or changed. In Unity, use Paridhwani > Create Tea Stall Benchmark, or recreate the additive package, then press Play again.","body");

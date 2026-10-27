@@ -344,3 +344,12 @@ Source compilation and 212 assertions pass. The current checked-in scene is inte
 - Added persistent rain/river and footstep volume channels, copied into practice/new-story preferences with backwards-compatible full-volume defaults for older saves. The existing ambience toggle is now labelled rain/river; footsteps have their own slider. Master volume controls both.
 - Rain and river start at zero gain, mute immediately, and silence on focus loss. Shelter transitions still blend. No recorded/third-party audio was added.
 - Runtime/editor compilation and 247 executable assertions pass. Generated-world checks cover all three collider tags; native smoke checks cover mix application and Unity JSON round-trip. Those native checks remain authored but unexecuted because of the existing Unity startup gate.
+
+
+## Restore and companion lifecycle follow-up (27 October 2026)
+
+- Manual restore distinguishes a valid primary/backup from missing or unreadable files. A failed restore keeps the live visit, cancels optional text, and explains recovery rather than replacing progress with startup defaults. Returning to a pre-arrival save keeps the arrival screen.
+- Successful restore resets NPC staging to authored origins before reapplying the saved chapter. This fixes loading an earlier chapter while NPCs remain at the later council or return positions.
+- Companion breadcrumbs now have a bounded 128-point history, reset on visit replacement and transport, and reject cross-world discontinuities. Old walking history cannot survive a load into another chapter. Returning from practice switches save ownership only after reading a valid main visit; failure keeps practice isolated.
+- World revision is now 3 because regenerated collider audio metadata is required. The old checked-in scene remains deliberately guarded; no fresh scene/player is claimed.
+- Added storage-status and companion lifecycle checks plus a native actor-displacement restore regression. Runtime/editor compilation and 259 executable assertions pass; scene assertions remain pending the licensed Unity gate.

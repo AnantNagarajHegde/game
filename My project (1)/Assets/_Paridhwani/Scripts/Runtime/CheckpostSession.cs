@@ -39,7 +39,7 @@ namespace Paridhwani
             if(!target || (outward && !CheckpostInvestigation.CanTravel(Progress))) return;
             ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation();
             if(outward) Progress.checkpostVisited=true;
-            player.Restore(target.position,target.eulerAngles.y); ApplyState(); if(!outward) CompleteReturnAtVillage(); Save();
+            player.Restore(target.position,target.eulerAngles.y); returnTrail.Reset(target.position); ApplyState(); if(!outward) CompleteReturnAtVillage(); Save();
             ui.ShowTravelArrival(outward); SetCursor(true);
         }
         string CheckpostHint()

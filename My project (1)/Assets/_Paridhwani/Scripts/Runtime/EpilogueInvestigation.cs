@@ -46,7 +46,7 @@ namespace Paridhwani {
  public void StartPracticeVisit() {if(Progress.storyCompleted)StartChapterPractice(ReplayChapter.Arrival);}
  public void ReturnToCompletedStory() {
  if(!IsPracticeVisit) return;
- Save();saves=completedStoryStore;completedStoryStore=null;ResetActorsToOrigins();Load();
+ Save();RestoreVisit(completedStoryStore,true);
  }
  }
 }

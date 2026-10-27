@@ -21,24 +21,24 @@ namespace Paridhwani {
  }
  public sealed partial class TeaStallSession {
  public Transform returnCompanion,returnWait,fridayArrival,fridayCompanion;
- readonly Queue<Vector3> returnSteps=new Queue<Vector3>(); Vector3 lastReturnStep;
+ readonly CompanionTrail returnTrail=new CompanionTrail();
  void ApplyReturnState() {
  if(!returnCompanion) return;
  var body=returnCompanion.GetComponent<Collider>(); if(body) body.enabled=!Progress.returnJourneyStarted || Progress.returnedWithAnanya;
  if(Progress.returnedWithAnanya) { var anchor=Progress.fridayFinaleStarted?fridayCompanion:returnWait; if(anchor) { returnCompanion.position=anchor.position; returnCompanion.rotation=anchor.rotation; } }
- else if(Progress.returnJourneyStarted && Vector3.Distance(returnCompanion.position,player.transform.position)>12) { returnCompanion.position=player.transform.position; returnSteps.Clear(); lastReturnStep=player.transform.position; }
+ else if(Progress.returnJourneyStarted && Vector3.Distance(returnCompanion.position,player.transform.position)>12) { returnCompanion.position=player.transform.position; returnTrail.Reset(player.transform.position); }
  }
  void UpdateReturnJourney() {
  if(!returnCompanion || !Progress.returnJourneyStarted || Progress.returnedWithAnanya) return;
  if(ui.IsModal) return;
- if(Vector3.Distance(lastReturnStep,player.transform.position)>.65f) { lastReturnStep=player.transform.position; returnSteps.Enqueue(lastReturnStep); }
- if(returnSteps.Count>2) {
- var target=returnSteps.Peek();
+ returnTrail.Sample(player.transform.position);
+ if(returnTrail.Count>2) {
+ var target=returnTrail.Next;
  if(Vector3.Distance(returnCompanion.position,player.transform.position)>10) returnCompanion.position=target;
  var direction=target-returnCompanion.position;
  var flatDirection=new Vector3(direction.x,0,direction.z); if(flatDirection.sqrMagnitude>.01f) returnCompanion.rotation=Quaternion.Slerp(returnCompanion.rotation,Quaternion.LookRotation(flatDirection),Time.deltaTime*6);
  returnCompanion.position=Vector3.MoveTowards(returnCompanion.position,target,4*Time.deltaTime);
- if(Vector3.Distance(returnCompanion.position,target)<.12f) returnSteps.Dequeue();
+ if(Vector3.Distance(returnCompanion.position,target)<.12f) returnTrail.Advance();
  }
  if(villageArrival && Vector3.Distance(player.transform.position,villageArrival.position)<4) CompleteReturnAtVillage();
  }
@@ -48,7 +48,7 @@ namespace Paridhwani {
  void EndForJourney() { ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation(); ui.HideModal(); SetCursor(false); }
  public void StartReturnWalk() {
  if(ui.Mode!="evidence" || ActiveActivity!=VillageActivity.ReturnTogether || !ReturnInvestigation.Begin(Progress,ridgeRouteChecked)) return;
- returnSteps.Clear(); lastReturnStep=player.transform.position; EndForJourney(); ApplyState(); Save();
+ returnTrail.Reset(player.transform.position); EndForJourney(); ApplyState(); Save();
  }
  public void SkipReturnJourney() {
  if(ui.Mode!="evidence" || ActiveActivity!=VillageActivity.ReturnTogether || !villageArrival || !ReturnInvestigation.Begin(Progress,ridgeRouteChecked)) return;

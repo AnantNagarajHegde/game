@@ -38,7 +38,7 @@ public static class ChapterChecks {
  Check(!VillageInputPolicy.NotebookShortcut("conversation",false) && !VillageInputPolicy.NotebookShortcut("pause",false),"Tab traverses modal controls");
  Check(VillageInputPolicy.NotebookShortcut("",false) && VillageInputPolicy.NotebookShortcut("notebook",false),"world notebook toggle retained");
  Check(!VillageInputPolicy.NotebookShortcut("",true),"typing cannot toggle notebook");
- foreach(string mode in new[]{"main-menu","new-visit-confirm","arrival","quit-failed","world-update","chapter-replay"})
+ foreach(string mode in new[]{"main-menu","new-visit-confirm","arrival","quit-failed","world-update-required","chapter-replay","restore-failed"})
  Check(!VillageInputPolicy.SaveShortcut(mode,false,false),"save hotkeys cannot bypass protected modal: "+mode);
  Check(!VillageInputPolicy.SaveShortcut("pause",false,true) && !VillageInputPolicy.SaveShortcut("conversation",true,false),"title settings and text entry suppress save hotkeys");
  Check(VillageInputPolicy.SaveShortcut("pause",false,false),"pause keeps explicit save/restore shortcuts");
@@ -66,20 +66,32 @@ public static class ChapterChecks {
  Check(samples[0]==0 && samples[samples.Length-1]==0,"surface transient fades without hard endpoint clicks");
  }
  }
+ static void CompanionChecks() {
+ var trail=new CompanionTrail();trail.Reset(new UnityEngine.Vector3(48,0,30));
+ trail.Sample(new UnityEngine.Vector3(48.2f,0,30));Check(trail.Count==0,"stationary companion sampling does not grow path");
+ trail.Sample(new UnityEngine.Vector3(49,0,30));trail.Sample(new UnityEngine.Vector3(50,0,30));Check(trail.Count==2 && trail.Next.x==49,"companion follows sampled order");
+ trail.Advance();Check(trail.Count==1 && trail.Next.x==50,"reached waypoint advances once");
+ trail.Sample(new UnityEngine.Vector3(1,0,0));Check(trail.Count==0,"transport cannot connect separate worlds through old path");
+ trail.Sample(new UnityEngine.Vector3(2,0,0));trail.Reset(new UnityEngine.Vector3(48,0,40));Check(trail.Count==0,"restore clears previous visit path");
+ for(int i=1;i<=150;i++)trail.Sample(new UnityEngine.Vector3(48+i,0,40));Check(trail.Count==CompanionTrail.MaximumPoints && trail.Next.x==71,"companion history has a finite backlog");
+ }
  static void FileChecks() {
  string directory=System.IO.Path.Combine(Environment.CurrentDirectory,"Temp","IterationVerification","ParidhwaniStore-"+Guid.NewGuid().ToString("N"));
  string file=System.IO.Path.Combine(directory,"visit.json");var codec=new StorageCodec();var store=new TeaSaveStore(file,codec);
  try {
- Check(!store.Read(out _).signRead,"new storage defaults");
+ Check(!store.Read(out _).signRead && store.LastReadStatus==TeaSaveReadStatus.Missing,"new storage defaults distinguish missing save");
+ Check(!store.TryRestore(out var absent,out _) && absent==null,"explicit missing restore cannot expose fresh-story defaults");
  Check(store.Write(new TeaProgress {signRead=true},out _),"file write succeeds: "+store.LastFailureDetail);
+ Check(store.Read(out _).signRead && store.LastReadStatus==TeaSaveReadStatus.Primary,"primary read status is explicit");
+ Check(store.TryRestore(out var valid,out _) && valid.signRead,"explicit restore returns a valid snapshot");
  Check(store.Write(new TeaProgress(),out _),"second write creates backup");
- System.IO.File.Delete(file); Check(store.HasAnySaveFiles,"existing backup prevents legacy migration overwrite");Check(store.Read(out var recovered).signRead && recovered!=null,"missing primary recovers backup");
+ System.IO.File.Delete(file); Check(store.HasAnySaveFiles,"existing backup prevents legacy migration overwrite");Check(store.Read(out var recovered).signRead && recovered!=null && store.LastReadStatus==TeaSaveReadStatus.Backup,"missing primary recovers backup");
  Check(store.Write(new TeaProgress {signRead=true},out _),"recovered backup can be saved");
  System.IO.File.WriteAllText(file,"broken");Check(store.Read(out _).signRead,"corrupt primary recovers backup");
  Check(store.Write(new TeaProgress(),out _),"recovery writes fresh primary");
  System.IO.File.Delete(file);Check(store.Read(out _).signRead,"recovery did not overwrite the good backup with corrupt primary");
  System.IO.File.WriteAllText(file,"{\"version\":99}");System.IO.File.WriteAllText(file+".bak","{\"version\":99}");
- store.Read(out _);Check(store.Write(new TeaProgress(),out _),"unsupported files preserved before fresh write: "+store.LastFailureDetail);
+ store.Read(out _);Check(store.LastReadStatus==TeaSaveReadStatus.Unreadable,"unsupported files distinguish restore failure from fresh story");Check(!store.TryRestore(out var unreadable,out _) && unreadable==null,"unreadable explicit restore cannot replace the current visit");Check(store.Write(new TeaProgress(),out _),"unsupported files preserved before fresh write: "+store.LastFailureDetail);
  Check(System.IO.Directory.GetFiles(directory,"*.unreadable-*").Length>=2,"unsupported primary and backup retained");
  Check(store.Archive(new TeaProgress {signRead=true},out _) && System.IO.Directory.GetFiles(System.IO.Path.Combine(directory,"ArchivedVisits")).Length==1,"new-story archive preserves an explicit snapshot");
  string recipes=System.IO.Path.Combine(directory,"recipes");System.IO.Directory.CreateDirectory(recipes);string recipe=System.IO.Path.Combine(recipes,"World.cs");System.IO.File.WriteAllText(recipe,"first\r\n");string initial=WorldRecipeSignature.Compute(recipes);System.IO.File.WriteAllText(recipe,"first\n");Check(initial==WorldRecipeSignature.Compute(recipes),"world recipe ignores checkout line endings");System.IO.File.WriteAllText(recipe,"changed\n");Check(initial!=WorldRecipeSignature.Compute(recipes),"world recipe detects a changed generator");
@@ -98,7 +110,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { InputChecks(); FootstepChecks(); FileChecks(); AsyncDialogueChecks();
+ public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

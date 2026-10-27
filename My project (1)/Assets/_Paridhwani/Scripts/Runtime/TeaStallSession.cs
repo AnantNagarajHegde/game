@@ -90,7 +90,7 @@ namespace Paridhwani
             }
             Progress=saves.Read(out string notice);
             if(notice!=null) SaveMessage=notice;
-            player.Restore(Progress.position,Progress.heading);
+            player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);
             CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
             if(!smoke) { ui.ShowMainMenu(); SetCursor(true); }
@@ -328,12 +328,24 @@ namespace Paridhwani
             LastSaveSucceeded=saves.Write(Progress,out string error);
             SaveMessage=LastSaveSucceeded?"Visit saved":error;
         }
-        public void Load()
+        public void Load() { RestoreVisit(saves,false); }
+        bool RestoreVisit(TeaSaveStore source,bool returningToMain)
         {
-            ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation();
-            Progress=saves.Read(out string notice);
-            player.Restore(Progress.position,Progress.heading); ApplyState();
-            SaveMessage=notice??"Saved visit restored"; ui.HideModal(); SetCursor(false);
+            if(!source.TryRestore(out var restored,out string notice))
+            {
+                SuspendDialogueText();
+                SaveMessage="Saved visit could not be restored. Your current visit is still open.";
+                ui.ShowRestoreError(source.LastReadStatus==TeaSaveReadStatus.Missing);SetCursor(true);return false;
+            }
+            // Switch save ownership only after a valid read. Failed main-visit returns stay in practice.
+            saves=source;if(returningToMain) completedStoryStore=null;
+            ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation();ResetActorsToOrigins();
+            Progress=restored;
+            player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();
+            SaveMessage=notice??"Saved visit restored";
+            if(Progress.arrivalAcknowledged) {ui.HideModal();SetCursor(false);}
+            else {ui.ShowArrival();SetCursor(true);}
+            return true;
         }
         void OnApplicationFocus(bool focused)
         {

@@ -13,7 +13,7 @@ namespace Paridhwani {
  if(HasSavedVisit){Save();if(!LastSaveSucceeded){ui.ShowMainMenu(SaveMessage);return;}if(!saves.Archive(previous,out var archiveError)){ui.ShowMainMenu(archiveError);return;}}
  var next=new TeaProgress();PresentationPolicy.Copy(previous,next);
  if(!saves.Write(next,out var error)){ui.ShowMainMenu(error);return;}
- EndForJourney();ResetActorsToOrigins();Progress=next;player.Restore(next.position,next.heading);ApplyState();Save();ui.ShowArrival();SetCursor(true);
+ EndForJourney();ResetActorsToOrigins();Progress=next;player.Restore(next.position,next.heading);returnTrail.Reset(next.position);ApplyState();Save();ui.ShowArrival();SetCursor(true);
  }
  public void RequestQuit() {Save();if(LastSaveSucceeded)ExitPlayer();else {ui.ShowQuitSaveError();SetCursor(true);}}
  public void QuitWithoutSaving(){skipQuitSave=true;ExitPlayer();}
