@@ -1,4 +1,3 @@
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +16,7 @@ namespace Paridhwani
         int startFrame;
         public void Begin(TeaStallSession value)
         {
+            if(!Debug.isDebugBuild) {enabled=false;return;}
             session=value; output=Path.Combine(Path.GetTempPath(),"ParidhwaniSmoke","run-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"));
             Directory.CreateDirectory(output); startFrame=Time.frameCount;
             StartCoroutine(Guarded());
@@ -416,4 +416,3 @@ namespace Paridhwani
         }
     }
 }
-#endif

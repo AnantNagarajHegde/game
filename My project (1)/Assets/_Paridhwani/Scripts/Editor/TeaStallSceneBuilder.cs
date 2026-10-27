@@ -35,6 +35,7 @@ namespace Paridhwani.Editor
 
         public static void Generate()
         {
+            PrepareSurfaceTextures();
             if(!Application.isBatchMode)
             {
                 for(int index=0;index<SceneManager.sceneCount;index++) {

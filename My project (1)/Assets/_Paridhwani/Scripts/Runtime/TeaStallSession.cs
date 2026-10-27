@@ -78,7 +78,7 @@ namespace Paridhwani
             if(!RuntimeWorldReady()) {
                 Progress=new TeaProgress();player.enabled=false;player.GetComponent<CharacterController>().enabled=false;ui.Bind(this);ui.ShowWorldUpdateRequired();SetCursor(true);Debug.LogError("PARIDHWANI_WORLD_OUTDATED: regenerate the world before playing; no saved visit was read or changed.");return;
             }
-            bool smoke=Array.IndexOf(Environment.GetCommandLineArgs(),"-village-smoke")>=0;
+            bool smoke=Debug.isDebugBuild && Array.IndexOf(Environment.GetCommandLineArgs(),"-village-smoke")>=0;
             string path=smoke?Path.Combine(Application.temporaryCachePath,"village-smoke-"+Guid.NewGuid().ToString("N")+".json"):
                 Path.Combine(Application.persistentDataPath,"paridhwani-tea-v1.json");
             saves=new TeaSaveStore(path);
@@ -94,10 +94,11 @@ namespace Paridhwani
             CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
             if(!smoke) { ui.ShowMainMenu(); SetCursor(true); }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
-            if(smoke) { Application.runInBackground=true; gameObject.AddComponent<VillageSmokeCheck>().Begin(this); }
-#endif
+            if(Debug.isDebugBuild)
+            {
+                if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
+                if(smoke) { Application.runInBackground=true; gameObject.AddComponent<VillageSmokeCheck>().Begin(this); }
+            }
         }
         void ApplyState()
         {

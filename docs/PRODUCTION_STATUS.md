@@ -23,7 +23,7 @@ The surface maps, synthesized footsteps and procedural rigs improve the prototyp
 
 ## Executed checks
 
-- All runtime/editor C# sources compile against the installed Unity 6000.6.7f1 references. Existing Unity build-variant deprecation warnings remain.
+- All runtime/editor C# sources compile against the installed Unity 6000.6.7f1 references. The obsolete DEVELOPMENT_BUILD directives have been removed. Runtime branches also compile with Editor/diagnostic symbols removed against the cached references; this is not a native Player build.
 - 259 executable assertions pass, covering story gates, retries, endings, storage recovery/archive/restore I/O, chapter seeds, input routing, movement input, footstep synthesis/cadence, companion paths, preferences, binding policy and optional-dialogue failure/cancellation behavior.
 - Storage I/O uses an injected minimal JSON codec in standalone tests. This does not claim Unity JsonUtility coverage; those tests are authored for the Editor/player.
 - Seven 512px RGB texture sources pass size, variation and opposite-edge checks. GPU shader import/rendering has not been executed.
@@ -36,7 +36,7 @@ Earlier iterations did compile, build and run visible smoke tests (1,226 and 1,7
 
 A fresh read on 27 October found successful desktop licensing handshakes and a successfully updated license in the desktop Editor log. The project log shows asset imports and a stale-world guard from Play mode. The exact project is now open: `unity run` refuses a second launch for that reason. Meanwhile `unity status` reports no connected Pipeline instance and warns it could not inspect running Editors. The project has no Pipeline dependency. The shell also uses a sandbox-specific LocalApplicationData directory; a session/access difference remains the likely explanation for the earlier automated connection failure, but the exact root cause is unproven. The CLI update check also failed DNS resolution; no update or license/configuration change was made.
 
-Current status: desktop Unity can initialize licensing; this session cannot drive its open Editor or claim completed regeneration/playtesting. Imported texture metadata and ShaderGraph settings changed outside this implementation and are left intact/uncommitted. No rendered UI acceptance or new complete player is claimed.
+Current status: desktop Unity can initialize licensing; this session cannot drive its open Editor or claim completed regeneration/playtesting. The native-upgraded texture metadata is now committed as the WetEarth import blocker repair; unrelated Editor settings are outside this repair. No rendered UI acceptance or new complete player is claimed.
 
 In the already-open Editor, run **Paridhwani > Create Tea Stall Benchmark**, then **Paridhwani > Run Benchmark Checks**, then Play. The current revision-3 world guard intentionally rejects the old generated scene before opening or writing a visit. The project log's stale-world message is expected until regeneration succeeds.
 
@@ -72,3 +72,8 @@ Three cycles address text-entry safety and real movement speed; grounded surface
 ## Conversation usability pass (27 October 2026)
 
 Conversation speech/choices now scroll under fixed actions, narrower cards stack replies, and scaled cards respect viewport width. Same-turn refreshes preserve reading position/control focus. Optional replies can return to the original authored line without story effects, and dialogue labels interpret service text literally. Native smoke coverage includes long replies at 960x540 with maximum text scale. All runtime/editor sources compile and 259 standalone assertions pass; those new layout checks remain authored but unexecuted through this session.
+
+
+## Reported surface import error repair
+
+All seven surface PNGs are valid, but their original minimal metadata was read as obsolete TextureImporter version 1. The logged failure occurred after licensing, during scene generation. This repair includes Unity's version-13 metadata with original GUIDs, validates/forces every required texture import before replacing the scene, and distinguishes a failed import from a missing source. After the Editor recompiles, retry Create Tea Stall Benchmark; it now performs the import preflight automatically. Repair Surface Texture Imports runs it separately. Full native generation still needs confirmation from the open Editor.

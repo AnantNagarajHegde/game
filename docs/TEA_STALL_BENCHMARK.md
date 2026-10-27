@@ -367,3 +367,12 @@ Source compilation and 212 assertions pass. The current checked-in scene is inte
 ## Unity availability clarification (27 October 2026)
 
 Earlier successful builds/rendered tests remain valid for their historical revisions. The old licensing timeout was a real automated-launch failure. A fresh desktop log now shows successful licensing; the exact project is open and has imported assets. The CLI batch attempt refuses the open project, while live discovery returns STATUS_NO_INSTANCES plus a running-process-inspection warning. No Pipeline package is installed in the project; no license, account, sandbox or package setting was changed. The shell's LocalApplicationData path is sandbox-specific. The current limitation is control of the running Editor, with regeneration/native acceptance still pending, rather than a proven ongoing license failure on the desktop. See PRODUCTION_STATUS.md for the current manual/closed-Editor verification routes.
+
+
+## Surface import blocker and diagnostic warning repair (27 October 2026)
+
+The reported WetEarth exception was a real generator defect. All seven PNGs exist and decode correctly. The desktop Editor log reports their previous minimal metadata as TextureImporter version 1, below Unity 6's supported minimum of 10; the files were originally checked in without full texture importer metadata. Unity has now upgraded them to version 13 without changing GUIDs. Those native-generated metadata files are included in this repair.
+
+Generation now validates all source files, synchronously forces texture imports and checks every Texture2D before creating a replacement scene. A failed import is reported separately from a missing file. The Repair Surface Texture Imports menu can run that preflight independently. No source files or Library caches are deleted, and no material falls back silently to an unrelated texture.
+
+Removed all obsolete DEVELOPMENT_BUILD directives. Diagnostic types compile independently of managed variants, and Debug.isDebugBuild gates profiling/smoke activation at runtime (including the isolated-save smoke flag). Release players do not activate these opt-in tools. Source verification additionally compiles runtime branches without Editor/diagnostic symbols using the cached references, and checks PNG signatures/dimensions, metadata schema and stable unique GUIDs. This remains source/import-input validation, not a native player build or completed Editor import repair execution.
