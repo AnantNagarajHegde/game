@@ -2,7 +2,7 @@
 
 28 October 2026, after the user handled the firewall prompt.
 
-**Latest update:** the user approved takeover and reported that controller testing worked. The live visit was saved and Play mode stopped safely. Native presentation now passes 93 checks; the corrected vendor-native run passes 4,252 sampled checks with 11 captures. See VENDOR_LIVELINESS_CHECKPOINT.md for final run paths and limits. The earlier takeover pause below is historical and resolved. The current remaining delivery gate is explicit Library-upload approval following automatic review rejection; no upload succeeded. Character sample work may proceed independently.
+**Latest update:** takeover and native work completed; the user's live visit was saved. The two-character cartoon sample is now rendered and verified; see CHARACTER_STYLE_SAMPLE.md. The user approved preview uploads after the automatic-review rejection. The one authorized retry failed before preparation because `Library prepare_uploads is not available` to the host helper. No upload succeeded, no Library IDs exist, and no alternate upload route was attempted. Earlier takeover/upload-permission pauses below are historical and resolved; supported file delivery remains blocked by helper capability.
 
 ## Completed this native attempt
 

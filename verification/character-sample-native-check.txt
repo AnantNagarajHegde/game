@@ -1,0 +1,36 @@
+Two-character cartoon sample - 28 October 2026
+
+Scope: Player and Manjunatha only. Original shaped mesh kit and CharacterInk
+shader; existing root collision, eye height and animation pivots retained.
+No new external art/software/paid assets. No broad cast replacement.
+
+PASS: cached-reference Runtime/Editor/Player-source compilation; 387 existing
+logic assertions. Raw log: verification/Temp/cartoon-character-source.log
+PASS: native generation/import and shader compilation.
+PASS: actual generated mesh finite vertices/nondegenerate triangles and pivot
+bindings, four demo routes and isolated state/camera/interaction behavior.
+Report: verification/Temp/PresentationPlaytests/run-20261028-162458923-028bb14e/
+17 captures, 960x540, brightness .9, text scale 1.3. Report count 9,443 includes
+individual vertex/triangle checks; it is not a count of gameplay scenarios.
+PASS: sample-model vendor cycles, physics queries, modal pause/resumption,
+save/load and finale staging. 4,259 sampled frame/transition checks, 11 captures:
+verification/Temp/VendorNative/20261028-162922794/
+
+Inspected: player/NPC portraits, normal gameplay and conversation, NPC work.
+First sample remains subject to user art/style feedback before broad adoption.
+No new standalone, performance signoff, exhaustive physical gamepad or language
+acceptance. User separately reported controller success before this model pass.
+
+SHA256 CharacterInk.shader:
+D0B987AA8E4A351B289CC1E90F950E3BACE3809BF14D77F5BD5A698CC03D1E5D
+SHA256 CartoonCharacterSample.cs:
+72CBE47B5EBDE926724BFAF4FC8D35C959D5FD65D27D203D63569C39EB79088A
+Main save unchanged across isolated character runs, SHA256:
+AFCBBF218398CC4C738AD0AC28D1BD8A1055DE1E2F814719D6C822ED34D02F4B
+
+Preview copies: verification/Temp/CharacterSamplePreview-20261028/
+Before-model scene/assets: verification/Temp/BeforeCharacterSample-20261028/
+Library delivery: authorized retry stopped before preparation because the
+required Library prepare_uploads operation is unavailable to the host helper.
+No successful upload or Library ID. No alternate route or further retry.
+Details/consistency plan: docs/CHARACTER_STYLE_SAMPLE.md

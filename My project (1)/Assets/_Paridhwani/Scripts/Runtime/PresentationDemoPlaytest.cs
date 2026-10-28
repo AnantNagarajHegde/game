@@ -166,6 +166,40 @@ namespace Paridhwani
                 yield return null;
             }
         }
+        IEnumerator CharacterSampleViews()
+        {
+            var tea=Array.Find(session.villagers,n=>n && n.role==VillageNpcRole.TeaVendor);
+            if(!session.player.visual.Find("Head/CartoonPlayer_Face"))yield break;
+            Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/CharacterInk")),"character sample shader compiles");
+            foreach(var actor in new[]{session.player.gameObject,tea.gameObject})
+            {
+                var rig=actor.GetComponentInChildren<VillageCharacter>();
+                Check(rig && rig.head && rig.leftArm && rig.rightArm && rig.leftLeg && rig.rightLeg,"sample preserves animation pivots");
+                foreach(var filter in actor.GetComponentsInChildren<MeshFilter>())
+                {
+                    var mesh=filter.sharedMesh;if(!mesh || !mesh.name.StartsWith("Cartoon"))continue;
+                    var points=mesh.vertices;var indices=mesh.triangles;
+                    Check(points.Length>3 && indices.Length>2,"sample mesh is populated: "+mesh.name);
+                    foreach(var point in points)Check(float.IsFinite(point.x)&&float.IsFinite(point.y)&&float.IsFinite(point.z),"finite sample vertex");
+                    for(int i=0;i<indices.Length;i+=3)Check(Vector3.Cross(points[indices[i+1]]-points[indices[i]],points[indices[i+2]]-points[indices[i]]).sqrMagnitude>1e-14f,"nondegenerate sample triangle: "+mesh.name);
+                }
+            }
+            // Additional portraits use the real game camera in Play mode. Normal
+            // gameplay/conversation captures above remain the scale/readability reference.
+            session.Close();yield return new WaitForSecondsRealtime(.8f);
+            var camera=session.player.view;Vector3 savedPosition=session.player.transform.position;float savedHeading=session.player.Heading;
+            Quaternion savedVisual=session.player.visual.rotation;
+            session.player.enabled=false;session.player.visual.rotation=Quaternion.identity;
+            var root=Root;var display=root.style.display;
+            session.ui.ShowInspection("Character sample","","","");root.style.display=DisplayStyle.None;
+            camera.transform.position=savedPosition+new Vector3(0,1.50f,1.65f);camera.transform.LookAt(savedPosition+Vector3.up*1.35f);
+            yield return new WaitForSecondsRealtime(.3f);yield return Capture("Character-player-front");
+            camera.transform.position=tea.transform.position+new Vector3(.15f,1.55f,-1.7f);camera.transform.LookAt(tea.transform.position+Vector3.up*1.5f);
+            yield return new WaitForSecondsRealtime(.3f);yield return Capture("Character-Manjunatha-front");
+            root.style.display=display;session.ui.HideModal();session.player.enabled=true;
+            session.player.Restore(savedPosition,savedHeading);session.player.visual.rotation=savedVisual;
+            yield return new WaitForSecondsRealtime(.7f);
+        }
         IEnumerator Rehearse(ReplayChapter chapter)
         {
             // Walk through CharacterController collisions; invoke authored actions programmatically.
@@ -190,6 +224,7 @@ namespace Paridhwani
                     Check(session.Progress.greeted && session.Progress.drinkOrdered && session.Progress.directionsKnown, "tea demo earns drink and library directions");
                     yield return Capture("Arrival-conversation");
                     session.OpenNotebook(); yield return Capture("Arrival-notebook"); session.Close();
+                    yield return CharacterSampleViews();
                     break;
                 case ReplayChapter.River:
                     foreach (var point in new[] { new Vector3(-10, 0, 6.5f), new Vector3(-14, 0, 6.5f), new Vector3(-19, 0, 6.5f), new Vector3(-21, 0, 6.5f), new Vector3(-23.5f, 0, 2.2f) })

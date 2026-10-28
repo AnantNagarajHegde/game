@@ -466,6 +466,7 @@ namespace Paridhwani.Editor
         }
         static GameObject Character(string name,Vector3 position,bool player,bool female=false)
         {
+            if(name=="Player" || name=="Manjunatha")return CartoonCharacter(name,position,player);
             var root=new GameObject(name); root.transform.position=position;
             var model=new GameObject("Character visual").transform; model.SetParent(root.transform,false);
             var rig=model.gameObject.AddComponent<VillageCharacter>();
