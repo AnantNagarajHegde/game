@@ -1,28 +1,37 @@
-# Product & Game Experience
+# Paridhwani
 
-Owns the learner-facing product experience: product concept, world and location design, story, characters, quests, game progression, and UI/UX coordination.
+Paridhwani is a story-led Kannada-learning adventure built in Unity. The prototype follows an archive worker investigating Ananya's disappearance and helping protect the village library. Players explore the village, speak with its residents, collect evidence, and practise Kannada through authored dialogue and activities.
 
-This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. The checked-in revision-3 benchmark has been regenerated in Unity; the existing standalone executable is older. Native benchmark checks and the scripted full-story Editor regression pass. The current art is procedural prototype work.
+The main story is authored from arrival through the council review and epilogue, with a separate practice visit that preserves the completed story save. The game is still a procedural prototype, not a release-ready product; final art, fluent language review, a connected NLP service, and broader player acceptance testing remain outstanding.
 
+## Open and play
 
-## Unity 3D implementation plan
+1. Open `My project (1)` in Unity Hub using **Unity 6000.6.7f1**.
+2. Open `Assets/_Paridhwani/Scenes/TeaStall_Benchmark.unity`.
+3. Press **Play**.
 
-See [Unity game plan](docs/UNITY_GAME_PLAN.md) for the project audit, village art direction, proposed scene manifest, complete story sequences, learning flow, separate NLP boundary, and implementation milestones.
+If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark** in the Editor. For controls, story walkthrough, and save details, see [play and build instructions](docs/TEA_STALL_BENCHMARK.md).
 
-## Playable village slice
+## Verification
 
-See [play and build instructions](docs/TEA_STALL_BENCHMARK.md). Open Assets/_Paridhwani/Scenes/TeaStall_Benchmark.unity in the Unity project and press Play.
+The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 275 standalone assertions also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
 
-## Current readiness and verification
+From this repository root, run source and logic checks in PowerShell:
 
-Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 275 standalone assertions pass. Desktop Unity generation, benchmark checks and the complete scripted Editor regression pass (6,800 frames, 51 captures), including the corrected library route and long dialogue at 960x540 with maximum text scale. A fresh standalone build and broader human acceptance are still pending.
+```powershell
+.\verification\Verify-Sources.ps1
+```
 
-The project now includes reached-chapter practice, recovery/archival safeguards, title/settings/exit flow, quality and motion preferences, reusable source textures, additive world packaging and an optional cancellable text adapter. Final production art, the real separate NLP service, language review and full in-engine release testing remain outstanding.
+This requires the project to have been imported in Unity and the configured Unity Editor and cached compiler references to be available. In a licensed desktop Unity session, the batch workflow can regenerate, check, build, and optionally smoke-test the Legacy or Additive layout:
 
-From the master workspace root, run `./game/verification/Verify-Sources.ps1` for source/logic checks. In a normal licensed Unity desktop session, use `./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke` (or `-Layout Additive`) for a fresh build and isolated rendered playthrough.
+```powershell
+.\verification\Verify-Unity.ps1 -Layout Legacy -Build -Smoke
+```
 
-Use **Paridhwani > Play Isolated Test Visit** for manual testing on a temporary save, or **Run Automated Editor Playtest** for the scripted native regression. Open the project through Unity Hub if a shell launch fails to reach its licensing client.
+Use `-Layout Additive` to select the Additive layout. For desktop Editor testing, use **Paridhwani > Play Isolated Test Visit** or **Run Automated Editor Playtest**. To build and test a fresh standalone player from the open Editor, use **Paridhwani > Build and Run Standalone Playtest**.
 
-For a fresh standalone build/test from the open desktop Editor, use **Paridhwani > Build and Run Standalone Playtest** after Assets > Refresh finishes. It builds before launching, monitors the isolated test, and writes report.json/player.log beneath game/verification/Temp/StandalonePlaytests. This command has passed source compilation; native execution remains pending. Existing generated scenes remain valid when only this verification tool changes.
+See [current production status](docs/PRODUCTION_STATUS.md) for verified results and remaining acceptance work. For the project plan, see [Unity game plan](docs/UNITY_GAME_PLAN.md).
 
-The NLP boundary now supports immutable correlated service messages through IDialogueTextService. See [the proposed service contract](docs/NLP_SERVICE_CONTRACT_PROPOSAL.md); the actual endpoint, authentication and transport remain unconfigured.
+## NLP integration
+
+Dialogue currently uses local authored content. The project includes an optional cancellable text-service adapter, but no real NLP endpoint, authentication, or transport is configured. See the [proposed service contract](docs/NLP_SERVICE_CONTRACT_PROPOSAL.md).
