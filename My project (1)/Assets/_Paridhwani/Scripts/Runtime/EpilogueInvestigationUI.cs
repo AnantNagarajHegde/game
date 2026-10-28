@@ -34,6 +34,7 @@ namespace Paridhwani {
  Button(card,"Revisit the completed village",session.Close);if(session.IsPracticeVisit) Button(card,"Return to the main visit",session.ReturnToCompletedStory,"quiet-button"); else Button(card,"Choose a chapter to practise",ShowChapterReplay,"quiet-button").name="credits-practice";
  }
  public void ShowPracticeArrival() {
+ if(session.IsPresentationDemo){ShowPresentationArrival();return;}
  var card=Card("practice-arrival","paper");Add(card,"SEPARATE PRACTICE VISIT","eyebrow");Add(card,session.PracticeChapterName,"title");Add(card,"Your main visit is preserved. This chapter has its own temporary save and the required earlier clues. Pause lets you return to the main visit; quitting and reopening also returns to the main save.","body");Button(card,"Begin practice",session.Close);
  }
  }

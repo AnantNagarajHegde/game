@@ -8,7 +8,8 @@ Target: a presentable prototype demonstration within 24 hours of the 28 October 
 2. Open `Assets/_Paridhwani/Scenes/TeaStall_Benchmark.unity`. These presentation changes do not require regeneration. If Unity reports an outdated world recipe, regenerate before rehearsal.
 3. Press Play, open Settings, and adjust Display brightness for the actual screen/projector. Its default is +0.7 exposure stops; its range is -0.5 to +1.5. UI text is unaffected by this scene exposure adjustment.
 4. From the title choose **Presentation demo / choose a scene**. The main visit is saved first. Demo scenes use separate temporary saves and supply the earlier clues required for their activities. They contain spoilers and do not unlock the main story.
-5. Rehearse every scene below. On a demo visit, Pause offers **Choose another demo scene** near the top. **Return to the main visit** restores the original main save. Ordinary chapter practice still requires reached chapters.
+5. Each demo arrival shows its four-step route and current objective. Choose Enter the demo scene; Pause can reopen Review this demo scene's instructions.
+6. Rehearse every scene below. On a demo visit, Pause offers **Choose another demo scene** near the top. **Return to the main visit** restores the original main save. Ordinary chapter practice still requires reached chapters.
 
 ## Suggested 8–10 minute demonstration
 
@@ -24,7 +25,8 @@ Keep the explanation of the real NLP engine accurate: this build uses authored d
 ## Checks that still require desktop Unity
 
 - Confirm the new title layout and brightness on the actual display at 960x540 and the intended presentation resolution.
-- Launch all four demo scenes, switch between them through Pause, and return to the main visit. Check that its position, clues and chapter unlocks are retained.
+- Check the world signs at the tea stall, library, river and council route: complete text, sensible proportions and readable contrast. The automated sign check logs VILLAGE_SIGN_LAYOUT_CHECKED; it does not replace a human readability check.
+- Launch all four demo scenes, reopen their instructions, switch between them through Pause, and return to the main visit. Check that its position, clues and chapter unlocks are retained.
 - Rehearse movement, interaction, notebook and the complete short route with the input device you will use. Controller work is being developed separately and should be accepted separately.
 - Run Paridhwani > Run Automated Editor Playtest. Require a fresh VILLAGE_SMOKE_OK; the older 6,800-frame result predates this batch.
 - Run Paridhwani > Build and Run Standalone Playtest from the open licensed Editor. Keep the new successful player and its matching report. Do not present an older build as if it includes these changes.

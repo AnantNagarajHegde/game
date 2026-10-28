@@ -97,6 +97,7 @@ namespace Paridhwani
         {
             var player=session.player;
             yield return new WaitForSecondsRealtime(1);
+            yield return VillagePresentationSmoke.CheckSigns();
             session.OpenTitle();session.AcknowledgeArrival();
             Check(session.ui.Mode=="main-menu" && !session.Progress.arrivalAcknowledged,"stale arrival callback cannot acknowledge from title");
             session.ContinueMainVisit();Check(session.ui.Mode=="arrival" && player.blocked,"fresh visit requires welcome");
@@ -519,6 +520,8 @@ namespace Paridhwani
                 session.ui.ShowPresentationDemo();session.StartPresentationDemo(demoChapter);
                 Check(session.IsPresentationDemo && session.IsPracticeVisit && !session.Progress.storyCompleted,"demo scene is a separate prepared visit: "+demoChapter);
                 Check(session.Progress.brightness==.9f,"demo copies the display preference");
+                Check(session.PresentationChapter==demoChapter && menuRoot.Q("demo-arrival-card")!=null && menuRoot.Q<Button>("demo-enter")!=null,"demo arrival shows its current scene guide");
+                Check(menuRoot.Query<Label>().ToList().Exists(label=>label.text==PresentationDemo.Route(demoChapter)),"demo arrival renders the presenter route literally");
                 session.Close();session.OpenTitle();session.ui.ShowPause();session.ui.ShowPresentationDemo();
                 session.StartPresentationDemo(demoChapter==ReplayChapter.Arrival?ReplayChapter.River:ReplayChapter.Arrival);
                 Check(session.IsPresentationDemo,"switching demo scenes preserves separate save ownership");

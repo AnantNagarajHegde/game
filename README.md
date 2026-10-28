@@ -14,7 +14,7 @@ If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark**
 
 ## Verification
 
-The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 344 standalone assertions for the committed presentation batch also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
+The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 367 standalone assertions for the committed presentation batches also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
 
 From this repository root, run source and logic checks in PowerShell:
 
@@ -45,3 +45,5 @@ Escape at the welcome screen returns to title until arrival is explicitly acknow
 ## Presentation demo
 
 The title's **Presentation demo / choose a scene** opens tea, river, trunk/deed or council scenes with prepared prior clues in separate temporary visits. Pause can switch demo scenes or return to the main visit. Demo progress does not unlock main-story chapters. Settings includes Display brightness for the presentation screen. See the [demo rehearsal guide](docs/DEMO_RUNBOOK.md). These additions have source coverage; fresh native layout/brightness/demo acceptance remains pending.
+
+Demo arrivals include a four-step route and the current objective; Pause can reopen the guide. World signs now fit text to their board proportions and share font atlases. Source checks pass; native acceptance of the new sign layout and guide remains pending.
