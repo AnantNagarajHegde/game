@@ -376,3 +376,12 @@ The reported WetEarth exception was a real generator defect. All seven PNGs exis
 Generation now validates all source files, synchronously forces texture imports and checks every Texture2D before creating a replacement scene. A failed import is reported separately from a missing file. The Repair Surface Texture Imports menu can run that preflight independently. No source files or Library caches are deleted, and no material falls back silently to an unrelated texture.
 
 Removed all obsolete DEVELOPMENT_BUILD directives. Diagnostic types compile independently of managed variants, and Debug.isDebugBuild gates profiling/smoke activation at runtime (including the isolated-save smoke flag). Release players do not activate these opt-in tools. Source verification additionally compiles runtime branches without Editor/diagnostic symbols using the cached references, and checks PNG signatures/dimensions, metadata schema and stable unique GUIDs. This remains source/import-input validation, not a native player build or completed Editor import repair execution.
+
+
+## Native surface repair and isolated Editor testing (28 October 2026)
+
+The desktop Inspector identified WetEarth as a Cubemap. Explicit Texture2D preprocessing, in addition to supported metadata, fixed all seven imports. Repair Surface Texture Imports emitted PARIDHWANI_SURFACE_IMPORTS_OK, Create Tea Stall Benchmark regenerated the revision-3 full story world, and native benchmark checks passed. Generated materials now retain filename-matching names and world-sign panels receive their theme.
+
+Added Play Isolated Test Visit and Run Automated Editor Playtest. Both isolate saves from the normal visit; automated tests return to Edit mode and report failures to disk. Manual title/arrival/world rendering was observed. The automated run reached river and temple tasks but stopped approaching the library veranda at (-5.25, 0, 12.30). A complete run is not claimed. The walking timeout now reports actual player position and nearby colliders instead of the misleading generic river-route message.
+
+Source compilation and 259 standalone assertions pass. On 28 October, direct shell launching again failed licensing IPC, but launching the project through Unity Hub worked. Current status is recorded in PRODUCTION_STATUS.md.

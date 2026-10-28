@@ -10,6 +10,7 @@ namespace Paridhwani
     {
         public string text;
         public Font font;
+        public ThemeStyleSheet theme;
         public bool kannada;
         RenderTexture texture;
         PanelSettings settings;
@@ -21,6 +22,7 @@ namespace Paridhwani
             texture.Create();
             settings=ScriptableObject.CreateInstance<PanelSettings>();
             settings.targetTexture=texture;
+            settings.themeStyleSheet=theme;
             settings.clearColor=true; settings.colorClearValue=new Color(.09f,.16f,.13f,1);
             settings.scaleMode=PanelScaleMode.ConstantPixelSize;
             var document=gameObject.AddComponent<UIDocument>();
@@ -30,7 +32,7 @@ namespace Paridhwani
             root.style.justifyContent=Justify.Center; root.style.alignItems=Align.Center;
             root.style.backgroundColor=new Color(.09f,.16f,.13f,1);
             fontAsset=FontAsset.CreateFontAsset(font);
-            var label=new Label(text);
+            var label=new Label(text){enableRichText=false};
             label.style.unityFontDefinition=FontDefinition.FromSDFFont(fontAsset);
             label.style.unityTextGenerator=TextGeneratorType.Advanced;
             label.style.fontSize=kannada?138:96;

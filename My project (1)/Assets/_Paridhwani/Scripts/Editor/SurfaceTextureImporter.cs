@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 namespace Paridhwani.Editor {
  public sealed class SurfaceTextureImporter : AssetPostprocessor {
- void OnPreprocessTexture() {if(!assetPath.Contains("/_Paridhwani/Art/Textures/Surfaces/"))return;var importer=(TextureImporter)assetImporter;importer.textureType=TextureImporterType.Default;importer.sRGBTexture=true;importer.wrapMode=TextureWrapMode.Repeat;importer.filterMode=FilterMode.Trilinear;importer.mipmapEnabled=true;importer.maxTextureSize=512;importer.textureCompression=TextureImporterCompression.Compressed;}
+ void OnPreprocessTexture() {if(!assetPath.Contains("/_Paridhwani/Art/Textures/Surfaces/"))return;var importer=(TextureImporter)assetImporter;importer.textureType=TextureImporterType.Default;importer.textureShape=TextureImporterShape.Texture2D;importer.sRGBTexture=true;importer.wrapMode=TextureWrapMode.Repeat;importer.filterMode=FilterMode.Trilinear;importer.mipmapEnabled=true;importer.maxTextureSize=512;importer.textureCompression=TextureImporterCompression.Compressed;}
  }
  public static partial class TeaStallSceneBuilder {
  static readonly System.Collections.Generic.Dictionary<string,Texture2D> surfaceTextures=new System.Collections.Generic.Dictionary<string,Texture2D>();
@@ -21,7 +21,7 @@ namespace Paridhwani.Editor {
  // A source can exist while its previous import artifact is unusable (for example, old .meta schemas).
  AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceUpdate|ImportAssetOptions.ForceSynchronousImport);
  var texture=AssetDatabase.LoadAssetAtPath<Texture2D>(path);
- if(!texture)throw new System.InvalidOperationException("Surface PNG exists but Unity could not import it as a Texture2D: "+path+". Inspect texture import errors in the Console; the current scene has not been replaced.");
+ if(!texture)throw new System.InvalidOperationException("Surface PNG did not import as Texture2D: "+path+" (actual type: "+(AssetDatabase.GetMainAssetTypeAtPath(path)?.Name??"none")+"). Inspect texture import errors in the Console; the current scene has not been replaced.");
  if(texture.width!=512 || texture.height!=512)throw new System.InvalidOperationException("Surface must import at 512x512: "+path);
  imported.Add(source,texture);
  }

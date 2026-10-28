@@ -25,6 +25,37 @@ namespace Paridhwani.Editor
         static Vector3 V(float x,float y,float z) => new Vector3(x,y,z);
         static Color Hex(string c) { ColorUtility.TryParseHtmlString("#"+c,out var value); return value; }
 
+        [InitializeOnLoadMethod]
+        static void RegisterPlaytestCleanup()
+        {
+            EditorApplication.playModeStateChanged-=ClearPlaytestFlag;
+            EditorApplication.playModeStateChanged+=ClearPlaytestFlag;
+        }
+        static void ClearPlaytestFlag(PlayModeStateChange state)
+        {
+            if(state==PlayModeStateChange.EnteredEditMode) {SessionState.SetBool(TeaStallSession.IsolatedTestKey,false);SessionState.SetBool(TeaStallSession.AutomatedTestKey,false);}
+        }
+        [MenuItem("Paridhwani/Run Automated Editor Playtest")]
+        public static void RunAutomatedEditorPlaytest()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode) {Debug.LogWarning("Stop Play mode before starting the automated test.");return;}
+            SessionState.SetBool(TeaStallSession.AutomatedTestKey,true);
+            try { PlayIsolatedTestVisit(); }
+            catch {SessionState.SetBool(TeaStallSession.AutomatedTestKey,false);throw;}
+        }
+        [MenuItem("Paridhwani/Play Isolated Test Visit")]
+        public static void PlayIsolatedTestVisit()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode) {Debug.LogWarning("Stop Play mode before beginning a separate test visit.");return;}
+            var session=UnityEngine.Object.FindAnyObjectByType<TeaStallSession>();
+            if(!session || SceneManager.GetActiveScene().path!=ScenePath || session.generatedWorldRevision!=TeaStallSession.RequiredWorldRevision ||
+                session.generatedRecipeSignature!=WorldRecipeSignature.Compute(Path.Combine(Application.dataPath,"_Paridhwani","Scripts","Editor")))
+                throw new InvalidOperationException("Regenerate the tea-stall benchmark before starting the isolated test visit.");
+            TeaStallChecks.Run();
+            SessionState.SetBool(TeaStallSession.IsolatedTestKey,true);
+            EditorApplication.isPlaying=true;
+        }
+
         [MenuItem("Paridhwani/Create Tea Stall Benchmark")]
         public static void Create()
         {
@@ -115,6 +146,7 @@ namespace Paridhwani.Editor
             AddEpilogueChapter(session);
             ConfigureBenchmarkRendering();
             Lighting();
+            foreach(var worldSign in UnityEngine.Object.FindObjectsByType<VillageSign>(FindObjectsInactive.Include))worldSign.theme=panel.themeStyleSheet;
             EditorSceneManager.SaveScene(scene,ScenePath);
             AssetDatabase.ImportAsset(ScenePath,ImportAssetOptions.ForceSynchronousImport);
             // Resolve the imported scene GUID before registering it in Build Settings.
@@ -165,6 +197,7 @@ namespace Paridhwani.Editor
         }
         static T Save<T>(T asset,string path) where T:UnityEngine.Object
         {
+            asset.name=Path.GetFileNameWithoutExtension(path);
             var existing=AssetDatabase.LoadAssetAtPath<T>(path);
             if(existing) { EditorUtility.CopySerialized(asset,existing); EditorUtility.SetDirty(existing); UnityEngine.Object.DestroyImmediate(asset); return existing; }
             AssetDatabase.CreateAsset(asset,path); return asset;

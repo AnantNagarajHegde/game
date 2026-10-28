@@ -2,7 +2,7 @@
 
 Owns the learner-facing product experience: product concept, world and location design, story, characters, quests, game progression, and UI/UX coordination.
 
-This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. Regenerate the benchmark in a working Unity Editor to include the latest source: the checked-in generated scene and existing executable are older, and the latest engine-dependent tests remain unexecuted. The current art is procedural prototype work.
+This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. The checked-in revision-3 benchmark has been regenerated in Unity; the existing standalone executable is older. Native benchmark checks pass, while complete latest-revision playthrough verification remains in progress. The current art is procedural prototype work.
 
 
 ## Unity 3D implementation plan
@@ -15,8 +15,10 @@ See [play and build instructions](docs/TEA_STALL_BENCHMARK.md). Open Assets/_Par
 
 ## Current readiness and verification
 
-Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. The latest generated world is stale; regenerate it before playing. Runtime/editor source compilation and 212 standalone assertions pass, but the current session cannot initialize Unity licensing.
+Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 259 standalone assertions pass. Desktop Unity generation and benchmark checks pass; the automated walking regression exposed a library-veranda approach blocker under investigation.
 
 The project now includes reached-chapter practice, recovery/archival safeguards, title/settings/exit flow, quality and motion preferences, reusable source textures, additive world packaging and an optional cancellable text adapter. Final production art, the real separate NLP service, language review and full in-engine release testing remain outstanding.
 
 From the master workspace root, run `./game/verification/Verify-Sources.ps1` for source/logic checks. In a normal licensed Unity desktop session, use `./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke` (or `-Layout Additive`) for a fresh build and isolated rendered playthrough.
+
+Use **Paridhwani > Play Isolated Test Visit** for manual testing on a temporary save, or **Run Automated Editor Playtest** for the scripted native regression. Open the project through Unity Hub if a shell launch fails to reach its licensing client.

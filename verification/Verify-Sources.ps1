@@ -14,6 +14,8 @@ foreach($surface in $surfaceNames) {
  $metaText=Get-Content -Raw -LiteralPath $metadata
  $version=[regex]::Match($metaText,'(?m)^  serializedVersion:\s*(\d+)')
  if(!$version.Success -or [int]$version.Groups[1].Value -lt 10){throw "Surface TextureImporter metadata is missing or too old for Unity 6: $surface"}
+ $shape=[regex]::Match($metaText,'(?m)^  textureShape:\s*(\d+)')
+ if(!$shape.Success -or [int]$shape.Groups[1].Value -ne 1){throw "Surface must import as Texture2D (shape 1), not a Cubemap: $surface"}
  $guid=[regex]::Match($metaText,'(?m)^guid: ([a-f0-9]{32})\s*$').Groups[1].Value
  if(!$guid -or $surfaceGuids.ContainsKey($guid)){throw "Missing or duplicated surface GUID: $surface"};$surfaceGuids[$guid]=$true
 }

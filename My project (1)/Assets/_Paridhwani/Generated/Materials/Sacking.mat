@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Paridhwani/Village Surface
+  m_Name: Sacking
   m_Shader: {fileID: 4800000, guid: 99ecf7c5d0c0baf49aa166663ce47341, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5bf64995983440938d4b70412a33e9c6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -32,7 +32,10 @@ Material:
     - _Cull: 2
     - _Grain: 70
     - _Roughness: 0.98
+    - _TextureScale: 4
+    - _TextureStrength: 0.75
     - _Wet: 0
+    - _WindStrength: 0
     m_Colors:
     - _BaseColor: {r: 0.5529412, g: 0.5019608, b: 0.37254903, a: 1}
   m_BuildTextureStacks: []

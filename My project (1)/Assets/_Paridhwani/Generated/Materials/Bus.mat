@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Paridhwani/Village Surface
+  m_Name: Bus
   m_Shader: {fileID: 4800000, guid: 99ecf7c5d0c0baf49aa166663ce47341, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -32,7 +32,10 @@ Material:
     - _Cull: 2
     - _Grain: 25
     - _Roughness: 0.85
+    - _TextureScale: 1
+    - _TextureStrength: 0
     - _Wet: 0.1
+    - _WindStrength: 0
     m_Colors:
     - _BaseColor: {r: 0.5411765, g: 0.26666668, b: 0.21960784, a: 1}
   m_BuildTextureStacks: []

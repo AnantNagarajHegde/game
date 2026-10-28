@@ -72,6 +72,11 @@ namespace Paridhwani
         float nextSave;
         bool ready;
         public bool LastSaveSucceeded {get;private set;}=true;
+        public bool IsIsolatedTestVisit {get;private set;}
+        public bool IsAutomatedTest {get;private set;}
+#if UNITY_EDITOR
+        public const string IsolatedTestKey="Paridhwani.IsolatedEditorPlaytest", AutomatedTestKey="Paridhwani.AutomatedEditorPlaytest";
+#endif
         public string SaveMessage { get; private set; }="Your visit saves automatically";
         void Start()
         {
@@ -79,10 +84,18 @@ namespace Paridhwani
                 Progress=new TeaProgress();player.enabled=false;player.GetComponent<CharacterController>().enabled=false;ui.Bind(this);ui.ShowWorldUpdateRequired();SetCursor(true);Debug.LogError("PARIDHWANI_WORLD_OUTDATED: regenerate the world before playing; no saved visit was read or changed.");return;
             }
             bool smoke=Debug.isDebugBuild && Array.IndexOf(Environment.GetCommandLineArgs(),"-village-smoke")>=0;
-            string path=smoke?Path.Combine(Application.temporaryCachePath,"village-smoke-"+Guid.NewGuid().ToString("N")+".json"):
+#if UNITY_EDITOR
+            smoke|=UnityEditor.SessionState.GetBool(AutomatedTestKey,false);
+#endif
+            IsAutomatedTest=smoke;
+            IsIsolatedTestVisit=smoke;
+#if UNITY_EDITOR
+            IsIsolatedTestVisit|=UnityEditor.SessionState.GetBool(IsolatedTestKey,false);
+#endif
+            string path=IsIsolatedTestVisit?Path.Combine(Application.temporaryCachePath,"village-playtest-"+Guid.NewGuid().ToString("N")+".json"):
                 Path.Combine(Application.persistentDataPath,"paridhwani-tea-v1.json");
             saves=new TeaSaveStore(path);
-            if(!smoke && !saves.HasAnySaveFiles)
+            if(!IsIsolatedTestVisit && !saves.HasAnySaveFiles)
             {
                 string legacy=Path.Combine(Path.GetDirectoryName(Application.persistentDataPath),"My project (1)","paridhwani-tea-v1.json");
                 var previous=new TeaSaveStore(legacy);
@@ -97,7 +110,7 @@ namespace Paridhwani
             if(Debug.isDebugBuild)
             {
                 if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
-                if(smoke) { Application.runInBackground=true; gameObject.AddComponent<VillageSmokeCheck>().Begin(this); }
+                if(smoke) gameObject.AddComponent<VillageSmokeCheck>().Begin(this);
             }
         }
         void ApplyState()
@@ -352,7 +365,7 @@ namespace Paridhwani
         {
             if(focused || !ready) return;
             Save();
-            if(!ui.IsModal) { ui.ShowPause(); SetCursor(true); }
+            if(!ui.IsModal && !IsAutomatedTest) { ui.ShowPause(); SetCursor(true); }
         }
         void OnApplicationPause(bool paused) { if(paused) Save(); }
         void OnApplicationQuit() { Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }

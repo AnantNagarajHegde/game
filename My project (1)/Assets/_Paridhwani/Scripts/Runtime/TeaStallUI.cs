@@ -65,7 +65,7 @@ namespace Paridhwani
             root.Q<VisualElement>(className:"task").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
             root.Q<VisualElement>(className:"controls").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
             string day=session.Progress.epilogueStarted?"SOME WEEKS LATER":session.Progress.fridayFinaleStarted?"FRIDAY / BEFORE 09:00":session.Progress.thursdayStarted?"THURSDAY":"WEDNESDAY";
-            storyDay.text=(session.IsPracticeVisit?"PRACTICE / ":"")+day; placeDay.text=day+" / Monsoon";
+            storyDay.text=(session.IsPracticeVisit?"PRACTICE / ":session.IsIsolatedTestVisit?"TEST VISIT / ":"")+day; placeDay.text=day+" / Monsoon";
             objective.text=session.Progress.Objective; saveStatus.text=session.SaveMessage;
             routeHint.text=session.NavigationHint;
             prompt.style.display=!IsModal && session.Nearby!=null ? DisplayStyle.Flex:DisplayStyle.None;

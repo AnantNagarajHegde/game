@@ -1,79 +1,45 @@
 # Current production status
 
-The main story is authored from arrival to epilogue. This is the current status; older iteration reports in TEA_STALL_BENCHMARK.md are historical. The game is not release-ready. No newly generated world/player or complete native verification has been confirmed in this implementation session.
+The main story is authored from arrival to epilogue. The revision-3 benchmark world has now been regenerated in Unity 6000.6.7f1, including all story locations. The game remains a procedural prototype and is not release-ready. Historical reports in TEA_STALL_BENCHMARK.md describe older revisions.
 
-## Implementation delivered
+## Verified implementation
 
-| Area | Implemented | Acceptance still required |
-|---|---|---|
-| Story | All 15 major beats, evidence gates, return, both endings | Fresh/resumed full Unity playthroughs |
-| Session | Title, continue, archived new story, save-aware exit | Native menu/layout and archive review |
-| Persistence | Atomic writes, backup recovery, unreadable-file preservation, transactional explicit restore, main/practice isolation, chapter actor reset | Unity JSON serializer and runtime failure tests |
-| Replay | 15 reached-chapter practice checkpoints | In-engine spawn/collision and staging checks |
-| Accessibility | Roman/English support, text scale, reduced camera motion, inverted look, volume | Kannada shaping, keyboard/UI and comfort review |
-| Input and movement | Text-entry shortcut protection, modal Tab traversal, one command per frame, normalized input and actual movement speed | Native focus/input/collision regression checks |
-| Audio | Ground-tagged earth/stone/timber steps, grounded distance cadence, separate environment/footstep mix | Listening review, original production audio and in-engine contact checks |
-| Rendering | Runtime Low/Balanced/High profiles, distance culling, seven periodic material maps, restrained wind | Shader compilation, representative visual/performance capture |
-| Characters | Corrected female variants; procedural idle/work/talk/follow motion | Production models/rigs, animation and visual review |
-| Scene packaging | Optional persistent Bootstrap + village + forest/farm additive exporter/loader | Execute export, bind/load validation and modular smoke player |
-| Dialogue boundary | Optional text-only delegate, cancellation/timeout, stale rejection, literal text, original-line restore, scrollable conversation and scaled-width controls | Actual separate NLP service/contract and language behavior |
-| Verification | Source, storage, texture, editor/built-player checks and profiling scripts | Successful licensed Unity build and rendered execution |
+- Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
+- Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
+- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 259 standalone assertions pass. These standalone checks are not a native Player build.
+- Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. Automated testing exercises TPP/FPP transitions, evidence tasks, save/restore, river walking and temple witnesses. The previous run stopped at the library veranda approach; a complete latest-revision run is still pending.
+- World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
 
-The surface maps, synthesized footsteps and procedural rigs improve the prototype. They do not establish the intended final Karnataka village art standard. Production models, terrain/vegetation refinement, authored audio and final scene composition remain unfinished.
+## Engine test workflow
 
-## Executed checks
+Open the project through Unity Hub. Use **Paridhwani > Create Tea Stall Benchmark** after changing generator recipes, then **Run Benchmark Checks**. **Play Isolated Test Visit** opens the normal title/arrival flow on a temporary save. **Run Automated Editor Playtest** runs the scripted native regression in the Game view and returns to Edit mode on completion/failure. The HUD labels test visits. The automated sequence uses real CharacterController movement for authored walking routes, while conversation/activity actions are invoked programmatically; this does not replace keyboard/controller acceptance testing.
 
-- All runtime/editor C# sources compile against the installed Unity 6000.6.7f1 references. The obsolete DEVELOPMENT_BUILD directives have been removed. Runtime branches also compile with Editor/diagnostic symbols removed against the cached references; this is not a native Player build.
-- 259 executable assertions pass, covering story gates, retries, endings, storage recovery/archive/restore I/O, chapter seeds, input routing, movement input, footstep synthesis/cadence, companion paths, preferences, binding policy and optional-dialogue failure/cancellation behavior.
-- Storage I/O uses an injected minimal JSON codec in standalone tests. This does not claim Unity JsonUtility coverage; those tests are authored for the Editor/player.
-- Seven 512px RGB texture sources pass size, variation and opposite-edge checks. GPU shader import/rendering has not been executed.
-- The native verification PowerShell script parses successfully and was actually retried on the latest source. It correctly reported failure rather than success.
-- Local commits are created after passing source checks. No GitHub push was attempted in this pass.
+Automated test captures and result.txt or failure.txt are written below the OS temporary directory at ParidhwaniSmoke/run-<timestamp>. Success requires VILLAGE_SMOKE_OK; reaching an intermediate screenshot is not a pass. Editor output also records PARIDHWANI_EDITOR_SMOKE_EXIT (0 success, 2 failure).
 
-## Current native verification boundary
+On 28 October, a shell-launched Editor again refused the licensing IPC connection. Launching the same project through the desktop Unity Hub succeeded. This demonstrates a launch-context limitation, not an invalid Unity license; its exact underlying cause is unproven. Desktop computer access is working in the current session.
 
-Earlier iterations did compile, build and run visible smoke tests (1,226 and 1,709 advancing frames). The later batch launch in `game/temple-verification.log` refused the LicenseClient-amogh IPC connection, launched a replacement client, timed out after 60 seconds, and crashed before the project checks. That records an automated-launch failure, not proof of an invalid license or a game-script defect.
+From the master workspace root:
 
-A fresh read on 27 October found successful desktop licensing handshakes and a successfully updated license in the desktop Editor log. The project log shows asset imports and a stale-world guard from Play mode. The exact project is now open: `unity run` refuses a second launch for that reason. Meanwhile `unity status` reports no connected Pipeline instance and warns it could not inspect running Editors. The project has no Pipeline dependency. The shell also uses a sandbox-specific LocalApplicationData directory; a session/access difference remains the likely explanation for the earlier automated connection failure, but the exact root cause is unproven. The CLI update check also failed DNS resolution; no update or license/configuration change was made.
+    ./game/verification/Verify-Sources.ps1
 
-Current status: desktop Unity can initialize licensing; this session cannot drive its open Editor or claim completed regeneration/playtesting. The native-upgraded texture metadata is now committed as the WetEarth import blocker repair; unrelated Editor settings are outside this repair. No rendered UI acceptance or new complete player is claimed.
-
-In the already-open Editor, run **Paridhwani > Create Tea Stall Benchmark**, then **Paridhwani > Run Benchmark Checks**, then Play. The current revision-3 world guard intentionally rejects the old generated scene before opening or writing a visit. The project log's stale-world message is expected until regeneration succeeds.
-
-Alternatively, with this project's Editor closed, run the batch workflow from a normal desktop shell at the master repository root:
+With this project's Editor closed, a normal desktop shell can run the fresh-build workflow:
 
     ./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke
     ./game/verification/Verify-Unity.ps1 -Layout Additive -Build -Smoke
 
-`-Smoke` opens a visible isolated-save test player only after a successful fresh build. Logs and JSON result reports are written under the Unity project's Temp/UnityVerification directory. Only newly built players are accepted by this workflow.
+No fresh standalone Player build or additive-package run has been verified in this pass. Both additive worlds currently load at startup; distance-based scene streaming is not implemented.
 
-Source checks can run here or locally:
+## Remaining acceptance and production work
 
-    ./game/verification/Verify-Sources.ps1
+| Area | Implemented | Still required |
+|---|---|---|
+| Story and replay | All 15 beats, evidence gates, return, endings, reached-chapter practice | Complete fresh/resumed native regression and replay spawn checks |
+| Persistence and session | Atomic recovery/archive, transactional restore, main/practice isolation, title/settings/exit | Runtime failure cases and full menu/input acceptance |
+| Movement and audio | Input focus policy, normalized movement, tagged ground footsteps and independent mixes | Resolve walking failures, hardware input and listening review |
+| Conversation and accessibility | Scrollable literal replies, original-line restore, text scale, reduced motion, language support | Short-window native layout, Kannada shaping and comfort review |
+| World and rendering | Regenerated prototype locations, seven surface maps, quality profiles and culling | Production characters/rigs, terrain, vegetation, textures, animation, composition and authored audio |
+| Packaging and performance | Optional additive exporter/loader, profiling tools | Execute additive export/build, frame-time/memory measurements and release packaging |
+| NLP | Optional cancellable text-only adapter | Connect the separately built real service once its contract is supplied; see NLP_UNITY_BOUNDARY.md |
+| Language and play quality | Authored Kannada-learning tasks and source gates | Fluent Kannada/regional review and player usability testing |
 
-An opt-in development player `-village-profile` records frame intervals and memory after gameplay starts. It has not produced an accepted performance result here. Both additive worlds currently load at startup; distance-based scene streaming is not implemented or claimed.
-
-## Outstanding work that is not complete
-
-1. Run the regenerated game in Unity, fix any discovered scene/physics/UI/shader/save defects, and complete regression testing.
-2. Finish and approve the representative tea-stall art benchmark, then bring all locations/characters/terrain/vegetation/animation/audio to that standard. The current procedural art is not final production art.
-3. Integrate the real separately built NLP service when its contract, implementation and allowed-fact policy are supplied. The optional adapter is not that service. See NLP_UNITY_BOUNDARY.md.
-4. Obtain fluent Kannada and regional review; validate shaping, teaching usefulness, pacing, accessibility and camera comfort with players.
-5. Measure CPU/GPU/frame-time/memory behavior on agreed hardware, tune accordingly, then perform release QA and packaging acceptance.
-
-These gates prevent an honest claim that every pending implementation/production cycle is complete. The remaining work is not hidden behind a story-source completion percentage.
-
-
-## Latest local implementation pass (27 October 2026)
-
-Three cycles address text-entry safety and real movement speed; grounded surface audio and per-channel volume; and safe restore, NPC staging and companion-path lifecycle. The story content is unchanged. The native smoke runner now acknowledges arrival, verifies restored actor origins, and checks the new volume channels through Unity serialization. These native assertions are authored, not executed here. Source compilation and 259 standalone assertions passed after the final changes. No percentage increase is claimed without completing production/engine gates.
-
-
-## Conversation usability pass (27 October 2026)
-
-Conversation speech/choices now scroll under fixed actions, narrower cards stack replies, and scaled cards respect viewport width. Same-turn refreshes preserve reading position/control focus. Optional replies can return to the original authored line without story effects, and dialogue labels interpret service text literally. Native smoke coverage includes long replies at 960x540 with maximum text scale. All runtime/editor sources compile and 259 standalone assertions pass; those new layout checks remain authored but unexecuted through this session.
-
-
-## Reported surface import error repair
-
-All seven surface PNGs are valid, but their original minimal metadata was read as obsolete TextureImporter version 1. The logged failure occurred after licensing, during scene generation. This repair includes Unity's version-13 metadata with original GUIDs, validates/forces every required texture import before replacing the scene, and distinguishes a failed import from a missing source. After the Editor recompiles, retry Create Tea Stall Benchmark; it now performs the import preflight automatically. Repair Surface Texture Imports runs it separately. Full native generation still needs confirmation from the open Editor.
+The implemented story source does not establish final art quality, complete engine verification or a finished game percentage.

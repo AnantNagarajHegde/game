@@ -164,6 +164,7 @@ namespace Paridhwani.Editor
                 earthAudio|=surface.kind==FootstepSurface.Earth;stoneAudio|=surface.kind==FootstepSurface.Stone;timberAudio|=surface.kind==FootstepSurface.Timber;
             }
             Check(earthAudio && stoneAudio && timberAudio,"generated world provides earth, stone and timber contact metadata");
+            foreach(var sign in UnityEngine.Object.FindObjectsByType<VillageSign>(FindObjectsInactive.Include))Check(sign.theme,"world sign has a runtime panel theme");
             string scene=TeaStallSceneBuilder.ScenePath;
             Check(File.Exists(scene),"scene generated");
             string sceneGuid=AssetDatabase.AssetPathToGUID(scene);

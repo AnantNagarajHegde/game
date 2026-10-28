@@ -14,12 +14,24 @@ namespace Paridhwani
         TeaStallSession session;
         string output;
         int startFrame;
+        bool originalBackground;
         public void Begin(TeaStallSession value)
         {
             if(!Debug.isDebugBuild) {enabled=false;return;}
+            originalBackground=Application.runInBackground;Application.runInBackground=true;
             session=value; output=Path.Combine(Path.GetTempPath(),"ParidhwaniSmoke","run-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"));
             Directory.CreateDirectory(output); startFrame=Time.frameCount;
             StartCoroutine(Guarded());
+        }
+        void OnDestroy() {Application.runInBackground=originalBackground;}
+        static void Finish(int code)
+        {
+#if UNITY_EDITOR
+            Debug.Log("PARIDHWANI_EDITOR_SMOKE_EXIT "+code);
+            UnityEditor.EditorApplication.isPlaying=false;
+#else
+            Application.Quit(code);
+#endif
         }
         static void Check(bool condition,string message)
         { if(!condition) throw new InvalidOperationException("Village smoke check: "+message); }
@@ -30,7 +42,7 @@ namespace Paridhwani
             {
                 bool next; object current=null;
                 try { next=stack.Peek().MoveNext(); if(next) current=stack.Peek().Current; }
-                catch(Exception e) { Debug.LogException(e); Application.Quit(2); yield break; }
+                catch(Exception e) { Debug.LogException(e);File.WriteAllText(Path.Combine(output,"failure.txt"),e.ToString());Finish(2);yield break; }
                 if(!next) { stack.Pop(); continue; }
                 if(current is IEnumerator nested) stack.Push(nested); else yield return current;
             }
@@ -66,7 +78,12 @@ namespace Paridhwani
             {
                 Vector3 delta=target-player.transform.position; delta.y=0;
                 if(delta.magnitude<.16f) break;
-                Check(Time.realtimeSinceStartup<until,"river route blocked at "+target);
+                if(Time.realtimeSinceStartup>=until) {
+                    var nearby=new List<string>();
+                    foreach(var obstacle in Physics.OverlapCapsule(player.transform.position+Vector3.up*.4f,player.transform.position+Vector3.up*1.4f,.65f,~(1<<2),QueryTriggerInteraction.Ignore))
+                        nearby.Add(obstacle.name);
+                    throw new InvalidOperationException("Village smoke check: walking route blocked. Target="+target+" Player="+player.transform.position+" Nearby="+string.Join(", ",nearby));
+                }
                 player.visual.rotation=Quaternion.LookRotation(delta);
                 controller.Move(delta.normalized*Mathf.Min(delta.magnitude,3.6f*Time.unscaledDeltaTime));
                 yield return null;
@@ -412,7 +429,7 @@ namespace Paridhwani
             File.WriteAllText(Path.Combine(output,"result.txt"),
                 "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, fourteen NPC instances, complete story through protected deed, return, council decision, later review, credits and isolated practice, ridge walking, direct reunion and trunk lead, confirmed checkpost round-trip, route permission, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
             Debug.Log("VILLAGE_SMOKE_OK "+output+" Frames="+(Time.frameCount-startFrame));
-            Application.Quit(0);
+            Finish(0);
         }
     }
 }
