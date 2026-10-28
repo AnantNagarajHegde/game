@@ -6,7 +6,7 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
 - Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
-- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 259 standalone assertions pass. These standalone checks are not a native Player build.
+- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 262 standalone assertions pass. These standalone checks are not a native Player build.
 - Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. The corrected automated native sequence passed on 28 October: arrival through reunion, original deed, return, council decision, epilogue, credits, completed-story restore, isolated practice and new-visit settings. It advanced 6,800 frames and produced 51 captures. The library approach now walks around Somanna and the bench through the open east side of the veranda.
 - World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
 
@@ -24,7 +24,7 @@ Open the project through Unity Hub. After external source edits, run **Assets > 
 
 Automated test captures and result.txt or failure.txt are written below the OS temporary directory at ParidhwaniSmoke/run-<timestamp>. Success requires VILLAGE_SMOKE_OK; reaching an intermediate screenshot is not a pass. Editor output also records PARIDHWANI_EDITOR_SMOKE_EXIT (0 success, 2 failure).
 
-On 28 October, a shell-launched Editor again refused the licensing IPC connection. Launching the same project through the desktop Unity Hub succeeded. This demonstrates a launch-context limitation, not an invalid Unity license; its exact underlying cause is unproven. Desktop computer access is working in the current session.
+On 28 October, a shell-launched Editor again refused the licensing IPC connection. Launching the same project through the desktop Unity Hub succeeded. This demonstrates a launch-context limitation, not an invalid Unity license; its exact underlying cause is unproven. Direct desktop testing worked in the preceding pass. This pass has shell/file access, but native desktop-control tools are not exposed.
 
 From the master workspace root:
 
@@ -36,6 +36,14 @@ With this project's Editor closed, a normal desktop shell can run the fresh-buil
 
     ./game/verification/Verify-Unity.ps1 -Layout Legacy -Build -Smoke
     ./game/verification/Verify-Unity.ps1 -Layout Additive -Build -Smoke
+
+The new **Paridhwani > Build and Run Standalone Playtest** command runs from the already-open desktop Editor. It regenerates/checks the benchmark, completes a development build, then launches only that successful build with an isolated save at 960x540. The Editor monitors the returned player process without blocking its UI. A zero exit code and VILLAGE_SMOKE_OK are both required. Failure, timeout, Editor shutdown or script reload cannot be reported as success; cancellation stops only the player launched by that test.
+
+Each invocation writes report.json and player.log below game/verification/Temp/StandalonePlaytests/run-<timestamp>-<id>. The report records building/running/passed/failed state, build completion time, player exit code, completion marker and failure details. The command is source-compiled but its fresh standalone execution remains pending desktop Unity acceptance.
+
+The batch workflow also keeps its reports outside Unity's cleared Temp directory, always writes a failure report, and stops early when licensing initialization fails. The actual retry on 28 October recorded editorPassed=false and smokePassed=false with a licensing initialization failure in verification/Temp/UnityVerification/Legacy-20261028-112727976.json; no stale player was launched. Its failed-build gate was exercised with a deliberately invalid non-Unity child: the report marked failure and no old player was launched. That negative check is not a Unity build.
+
+Verification-only runner changes are excluded from the world recipe signature. The checked-in generated world still matches; changed or added actual generator files remain covered by regression tests.
 
 No fresh standalone Player build or additive-package run has been verified in this pass. Both additive worlds currently load at startup; distance-based scene streaming is not implemented.
 

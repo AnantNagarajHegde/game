@@ -8,8 +8,10 @@ namespace Paridhwani {
  public static string Compute(string directory) {
  if(!Directory.Exists(directory))return "";
  using(var sha=SHA256.Create()) {
+ // Standalone verification tooling does not author world geometry or bindings. Keep its edits from invalidating a generated world.
  foreach(string path in Directory.GetFiles(directory,"*.cs",SearchOption.AllDirectories).OrderBy(p=>p,StringComparer.Ordinal)) {
  string relative=path.Substring(directory.TrimEnd(Path.DirectorySeparatorChar).Length).Replace('\\','/');
+ if(string.Equals(relative,"/StandalonePlayerPlaytest.cs",StringComparison.OrdinalIgnoreCase))continue;
  var bytes=Encoding.UTF8.GetBytes(relative+"\n"+File.ReadAllText(path).Replace("\r\n","\n")+"\n");sha.TransformBlock(bytes,0,bytes.Length,null,0);
  }
  sha.TransformFinalBlock(Array.Empty<byte>(),0,0);return Convert.ToBase64String(sha.Hash);

@@ -94,7 +94,18 @@ public static class ChapterChecks {
  store.Read(out _);Check(store.LastReadStatus==TeaSaveReadStatus.Unreadable,"unsupported files distinguish restore failure from fresh story");Check(!store.TryRestore(out var unreadable,out _) && unreadable==null,"unreadable explicit restore cannot replace the current visit");Check(store.Write(new TeaProgress(),out _),"unsupported files preserved before fresh write: "+store.LastFailureDetail);
  Check(System.IO.Directory.GetFiles(directory,"*.unreadable-*").Length>=2,"unsupported primary and backup retained");
  Check(store.Archive(new TeaProgress {signRead=true},out _) && System.IO.Directory.GetFiles(System.IO.Path.Combine(directory,"ArchivedVisits")).Length==1,"new-story archive preserves an explicit snapshot");
- string recipes=System.IO.Path.Combine(directory,"recipes");System.IO.Directory.CreateDirectory(recipes);string recipe=System.IO.Path.Combine(recipes,"World.cs");System.IO.File.WriteAllText(recipe,"first\r\n");string initial=WorldRecipeSignature.Compute(recipes);System.IO.File.WriteAllText(recipe,"first\n");Check(initial==WorldRecipeSignature.Compute(recipes),"world recipe ignores checkout line endings");System.IO.File.WriteAllText(recipe,"changed\n");Check(initial!=WorldRecipeSignature.Compute(recipes),"world recipe detects a changed generator");
+ string recipes=System.IO.Path.Combine(directory,"recipes");System.IO.Directory.CreateDirectory(recipes);
+ string recipe=System.IO.Path.Combine(recipes,"World.cs");System.IO.File.WriteAllText(recipe,"first\r\n");
+ string initial=WorldRecipeSignature.Compute(recipes);System.IO.File.WriteAllText(recipe,"first\n");
+ Check(initial==WorldRecipeSignature.Compute(recipes),"world recipe ignores checkout line endings");
+ string runner=System.IO.Path.Combine(recipes,"StandalonePlayerPlaytest.cs");System.IO.File.WriteAllText(runner,"test tool");
+ Check(initial==WorldRecipeSignature.Compute(recipes),"standalone verifier does not invalidate the generated world");
+ System.IO.File.WriteAllText(runner,"changed tool");
+ Check(initial==WorldRecipeSignature.Compute(recipes),"standalone verifier edits preserve world signature");
+ string other=System.IO.Path.Combine(recipes,"OtherScene.cs");System.IO.File.WriteAllText(other,"new world recipe");
+ Check(initial!=WorldRecipeSignature.Compute(recipes),"new world recipes still invalidate the scene");System.IO.File.Delete(other);
+ System.IO.File.WriteAllText(recipe,"changed\n");
+ Check(initial!=WorldRecipeSignature.Compute(recipes),"world recipe detects a changed generator");
  Check(!System.IO.File.Exists(file+".tmp"),"atomic write leaves no temp file");
  } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
  }

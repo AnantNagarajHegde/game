@@ -396,3 +396,14 @@ An overbroad literal-text assertion was corrected to inspect the speech containe
 The final run, ParidhwaniSmoke/run-20261028-052700 under the OS temporary directory, emitted VILLAGE_SMOKE_OK and PARIDHWANI_EDITOR_SMOKE_EXIT 0, advanced 6,800 frames and wrote 51 PNG captures. All runtime/editor source checks and 259 standalone assertions also pass. This is native scripted Editor coverage; it does not claim a new standalone build, final language/art approval or human input acceptance.
 
 Standalone verification compiler outputs moved to game/verification/Temp, outside the Unity project Temp folder which Editor startup clears. This avoids the compilation-output deletion observed when starting Unity alongside a source check. After external C# edits, use Assets > Refresh and wait for compilation before starting an Editor playtest.
+
+
+## Standalone test workflow implementation (28 October 2026)
+
+Added Build and Run Standalone Playtest to the Paridhwani menu. It uses the already-open Editor to regenerate/check/build before launching a visible isolated-save development player at 960x540. It never falls back to an older executable after a build failure. The asynchronous monitor requires a clean exit and VILLAGE_SMOKE_OK, writes JSON and a player log, and handles timeout/script-reload/Editor-close failure with cleanup limited to its own child process.
+
+The batch verifier now writes reports even on failure, stops early at an explicit licensing initialization failure, and stores logs/reports outside the Unity project Temp directory. A deliberate non-Unity child failure confirmed that failure reporting works and does not launch an existing player; this fixture is not a native build.
+
+The standalone runner is excluded from world recipe hashing because it creates no geometry/bindings. The checked-in world retains its recipe match. Regression checks cover ignored tooling edits and still detect changed/new world recipe files. Runtime/editor compilation and 262 standalone assertions pass. Fresh standalone acceptance is still pending; the preceding 6,800-frame Editor story pass remains the latest successful native run.
+
+The updated batch workflow was actually retried. It stopped at licensing initialization failure, wrote Legacy-20261028-112727976.json under verification/Temp/UnityVerification with both pass flags false, and did not launch an old player. This confirms failure reporting, not a successful standalone build.
