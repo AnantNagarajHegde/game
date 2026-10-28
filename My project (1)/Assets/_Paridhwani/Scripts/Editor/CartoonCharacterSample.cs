@@ -60,41 +60,60 @@ namespace Paridhwani.Editor
             var mesh=new Mesh();mesh.SetVertices(v);mesh.SetTriangles(t,0);mesh.RecalculateNormals();return mesh;
         }
         static CharacterRing[] CharacterFaceRings(bool mature)=>new[]{new CharacterRing(-.20f,.028f,.035f,.022f),new CharacterRing(-.15f,mature?.109f:.09f,.09f,.02f),new CharacterRing(-.06f,.138f,.118f,.008f),new CharacterRing(.055f,.149f,.12f),new CharacterRing(.15f,.128f,.103f,-.009f),new CharacterRing(.21f,.055f,.051f,-.015f),new CharacterRing(.225f,.015f,.014f,-.016f)};
-        static Vector3 HairSection(float y,bool mature)
+        static float HairHem(float angle,bool mature)
         {
-            var rings=CharacterFaceRings(mature);
-            for(int i=1;i<rings.Length;i++)if(y<=rings[i].y)
-            {
-                float f=Mathf.InverseLerp(rings[i-1].y,rings[i].y,y);
-                return new Vector3(Mathf.Lerp(rings[i-1].x,rings[i].x,f)+.014f,Mathf.Lerp(rings[i-1].z,rings[i].z,f)+.014f,Mathf.Lerp(rings[i-1].forward,rings[i].forward,f));
-            }
-            return new Vector3(.021f,.021f,-.016f);
+            float front=Mathf.Cos(angle),side=Mathf.Sin(angle);
+            float temple=mature?.035f:.01f;
+            if(front<0)return Mathf.Lerp(temple,mature?-.045f:-.07f,Mathf.Pow(-front,1.4f));
+            float forehead=mature?.14f+.008f*side:.12f+.012f*side-.012f*Mathf.Exp(-Mathf.Pow((side+.2f)/.4f,2));
+            return Mathf.Lerp(temple,forehead,front*front);
         }
-        static float HairSurface(float x,float y,bool mature)
-        {var section=HairSection(y,mature);return section.z+section.y*Mathf.Sqrt(Mathf.Max(.03f,1-x*x/(section.x*section.x)))+.003f;}
+        static float HairEdgePolar(float angle,bool mature)
+        {return Mathf.Acos(Mathf.Clamp((HairHem(angle,mature)-.045f)/(mature?.195f:.20f),-1,1));}
+        static Vector3 HairPoint(float angle,float polar,bool mature,float lift=0)
+        {
+            float x=mature?.168f:.174f,z=mature?.145f:.15f,y=mature?.195f:.20f,center=.045f;
+            var p=V(Mathf.Sin(angle)*x*Mathf.Sin(polar),center+y*Mathf.Cos(polar),-.012f+Mathf.Cos(angle)*z*Mathf.Sin(polar));
+            var normal=V(p.x/(x*x),(p.y-center)/(y*y),(p.z+.012f)/(z*z)).normalized;
+            return p+normal*lift;
+        }
         static Mesh HairCrown(bool mature)
         {
-            const int sides=28,rows=7;var v=new List<Vector3>();var t=new List<int>();
-            for(int row=0;row<=rows;row++)for(int s=0;s<sides;s++)
+            // A continuous outer shell, with a shaped hairline and a narrow solid rim.
+            // The unique pole avoids coincident/degenerate crown triangles.
+            const int sides=40,rows=20;var v=new List<Vector3>{HairPoint(0,0,mature)};var t=new List<int>();
+            for(int row=1;row<=rows;row++)for(int s=0;s<sides;s++)
             {
-                float angle=s*Mathf.PI*2/sides,f=row/(float)rows,front=Mathf.Max(0,Mathf.Cos(angle));
-                float edge=Mathf.Lerp(-.075f,mature?.13f:.095f,front*front);
-                float crown=Mathf.Lerp(mature?.24f:.25f,edge,f);var section=HairSection(crown,mature);
-                v.Add(V(Mathf.Sin(angle)*section.x,crown,Mathf.Cos(angle)*section.y+section.z));
+                float angle=s*Mathf.PI*2/sides;
+                v.Add(HairPoint(angle,HairEdgePolar(angle,mature)*row/rows,mature));
             }
-            for(int row=0;row<rows;row++)for(int s=0;s<sides;s++)
-            {int a=row*sides+s,b=row*sides+(s+1)%sides,c=a+sides,d=b+sides;t.AddRange(new[]{a,c,b,b,c,d});}
-            int top=v.Count;v.Add(V(0,mature?.24f:.25f,-.016f));for(int s=0;s<sides;s++)t.AddRange(new[]{top,s,(s+1)%sides});
+            for(int s=0;s<sides;s++)t.AddRange(new[]{0,1+s,1+(s+1)%sides});
+            for(int row=0;row<rows-1;row++)for(int s=0;s<sides;s++)
+            {int a=1+row*sides+s,b=1+row*sides+(s+1)%sides,c=a+sides,d=b+sides;t.AddRange(new[]{a,c,b,b,c,d});}
+            int rim=v.Count;
+            for(int s=0;s<sides;s++)
+            {
+                var p=v[1+(rows-1)*sides+s];p.x*=.94f;p.z=(p.z+.012f)*.94f-.012f;p.y-=.003f;v.Add(p);
+            }
+            for(int s=0;s<sides;s++)
+            {int a=1+(rows-1)*sides+s,b=1+(rows-1)*sides+(s+1)%sides,c=rim+s,d=rim+(s+1)%sides;t.AddRange(new[]{a,c,b,b,c,d});}
             var mesh=new Mesh();mesh.SetVertices(v);mesh.SetTriangles(t,0);mesh.RecalculateNormals();return mesh;
         }
-        static Mesh HairFringe(bool mature)
+        static Mesh HairCombing(bool mature)
         {
             var v=new List<Vector3>();var t=new List<int>();
-            for(int i=0;i<7;i++)
+            const int steps=14;int strands=mature?1:2;
+            for(int strand=0;strand<strands;strand++)
             {
-                float x=-.10f+i*.033f,w=.021f,tip=(mature?.115f:.075f)+(i%3)*.01f,topY=mature?.15f:.145f;
-                int a=v.Count;v.Add(V(x-w,topY,HairSurface(x-w,topY,mature)));v.Add(V(x+w,topY,HairSurface(x+w,topY,mature)));
-                v.Add(V(x+.008f,tip,HairSurface(x+.008f,tip,mature)));t.AddRange(new[]{a,a+2,a+1});
+                int start=v.Count;
+                for(int step=0;step<=steps;step++)
+                {
+                    float f=step/(float)steps,angle=Mathf.Lerp(mature?.65f:-.85f+strand*.65f,mature?.30f:-.18f+strand*.65f,f);
+                    float polar=Mathf.Lerp(.34f,HairEdgePolar(angle,mature)*.91f,f);
+                    float width=.004f+.016f*Mathf.Sin(f*Mathf.PI);
+                    v.Add(HairPoint(angle-width,polar,mature,.0015f));v.Add(HairPoint(angle+width,polar,mature,.0015f));
+                }
+                for(int step=0;step<steps;step++){int a=start+step*2;t.AddRange(new[]{a,a+2,a+1,a+1,a+2,a+3});}
             }
             var mesh=new Mesh();mesh.SetVertices(v);mesh.SetTriangles(t,0);mesh.RecalculateNormals();return mesh;
         }
@@ -144,7 +163,7 @@ namespace Paridhwani.Editor
             CharacterPart(id+"_Nose",nose,skin,head);
             CharacterPart(id+"_Mouth",FaceStroke(new[]{new Vector2(-.030f,-.111f),new Vector2(0,-.116f),new Vector2(.030f,-.111f)},.004f,.006f),ink,head);
             CharacterPart(id+"_HairCrown",HairCrown(mature),hair,head);
-            CharacterPart(id+"_HairFringe",HairFringe(mature),hairLight,head);
+            CharacterPart(id+"_HairCombing",HairCombing(mature),hairLight,head);
             if(mature)
             {
                 CharacterPart(id+"_Moustache",FaceStroke(new[]{new Vector2(-.058f,-.082f),new Vector2(-.025f,-.070f),new Vector2(0,-.078f),new Vector2(.025f,-.070f),new Vector2(.058f,-.082f)},.014f,.012f),hair,head);

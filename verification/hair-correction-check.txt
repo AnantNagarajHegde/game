@@ -1,0 +1,16 @@
+2026-10-28 hair correction — local source checkpoint
+Baseline source: ef5dd15 plus existing shared dirty controller/NLP/generated files.
+Changed: CartoonCharacterSample hair only; PresentationDemoPlaytest adds left/right/rear captures.
+Source verification: compilation Runtime/Editor/Player-source branches; 387 assertions PASSED.
+Raw log: Temp/hair-correction-final-source.log
+Final native run: Temp/PresentationPlaytests/run-20261028-170909369-d8581458/report.json
+Unity 6000.6.7f1; source digest 50f40de723ddc8c38b7818caf104c496a9b099207e81635234ad2cbf179a0052
+PASSED: 13239 checks, primarily mesh validation plus four demo routes, 23 PNG captures, 960x540.
+Inspected: all eight character front/side/rear views, arrival gameplay and conversation.
+Non-hair generated mesh preservation: 63 baseline SHA256 hashes, 0 changed.
+Main saved file SHA256 before/after: FE156A5D14BE07CA28C8E15F725151B7A8AECF911FB8A9F4CE6A41FABBE40DFA
+Preview copies: Temp/HairCorrectionPreview-20261028/
+Not run: standalone rebuild, new hardware controller pass, broad cast acceptance.
+User screenshot not viewed: Windows Library materialize finalization lacks os.setxattr.
+No Library upload: existing prepare_uploads capability unavailable; no new retry.
+Generated scene/mesh/material outputs stay local; unrelated shared changes excluded; no push.

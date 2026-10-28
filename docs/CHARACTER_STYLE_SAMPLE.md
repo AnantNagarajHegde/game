@@ -41,6 +41,18 @@ No files were uploaded, no uncertain mutation is pending, and no Library IDs exi
 
 ## Village-wide consistency follow-up
 
+## Hair correction checkpoint — 2026-10-28
+
+The player and Manjunatha now use a continuous fitted hair shell, a rounded lower crown, shaped forehead/temple/nape edges and subtle surface combing. Detached triangular fringe and the exposed scalp bands in the original sample are removed. This changes hair only: all 63 generated non-hair meshes matched their pre-correction SHA-256 values. Face, clothing, animation pivots, root collision and camera scale are retained.
+
+Actual final Unity Play-mode captures are in `verification/Temp/HairCorrectionPreview-20261028/`: front, left, right and rear for both characters, plus `Gameplay.png` and `Conversation.png`. All ten were inspected. Portraits use staged game-camera poses, not a new gameplay camera. Raw final run: `verification/Temp/PresentationPlaytests/run-20261028-170909369-d8581458/`, passed with 23 captures at 960x540, four demo routes and 13,239 checks (primarily mesh vertex/triangle checks, not gameplay scenarios). The first revision was rendered, found too tall, lowered and rerun. Cached-reference compilation and 387 existing assertions also passed (`verification/Temp/hair-correction-final-source.log`).
+
+The main save SHA-256 remained `FE156A5D14BE07CA28C8E15F725151B7A8AECF911FB8A9F4CE6A41FABBE40DFA` across isolated tests. An earlier refresh had reloaded a live paused visit before Play mode was checked; the saved file was backed up before stopping that visit and no save was written from the reloaded state. No claim is made about restoration of unsaved runtime state. The resumed final checks completed and returned Unity to Edit mode.
+
+The user's feedback attachment `libfile_a0b3ec928c6c8191b8c97bc87f13708f` was not viewed: required materialization failed during Windows metadata finalization (`AttributeError: module 'os' has no attribute 'setxattr'`), so no finalized local file exists. The correction was evaluated against our own actual before/after renders. Outbound preview delivery remains blocked by the previously established unavailable Library `prepare_uploads` capability, not by missing permission. No alternate transfer route or further retry was attempted. Local PNGs are ready for supported delivery.
+
+No new standalone build, exhaustive physical-controller pass, or full animation acceptance was run for this hair-only change. The user subsequently approved the player/NPC appearance and continuing this style; remaining identities need individual age, hair and clothing variants rather than copies of Manjunatha.
+
 After the user judges the sample, apply the accepted character language to the remaining cast with role/age/clothing variation. Review environments in coherent location groups:
 
 | Group | Review and production work |
