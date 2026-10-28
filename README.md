@@ -16,6 +16,8 @@ If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark**
 
 The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 367 standalone assertions for the committed presentation batches also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
 
+A subsequent fresh Windows development build from **ee83297 plus the recorded uncommitted controller work** passed the full standalone smoke over **17,202 frames**, exiting with code 0. A frozen runnable ZIP is under `My project (1)/Builds/Verified/Paridhwani-ee83297-with-controller-20261028-092644.zip`. See [build provenance, controller coverage and remaining gates](verification/standalone-ee83297-check.txt). Physical-controller and human/fluent-Kannada acceptance remain pending.
+
 From this repository root, run source and logic checks in PowerShell:
 
 ```powershell

@@ -1,0 +1,69 @@
+Fresh standalone verification - 28 October 2026
+
+Build source revision: ee8329755f462c2b2d649895f6fa05f67598c299
+Dirty source state: 25 Git status entries, including the separately developed
+uncommitted controller scripts, input/UI/walker/smoke/runner changes, generated
+assets and settings. This is NOT a clean-commit-only build. Controller task was
+completed/idle before building; no competing build or source edits were made.
+No source files changed between the before and after-build manifests.
+
+Provenance directory:
+verification/Temp/StandaloneProvenance-20261028-092558/
+before.json: exact revision, status and hashes for 392 project input files.
+working-tree.patch: binary-capable diff preserving the pre-build dirty state.
+source-files/: actual runtime/editor source and meta copies, including controller.
+after-build.json: post-build inputs, differences and hashes of all build files.
+The normal build regenerated VillageAtmosphere.asset and TeaStall_Benchmark.unity;
+their prior dirty contents are preserved in working-tree.patch. No generated
+scene/material/controller changes were committed as part of this evidence batch.
+
+Fresh Windows development build: Succeeded (Unity 6000.6.7f1).
+Build completed UTC: 2026-10-28T09:26:59.7147980Z
+Player: My project (1)/Builds/TeaStall/Paridhwani.exe
+Report: verification/Temp/StandalonePlaytests/run-20261028-092644895-3e0c8eb3/report.json
+Player log: same directory, player.log.
+Full-story standalone result: PASSED, 17,202 frames, player exit code 0.
+Matching log markers:
+- VILLAGE_SIGN_LAYOUT_CHECKED signs=39 fonts=2
+- VILLAGE_CONTROLLER_CHECKED
+- VILLAGE_CONTROLLER_TRUNK_CHECKED
+- VILLAGE_CONTROLLER_EVIDENCE_CHECKED
+- VILLAGE_MENU_LAYOUT_CHECKED
+- VILLAGE_EXIT_FLOW_CHECKED
+- VILLAGE_PRESENTATION_DEMO_CHECKED
+- VILLAGE_SMOKE_OK
+No matches for Exception:, error CS, Assertion failed or Error: in player.log.
+
+Controller coverage uses an injected Unity Gamepad: movement/look, modal input
+blocking, menu submit/cancel, dropdown/slider/navigation/scrolling, interaction,
+dialogue/notebook, disconnect pause, repeated trunk digits and evidence retry.
+The previously failing checkpost return journey passed in the complete run.
+Standalone demo coverage: all four prepared entries, literal guides, scene
+switching and main-save restoration. The detailed four-route harness is Editor-
+only; its separate prior run passed 93 checks at 960x540/textScale 1.3 with 15
+captures in PresentationPlaytests/run-20261028-092152133-3d51775b. It was not run
+as a standalone harness, and no new Player-only route count is claimed.
+
+54 standalone PNGs and result.txt copied to the provenance captures/ directory.
+Inspected new standalone captures: village, tea dialogue, Kencha/checkpost,
+opened trunk, council suspension, and chapter menu at large text/640x480.
+
+Frozen runnable package:
+My project (1)/Builds/Verified/Paridhwani-ee83297-with-controller-20261028-092644.zip
+Archive size: 74,956,042 bytes.
+Archive SHA-256: 80cc10b02cbe51b42181ad33e29fa244781cfad997b89cc13ca606b2b145f13c
+302 archived files individually decompressed and SHA-256 checked against the
+verified build manifest. Only Unity's explicitly named BackUpThisFolder folder
+is excluded; executable, data, Mono runtime and native dependencies are present.
+Extract the whole archive and run Paridhwani.exe beside its data/runtime folders.
+Assembly-CSharp.dll SHA-256:
+de7d47236e4fd5e52b5e3968ed98632988b70a3365038aa6be169dcd4fc77ef3
+verified-package.json records the archive, source, report, exit and hash checks.
+
+NOT RUN: physical controller/driver, full human playthrough, fluent Kannada
+acceptance, presentation display/projector rehearsal, performance certification.
+Optional free-text dialogue requires a keyboard; no real NLP endpoint is set.
+Next substantive planned work: per-location standalone frame-time/memory
+baseline on this machine. Agree target hardware/quality before minimum-spec
+sign-off; obtain controller/display and fluent-language acceptance separately.
+Final production art and the external NLP contract remain separate workstreams.
