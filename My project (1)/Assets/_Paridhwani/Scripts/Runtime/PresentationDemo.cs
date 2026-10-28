@@ -67,6 +67,7 @@ namespace Paridhwani {
  }
  }
  public void ShowPresentationArrival() {
+ if(!session.IsPresentationDemo)return;
  var shell=Card("practice-arrival","paper");shell.name="demo-arrival-card";shell.style.height=Length.Percent(85);
  Add(shell,"PRESENTATION DEMO / TEMPORARY VISIT","eyebrow").style.flexShrink=0;
  var enter=Button(shell,"Enter the demo scene",session.Close);enter.name="demo-enter";enter.style.flexShrink=0;FocusLater(enter);

@@ -15,11 +15,29 @@ PASSED: independently compiled HEAD sources plus PresentationDemo.cs and
 PresentationDemoPlaytest.cs; runtime/editor/Player branches and 367 assertions.
 Independent snapshot: verification/Temp/PresentationCompile-bfeeec7eac524236bd29641099146320
 
-NOT RUN: new focused native presentation test. Native Unity still exposed the
-old menu after Assets > Refresh and Ctrl+R; cached Assembly-CSharp.dll remained
-timestamped 28 October 14:24:53 local, predating the new test script. No fresh
-PresentationPlaytests report or new captures were produced. Import/invocation
-is pending, not denied. Its cause is uncertain; no licensing/accounts changed.
+RECOVERED: initial native import/invocation was pending. The script was created
+at 14:25:50 local during the concurrent build started at 14:25:49. The Player
+compiler response contained it; the Editor response did not. Refresh and a
+timestamp-only touch did not rebuild the Editor assembly. Adding an ordinary
+guard to PresentationDemo.ShowPresentationArrival (ignore non-demo calls), then
+Refresh, rebuilt the Editor assembly at 14:40:54 and exposed the menu. The exact
+cache-invalidation cause remains unproven. No restart, process termination,
+cache deletion, regeneration, licensing/account/security change was used.
+
+PASSED: initial focused Editor run, 65 checks, 9 captures at 960x540:
+verification/Temp/PresentationPlaytests/run-20261028-091124160-c6b367f3/report.json
+PASSED: expanded scripted route rehearsal, 91 checks, 15 captures, 960x540,
+textScale 1.3; tea/river CharacterController routes and authored actions,
+wrong-answer retries, trunk/deed protection, interim council decision,
+guide/Pause navigation and main-save restoration after each demo.
+verification/Temp/PresentationPlaytests/run-20261028-091435612-069aa9a9/report.json
+Source/content SHA-256: b36892e7872549e91a8b06519f12f162ffce7554e9c89c89e9dc80352c5d2dee
+Marker: PARIDHWANI_PRESENTATION_PLAYTEST_OK
+Signs: VILLAGE_SIGN_LAYOUT_CHECKED signs=39 fonts=2
+Reviewed: initial title/guide/arrival captures and final tea/notebook,
+river booking/deduction, protected deed and council-decision captures.
+PASSED again: source compilation/runtime branches and 387 assertions after
+the source guard and route-rehearsal additions.
 
 Separate concurrent evidence, not acceptance of this new test harness:
 verification/Temp/StandalonePlaytests/run-20261028-085549450-d3bbacff/report.json
@@ -27,7 +45,9 @@ records buildResult Succeeded, state passed, playerExitCode 0, smokePassed true,
 and VILLAGE_SMOKE_OK with 17,195 frames. Village and tea dialogue captures from
 the earlier run-20261028-085203 were inspected; these remain prototype visuals.
 
-NOT RUN: full manual four-scene route, physical controller, fluent Kannada
-acceptance, performance profiling or a new standalone build of this harness.
-Next: import/execute the focused test, inspect all guide/world captures, then
-rehearse the four routes and fix observed blocking/composition issues.
+NOT RUN: full human four-scene route, physical controller, fluent Kannada
+acceptance, performance profiling or a standalone build after this recovery.
+The focused harness is Editor-only; it is not physical-device acceptance.
+Next: physical-controller/human rehearsal on the actual presentation display,
+then freeze the verified build and fix only observed blocking/visual issues.
+The owned-child-window close action was not retried; the Project pane remains.

@@ -67,7 +67,7 @@ namespace Paridhwani
             originalBackground = Application.runInBackground;
             originalWidth = Screen.width; originalHeight = Screen.height; originalMode = Screen.fullScreenMode;
             Application.runInBackground = true;
-            deadline = Time.realtimeSinceStartup + 120;
+            deadline = Time.realtimeSinceStartup + 180;
             output = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "verification", "Temp", "PresentationPlaytests",
                 "run-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmssfff") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8)));
             Directory.CreateDirectory(output);
@@ -115,7 +115,7 @@ namespace Paridhwani
             }
             EditorApplication.isPlaying = false;
         }
-        void Update() { if (!finished && report != null && Time.realtimeSinceStartup > deadline) Complete("Presentation checks exceeded 120 seconds."); }
+        void Update() { if (!finished && report != null && Time.realtimeSinceStartup > deadline) Complete("Presentation checks exceeded 180 seconds."); }
         void OnDestroy()
         {
             Application.runInBackground = originalBackground;
@@ -151,6 +151,86 @@ namespace Paridhwani
                 element.worldBound.xMin >= Root.worldBound.xMin - 2 && element.worldBound.xMax <= Root.worldBound.xMax + 2 &&
                 element.worldBound.yMin >= Root.worldBound.yMin - 2 && element.worldBound.yMax <= Root.worldBound.yMax + 2, name + " stays inside the viewport");
         }
+        IEnumerator WalkTo(Vector3 target)
+        {
+            session.player.blocked = true;
+            var controller = session.player.GetComponent<CharacterController>();
+            float until = Time.realtimeSinceStartup + 15;
+            while (true)
+            {
+                Vector3 delta = target - session.player.transform.position; delta.y = 0;
+                if (delta.magnitude < .16f) break;
+                if (Time.realtimeSinceStartup >= until) throw new InvalidOperationException("Presentation walking route blocked at " + session.player.transform.position + " toward " + target);
+                session.player.visual.rotation = Quaternion.LookRotation(delta);
+                controller.Move(delta.normalized * Mathf.Min(delta.magnitude, 3.6f * Time.unscaledDeltaTime));
+                yield return null;
+            }
+        }
+        IEnumerator Rehearse(ReplayChapter chapter)
+        {
+            // Walk through CharacterController collisions; invoke authored actions programmatically.
+            // This is a scripted route regression, not a keyboard/gamepad usability test.
+            switch (chapter)
+            {
+                case ReplayChapter.Arrival:
+                    yield return WalkTo(new Vector3(0, 0, -4.8f));
+                    yield return WalkTo(new Vector3(-4.2f, 0, -4.8f));
+                    yield return WalkTo(new Vector3(-4.2f, 0, -1.65f));
+                    session.player.SetLookAngles(0, 17); yield return new WaitForSecondsRealtime(.4f);
+                    Check(session.Nearby == "Talk to Manjunatha", "demo tea route reaches the vendor");
+                    session.Interact(); yield return new WaitForSecondsRealtime(.9f);
+                    session.Choose(0); session.Choose(0); session.Choose(0);
+                    Check(session.Progress.greeted && session.Progress.drinkOrdered && session.Progress.directionsKnown, "tea demo earns drink and library directions");
+                    yield return Capture("Arrival-conversation");
+                    session.OpenNotebook(); yield return Capture("Arrival-notebook"); session.Close();
+                    break;
+                case ReplayChapter.River:
+                    foreach (var point in new[] { new Vector3(-10, 0, 6.5f), new Vector3(-14, 0, 6.5f), new Vector3(-19, 0, 6.5f), new Vector3(-21, 0, 6.5f), new Vector3(-23.5f, 0, 2.2f) })
+                        yield return WalkTo(point);
+                    session.player.SetLookAngles(0, 17); yield return new WaitForSecondsRealtime(.4f);
+                    Check(session.Nearby == "Talk to Giri", "demo river path reaches Giri");
+                    session.Interact(); yield return new WaitForSecondsRealtime(.9f);
+                    session.Choose(0); session.Choose(0); yield return new WaitForSecondsRealtime(.9f);
+                    Check(session.player.IsInspecting, "demo inspection frames the bicycle");
+                    session.SelectBicyclePart(BicyclePart.Frame); session.SelectBicyclePart(BicyclePart.Stand); session.SelectBicyclePart(BicyclePart.CarrierPocket);
+                    session.SubmitInvestigationAnswer(0); Check(!session.Progress.bookingSlipFound, "demo rejects wrong pocket answer");
+                    session.SubmitInvestigationAnswer(1);
+                    session.OpenActivity(VillageActivity.BookingSlip); session.SubmitInvestigationAnswer(0);
+                    Check(session.Progress.bookingSlipRead, "demo booking interpreted");
+                    yield return Capture("River-booking");
+                    session.Close(); session.Close(); yield return new WaitForSecondsRealtime(.9f);
+                    Check(session.Turn != null && session.Turn.Id == "deduce", "demo evidence returns to Giri");
+                    session.Choose(0); session.SubmitInvestigationAnswer(0); Check(!session.Progress.riverDeductionKnown, "demo rejects unwitnessed accident inference");
+                    session.SubmitInvestigationAnswer(2);
+                    Check(session.Progress.riverDeductionKnown && !session.Progress.templeLeadKnown, "demo earns qualified inference before the next lead");
+                    yield return Capture("River-deduction");
+                    break;
+                case ReplayChapter.Deed:
+                    session.player.blocked = true; yield return new WaitForSecondsRealtime(.4f);
+                    Check(session.Nearby == "Inspect the family trunk", "deed demo starts at the physical trunk");
+                    session.Interact(); yield return new WaitForSecondsRealtime(.9f);
+                    session.TrunkAttempt = "1200"; session.SubmitTrunkCode(); Check(!session.Progress.trunkOpened, "demo wrong code leaves trunk locked");
+                    session.TrunkAttempt = "1207"; session.SubmitTrunkCode();
+                    Check(session.Progress.trunkOpened && !session.Progress.deedRetrieved, "demo unlock still requires deed review");
+                    session.OpenActivity(VillageActivity.DeedReview);
+                    session.SubmitInvestigationAnswer(0); session.SubmitInvestigationAnswer(2); session.SubmitInvestigationAnswer(1); session.ProtectDeed();
+                    Check(session.Progress.deedRetrieved && !session.deedPaper.activeSelf, "demo reviewed original protected");
+                    yield return Capture("Deed-protected");
+                    break;
+                case ReplayChapter.Council:
+                    session.player.blocked = true; yield return new WaitForSecondsRealtime(.4f);
+                    Check(session.Nearby == "Talk to Council president", "council demo starts at the president");
+                    session.Interact(); yield return new WaitForSecondsRealtime(.9f); session.Choose(0);
+                    session.SubmitInvestigationAnswer(1); Check(!session.Progress.deedPresented, "demo booking cannot replace the original");
+                    session.SubmitInvestigationAnswer(0); session.SubmitInvestigationAnswer(1); session.SubmitInvestigationAnswer(0); session.SubmitInvestigationAnswer(2);
+                    session.RequestCouncilDecision();
+                    Check(session.Progress.workSuspended && !session.Progress.libraryProtected && session.worksSuspendedMarker.activeSelf, "demo council suspends work pending later review");
+                    yield return Capture("Council-decision");
+                    break;
+            }
+            session.Save(); Check(session.LastSaveSucceeded, "rehearsed demo saves separately");
+            session.OpenTitle(); session.ContinueMainVisit();
+        }
         IEnumerator Checks()
         {
             yield return null;
@@ -180,6 +260,7 @@ namespace Paridhwani
                 session.Close(); yield return new WaitForSecondsRealtime(.3f);
                 Check(!session.ui.IsModal && !session.player.blocked, "demo entry releases movement");
                 yield return Capture(chapter + "-world");
+                yield return Rehearse(chapter);
                 session.ui.ShowPause();
                 Check(Root.Q<Button>("settings-demo-guide") != null && Root.Q<Button>("settings-demo-scenes") != null, "Pause offers guide and scene switching");
                 session.ui.ShowPresentationArrival(); yield return new WaitForSecondsRealtime(.2f);
