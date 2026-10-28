@@ -305,7 +305,8 @@ namespace Paridhwani
             Add(card,"Welcome to Kalyanapura","title");
             Add(card,"You came to help archive the community library. Ananya was meant to meet you, but she is not at the bus stand. The tea-stall owner may know the way.","body");
             Add(card,"Walk with WASD, look with the mouse, and press E when a nearby person or sign offers a prompt. Conversations take their time. Your notebook is always one Tab away.","body");
-            Button(card,"Step into the village  [Enter]",session.AcknowledgeArrival);
+            var enter=Button(card,"Step into the village  [Enter]",session.AcknowledgeArrival);enter.name="arrival-enter";FocusLater(enter);
+            Button(card,"Back to title  [Esc]",session.OpenTitle,"quiet-button").name="arrival-title";
         }
         public void ShowPause()
         {

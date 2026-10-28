@@ -28,7 +28,15 @@ namespace Paridhwani {
  Button(card,"Archive this visit and begin",session.BeginNewMainVisit);Button(card,"Keep my current visit",()=>ShowMainMenu(),"quiet-button");
  }
  public void ShowQuitSaveError() {
- var card=Card("quit-save-error","paper");Add(card,"Your latest changes could not be saved","title");Add(card,"You can return to the visit and try saving again, or leave without these latest changes.","body");Button(card,"Return to the visit",session.ContinueMainVisit);Button(card,"Leave without saving",session.QuitWithoutSaving,"quiet-button");
+ var shell=Card("quit-save-error","paper");shell.name="quit-save-card";shell.style.height=UnityEngine.UIElements.Length.Percent(85);
+ Add(shell,"VISIT STILL OPEN","eyebrow").style.flexShrink=0;
+ var back=Button(shell,session.QuitCancelLabel,session.CancelQuit,"quiet-button");back.name="quit-cancel";back.style.flexShrink=0;FocusLater(back);
+ var card=MenuScroll(shell,"quit-save-scroll");
+ Add(card,"Your latest changes could not be saved","title");
+ Add(card,"Retry saving before leaving, return to the previous screen, or leave without the latest changes.","body");
+ Add(card,session.SaveMessage,"feedback");
+ Button(card,"Retry save and exit",session.RequestQuit).name="quit-retry";
+ Button(card,"Leave without saving",session.QuitWithoutSaving,"quiet-button").name="quit-without-saving";
  }
  }
 }

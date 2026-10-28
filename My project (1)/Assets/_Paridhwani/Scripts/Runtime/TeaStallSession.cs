@@ -308,6 +308,9 @@ namespace Paridhwani
         }
         public void Close()
         {
+            if(ui.Mode=="arrival"){OpenTitle();return;}
+            if(ui.Mode=="quit-save-error"){CancelQuit();return;}
+            if(ui.Mode=="world-update-required")return;
             if(ui.Mode=="chapter-replay"){ui.CloseChapterReplay();return;}
             if(ui.Mode=="main-menu"){if(Progress.arrivalAcknowledged)ContinueMainVisit();return;}
             if(ui.Mode=="new-visit-confirm"){ui.ShowMainMenu();return;}
@@ -334,7 +337,10 @@ namespace Paridhwani
             player.blocked=free; player.SuppressLook();
             Cursor.lockState=free?CursorLockMode.None:CursorLockMode.Locked; Cursor.visible=free;
         }
-        public void AcknowledgeArrival() { Progress.arrivalAcknowledged=true; Save(); Close(); }
+        public void AcknowledgeArrival() {
+            if(!VisitExitNavigation.CanAcknowledgeArrival(ui.Mode))return;
+            Progress.arrivalAcknowledged=true;Save();EndForJourney();
+        }
         public void SettingsChanged() { ApplyState(); Save(); }
         public void Save()
         {

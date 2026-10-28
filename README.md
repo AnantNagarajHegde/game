@@ -14,7 +14,7 @@ If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark**
 
 ## Verification
 
-The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 292 standalone assertions also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
+The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 313 standalone assertions also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
 
 From this repository root, run source and logic checks in PowerShell:
 
@@ -39,3 +39,5 @@ Dialogue currently uses local authored content. The project includes an optional
 Service attachment/detachment uses SetOptionalDialogueService on the Unity thread. Switching providers invalidates old replies; cancellation and shutdown contain transport callback failures while preserving the authored conversation.
 
 Chapter practice returns to its title, Pause or credits origin. Settings and chapter lists keep Back visible while scrolling, and live text scaling updates panel width and height. These changes have source coverage; their new native focus/layout assertions remain pending.
+
+Escape at the welcome screen returns to title until arrival is explicitly acknowledged. Failed save-and-exit attempts offer a retry and preserve the originating title/settings/Pause screen when cancelled. These flows have source checks; their native smoke assertions are pending.

@@ -11,6 +11,10 @@ namespace Paridhwani
     // Opt-in built-player verification. Uses a unique temporary save, never a player's visit.
     public sealed class VillageSmokeCheck : MonoBehaviour
     {
+        sealed class FailingSaveCodec : ITeaProgressCodec {
+            public string Encode(TeaProgress progress) => throw new IOException("Deliberate isolated quit-save regression");
+            public TeaProgress Decode(string json) => null;
+        }
         TeaStallSession session;
         string output;
         int startFrame;
@@ -93,7 +97,12 @@ namespace Paridhwani
         {
             var player=session.player;
             yield return new WaitForSecondsRealtime(1);
-            session.AcknowledgeArrival();
+            session.OpenTitle();session.AcknowledgeArrival();
+            Check(session.ui.Mode=="main-menu" && !session.Progress.arrivalAcknowledged,"stale arrival callback cannot acknowledge from title");
+            session.ContinueMainVisit();Check(session.ui.Mode=="arrival" && player.blocked,"fresh visit requires welcome");
+            session.Close();Check(session.ui.Mode=="main-menu" && player.blocked && !session.Progress.arrivalAcknowledged,"Escape at welcome returns to title without entering the village");
+            session.ContinueMainVisit();session.AcknowledgeArrival();
+            Check(!session.ui.IsModal && !player.blocked && session.Progress.arrivalAcknowledged,"explicit welcome action enters and acknowledges the visit");
             player.blocked=true;
             player.Restore(new Vector3(0,.2f,-4.8f),-32);
             yield return new WaitForSecondsRealtime(.8f);
@@ -475,6 +484,28 @@ namespace Paridhwani
             Check(session.ui.Mode=="pause","large-text chapter selector returns to Pause");
             session.Progress.textScale=settingsScale;session.SettingsChanged();session.Close();Screen.SetResolution(settingsWidth,settingsHeight,settingsMode);
             Debug.Log("VILLAGE_MENU_LAYOUT_CHECKED");
+            // Force a real Save() failure without touching the user's or isolated story's save files.
+            var saveField=typeof(TeaStallSession).GetField("saves",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
+            Check(saveField!=null,"quit regression can isolate save ownership");
+            var visitStore=saveField.GetValue(session);var visitProgress=session.Progress;
+            try {
+                saveField.SetValue(session,new TeaSaveStore(Path.Combine(output,"failed-quit","visit.json"),new FailingSaveCodec()));
+                session.OpenTitle();session.RequestQuit();yield return new WaitForSecondsRealtime(.1f);
+                Check(session.ui.Mode=="quit-save-error" && !session.LastSaveSucceeded && player.blocked,"failed quit keeps the player in a modal");
+                Check((menuRoot.focusController.focusedElement as VisualElement)?.name=="quit-cancel","failed quit focuses safe return rather than leaving without saving");
+                session.RequestQuit();Check(session.ui.Mode=="quit-save-error" && session.QuitCancelLabel=="Back to title","retry retains original title context");
+                yield return Shot("52-quit-save-failure");
+                session.Close();Check(session.ui.Mode=="main-menu" && player.blocked,"Escape from failed title quit returns to title");
+                session.OpenTitleSettings();session.RequestQuit();session.CancelQuit();
+                Check(session.ui.Mode=="pause" && session.TitleSettings && player.blocked,"failed settings quit preserves title settings");
+                session.Close();Check(session.ui.Mode=="main-menu","recovered title settings still return to title");
+                session.ContinueMainVisit();session.ui.ShowPause();session.RequestQuit();session.Close();
+                Check(session.ui.Mode=="pause" && !session.TitleSettings && player.blocked,"failed gameplay quit returns to Pause");
+                Check(ReferenceEquals(session.Progress,visitProgress) && !session.Progress.storyCompleted,"quit failures retain the current visit");
+            } finally {saveField.SetValue(session,visitStore);}
+            session.Close();session.Save();Check(session.LastSaveSucceeded,"normal isolated save remains usable after failure regression");
+            Debug.Log("VILLAGE_EXIT_FLOW_CHECKED");
+
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),
                 "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, fourteen NPC instances, complete story through protected deed, return, council decision, later review, credits and isolated practice, ridge walking, direct reunion and trunk lead, confirmed checkpost round-trip, route permission, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));

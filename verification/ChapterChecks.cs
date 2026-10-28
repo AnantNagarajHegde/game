@@ -31,6 +31,29 @@ public static class ChapterChecks {
  public string Encode(TeaProgress p) => "{\"version\":"+p.version+",\"sign\":"+(p.signRead?"true":"false")+"}";
  public TeaProgress Decode(string json) => new TeaProgress {version=json.Contains("\"version\":99")?99:1,signRead=json.Contains("\"sign\":true")};
  }
+ static void ExitMenuChecks() {
+ var menu=new VisitExitNavigation();
+ Check(menu.ReturnMode(true)=="pause","quit recovery defaults to a safe modal");
+ menu.Begin("main-menu",false);
+ Check(menu.ReturnMode(false)=="main-menu" && menu.ReturnLabel(false)=="Back to title","failed title quit preserves title before arrival");
+ Check(menu.ReturnMode(true)=="main-menu","failed title quit preserves title after arrival");
+ menu.Begin("quit-save-error",true);
+ Check(menu.OriginMode=="main-menu" && !menu.TitleSettings,"retry cannot replace the original title context");
+ menu.Begin("pause",true);
+ Check(menu.ReturnMode(false)=="pause" && menu.TitleSettings,"failed title-settings quit preserves settings even before arrival");
+ menu.Begin("quit-save-error",false);
+ Check(menu.TitleSettings,"retry preserves title-settings ownership");
+ menu.Begin("pause",false);
+ Check(menu.ReturnMode(true)=="pause" && menu.ReturnLabel(true)=="Back to Pause" && !menu.TitleSettings,"later gameplay pause clears old title-settings context");
+ Check(menu.ReturnMode(false)=="arrival","unacknowledged visit cannot return directly to gameplay");
+ menu.Begin("arrival",false);
+ Check(menu.ReturnMode(false)=="arrival" && menu.ReturnLabel(false)=="Back to welcome","failed welcome quit returns to welcome");
+ menu.Begin("conversation",false);
+ Check(menu.ReturnMode(true)=="pause","unexpected quit entry falls back to Pause");
+ Check(VisitExitNavigation.CanAcknowledgeArrival("arrival"),"welcome explicitly accepts arrival acknowledgment");
+ foreach(string mode in new[]{"","main-menu","pause","quit-save-error","conversation","chapter-replay"})
+ Check(!VisitExitNavigation.CanAcknowledgeArrival(mode),"arrival callback cannot dismiss another screen: "+mode);
+ }
  static void ReplayMenuChecks() {
  var menu=new ChapterReplayNavigation();
  Check(menu.OriginMode=="pause","chapter selector has a safe modal return by default");
@@ -115,6 +138,13 @@ public static class ChapterChecks {
  System.IO.File.WriteAllText(recipe,"changed\n");
  Check(initial!=WorldRecipeSignature.Compute(recipes),"world recipe detects a changed generator");
  Check(!System.IO.File.Exists(file+".tmp"),"atomic write leaves no temp file");
+ string blocker=System.IO.Path.Combine(directory,"blocked-parent");System.IO.File.WriteAllText(blocker,"kept");
+ var blockedStore=new TeaSaveStore(System.IO.Path.Combine(blocker,"visit.json"),codec);var unsaved=new TeaProgress {signRead=true};
+ Check(!blockedStore.Write(unsaved,out var writeError) && writeError=="Progress could not be saved. Please try again.","filesystem failure returns the retryable save error used by quit recovery");
+ Check(unsaved.signRead && System.IO.File.ReadAllText(blocker)=="kept" && !blockedStore.HasAnySaveFiles,"failed save retains the current snapshot without changing the blocking file");
+ Check(blockedStore.LastFailureDetail.StartsWith("create directory /"),"failed save retains the actual failing operation for diagnosis");
+ System.IO.File.Delete(blocker);
+ Check(blockedStore.Write(unsaved,out _) && blockedStore.Read(out _).signRead && blockedStore.LastFailureDetail==null,"retry after storage recovery saves the same current snapshot and clears the old failure");
  } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
  }
  sealed class StubDialogueService : IDialogueTextService {
@@ -209,7 +239,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { ReplayMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ public static int Main() { ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");
