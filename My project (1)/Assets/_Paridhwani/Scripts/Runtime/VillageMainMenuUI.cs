@@ -14,13 +14,24 @@ namespace Paridhwani {
  Button(card,"Close this play session",session.RequestQuit);
  }
  public void ShowMainMenu(string feedback="") {
- var shell=Card("main-menu","paper");shell.style.height=Length.Percent(85);var card=new ScrollView();Class(card,"evidence-scroll");shell.Add(card);Add(card,"P A R I D H W A N I","brand");Add(card,"A language. A place. A way to belong.","title");
- Add(card,"Arrive in Kalyanapura, follow Ananya's trail and learn Kannada through the people and places along the way.","body");
+ bool saved=session.HasSavedVisit;
+ var shell=Card("main-menu","paper");shell.name="title-card";Class(shell,"title-card");shell.style.height=Length.Percent(85);
+ var card=MenuScroll(shell,"title-scroll");
+ Add(card,"KARNATAKA / THE MONSOON SEASON","eyebrow");Add(card,"P A R I D H W A N I","brand");
+ Add(card,"A language. A place. A way to belong.","title");
+ Add(card,"Ananya was meant to meet you at the village library. Follow her trail through Kalyanapura, learn Kannada through everyday exchanges, and uncover the records that matter to its people.","body");
  if(feedback!="")Add(card,feedback,"feedback");
- var resume=Button(card,session.IsPracticeVisit?"Continue practice":"Continue visit",session.ContinueMainVisit);resume.SetEnabled(session.HasSavedVisit);
+ var resume=Button(card,session.IsPresentationDemo?"Continue presentation demo":session.IsPracticeVisit?"Continue practice":"Continue visit",session.ContinueMainVisit);resume.name="title-continue";resume.SetEnabled(saved);
+ Button start=null;
  if(session.IsPracticeVisit)Button(card,"Return to the main visit",session.ReturnToCompletedStory);
- else {Button(card,"Begin a new story",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});Button(card,"Practise a reached chapter",ShowChapterReplay,"quiet-button").name="title-practice";}
+ else {
+ start=Button(card,saved?"Begin a new story":"Begin your visit",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});start.name="title-start";
+ Button(card,"Presentation demo / choose a scene",ShowPresentationDemo).name="title-demo";
+ Button(card,"Practise a reached chapter",ShowChapterReplay,"quiet-button").name="title-practice";
+ }
  Button(card,"Settings",session.OpenTitleSettings,"quiet-button");Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
+ Add(card,"Take your time. Reading and conversations have no countdown.","small");
+ FocusLater(saved?resume:start);
  }
  public void ShowNewVisitConfirmation() {
  var card=Card("new-visit-confirm","paper");Add(card,"BEGIN AGAIN","eyebrow");Add(card,"Start a new main story?","title");

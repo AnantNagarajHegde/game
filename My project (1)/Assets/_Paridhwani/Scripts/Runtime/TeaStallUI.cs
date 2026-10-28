@@ -316,6 +316,7 @@ namespace Paridhwani
             var card=MenuScroll(shell,"pause-scroll");Add(card,"A moment to yourself","title");
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
             if(!session.TitleSettings){
+            AddPresentationActions(card);
             Button(card,"Title menu",session.OpenTitle,"quiet-button");
             Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
             Button(card,"Open field notebook",session.OpenNotebook);
@@ -336,6 +337,7 @@ namespace Paridhwani
             var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
             var environmentVolume=new Slider("Rain and river volume",0,1){value=session.Progress.ambienceVolume};environmentVolume.RegisterValueChangedCallback(e=>{session.Progress.ambienceVolume=e.newValue;session.SettingsChanged();});card.Add(environmentVolume);
             var stepsVolume=new Slider("Footstep volume",0,1){value=session.Progress.footstepVolume};stepsVolume.RegisterValueChangedCallback(e=>{session.Progress.footstepVolume=e.newValue;session.SettingsChanged();});card.Add(stepsVolume);
+            AddDisplaySettings(card);
             var quality=new DropdownField("Rendering quality",new System.Collections.Generic.List<string>{"Balanced","Low","High"},(int)PresentationPolicy.ValidQuality(session.Progress.quality));quality.RegisterValueChangedCallback(e=>{session.Progress.quality=(VillageQuality)quality.index;session.SettingsChanged();});card.Add(quality);
             Add(card,"Low reduces resolution, shadows and distant scenery; High uses full resolution and more antialiasing.","small");
             Add(card,"F5  Save visit    F9  Restore visit","small");

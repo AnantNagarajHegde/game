@@ -27,6 +27,7 @@ namespace Paridhwani
         public bool reducedMotion,invertY;
         public float masterVolume=1,ambienceVolume=1,footstepVolume=1;
         public VillageQuality quality;
+        public float brightness=PresentationPolicy.DefaultBrightness;
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
@@ -132,6 +133,7 @@ namespace Paridhwani
                 p.ambienceVolume=json.Contains("\"ambienceVolume\"")?PresentationPolicy.Volume(p.ambienceVolume):1;
                 p.footstepVolume=json.Contains("\"footstepVolume\"")?PresentationPolicy.Volume(p.footstepVolume):1;
                 p.quality=PresentationPolicy.ValidQuality(p.quality);
+                p.brightness=json.Contains("\"brightness\"")?PresentationPolicy.Brightness(p.brightness):PresentationPolicy.DefaultBrightness;
                 if(!float.IsFinite(p.heading)) p.heading=-18;
                 // Avoid native engine calls during file recovery and clamp old/new preferences consistently.
                 p.textScale=Clamp(p.textScale,.85f,1.3f,1); p.sensitivity=Clamp(p.sensitivity,.05f,.3f,.12f);

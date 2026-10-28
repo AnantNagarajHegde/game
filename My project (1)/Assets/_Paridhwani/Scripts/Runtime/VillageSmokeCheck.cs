@@ -505,6 +505,31 @@ namespace Paridhwani
             } finally {saveField.SetValue(session,visitStore);}
             session.Close();session.Save();Check(session.LastSaveSucceeded,"normal isolated save remains usable after failure regression");
             Debug.Log("VILLAGE_EXIT_FLOW_CHECKED");
+            float previousBrightness=session.Progress.brightness;
+            session.Progress.brightness=.9f;session.SettingsChanged();session.Load();
+            Check(Mathf.Abs(session.Progress.brightness-.9f)<.001f,"display brightness survives native JSON save/restore");
+            var displayVolumes=session.GetComponents<UnityEngine.Rendering.Volume>();
+            Check(Array.Exists(displayVolumes,v=>v.sharedProfile && v.sharedProfile.TryGet<UnityEngine.Rendering.Universal.ColorAdjustments>(out var grading) && Mathf.Abs(grading.postExposure.value-.9f)<.001f),"display brightness reaches the runtime grading volume");
+            bool mainGreeting=session.Progress.greeted;var mainPosition=player.transform.position;
+            session.OpenTitle();yield return new WaitForSecondsRealtime(.1f);
+            Check((menuRoot.focusController.focusedElement as VisualElement)?.name=="title-continue","saved visit focuses Continue on the title");
+            session.ui.ShowPresentationDemo();session.Close();
+            Check(session.ui.Mode=="main-menu" && !session.IsPracticeVisit,"demo selector can close without changing visit ownership");
+            foreach(var demoChapter in PresentationDemo.Chapters) {
+                session.ui.ShowPresentationDemo();session.StartPresentationDemo(demoChapter);
+                Check(session.IsPresentationDemo && session.IsPracticeVisit && !session.Progress.storyCompleted,"demo scene is a separate prepared visit: "+demoChapter);
+                Check(session.Progress.brightness==.9f,"demo copies the display preference");
+                session.Close();session.OpenTitle();session.ui.ShowPause();session.ui.ShowPresentationDemo();
+                session.StartPresentationDemo(demoChapter==ReplayChapter.Arrival?ReplayChapter.River:ReplayChapter.Arrival);
+                Check(session.IsPresentationDemo,"switching demo scenes preserves separate save ownership");
+                session.ReturnToCompletedStory();
+                Check(!session.IsPracticeVisit && !session.IsPresentationDemo && session.Progress.greeted==mainGreeting && !session.Progress.riverReportKnown && !session.Progress.deedRetrieved && Vector3.Distance(player.transform.position,mainPosition)<.1f,"demo return restores the main visit without staged evidence: "+demoChapter);
+            }
+            session.Progress.brightness=previousBrightness;session.SettingsChanged();
+            Debug.Log("VILLAGE_PRESENTATION_DEMO_CHECKED");
+
+
+
 
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),

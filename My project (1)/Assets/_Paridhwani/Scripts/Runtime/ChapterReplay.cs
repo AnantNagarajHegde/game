@@ -44,7 +44,7 @@ namespace Paridhwani {
  public void StartChapterPractice(ReplayChapter chapter) {
  if(IsPracticeVisit || !ChapterReplay.IsUnlocked(Progress,chapter))return;
  Save();if(!LastSaveSucceeded)return;completedStoryStore=saves;
- var next=ChapterReplay.Seed(chapter,Progress);PracticeChapterName=ChapterReplay.Name(chapter);Progress=next;
+ presentationDemo=false;var next=ChapterReplay.Seed(chapter,Progress);PracticeChapterName=ChapterReplay.Name(chapter);Progress=next;
  saves=new TeaSaveStore(System.IO.Path.Combine(Application.temporaryCachePath,"paridhwani-practice-"+System.Guid.NewGuid().ToString("N")+".json"));
  EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
  }

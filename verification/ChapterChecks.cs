@@ -239,7 +239,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ public static int Main() { DemoPresentationChecks.Run(Check); ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

@@ -115,3 +115,10 @@ Slider { margin-top: 12px; margin-bottom: 12px; }
 .dialogue-scroll .choice { flex-shrink: 0; flex-basis: auto; margin-bottom: 6px; }
 .conversation .dialogue-footer { flex-wrap: wrap; justify-content: flex-start; }
 .dialogue-footer > * { margin-right: 12px; }
+
+/* Title presentation: readable hierarchy over the live village backdrop. */
+.title-card { width: 720px; border-top-width: 3px; }
+.title-card .brand { font-size: 26px; margin-top: 5px; margin-bottom: 14px; }
+.title-card .title { font-size: 24px; margin-bottom: 14px; }
+.title-card .body { font-size: 14px; margin-bottom: 18px; }
+.title-card .button { min-height: 38px; }
