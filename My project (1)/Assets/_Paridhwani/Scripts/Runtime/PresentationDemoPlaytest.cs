@@ -259,6 +259,13 @@ namespace Paridhwani
                 yield return Capture(chapter + "-guide");
                 session.Close(); yield return new WaitForSecondsRealtime(.3f);
                 Check(!session.ui.IsModal && !session.player.blocked, "demo entry releases movement");
+                if (chapter == ReplayChapter.Arrival)
+                {
+                    var vendor = Array.Find(session.villagers, npc => npc && npc.role == VillageNpcRole.TeaVendor);
+                    Check(vendor && session.Nearby != "Read the bus timetable", "Arrival demo avoids the unrelated timetable prompt");
+                    Vector3 face = session.player.view.WorldToViewportPoint(vendor.eyes.position);
+                    Check(face.z > 0 && face.x > .15f && face.x < .8f && face.y > .25f && face.y < .85f, "Arrival demo frames the tea vendor in view");
+                }
                 yield return Capture(chapter + "-world");
                 yield return Rehearse(chapter);
                 session.ui.ShowPause();

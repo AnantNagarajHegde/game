@@ -6,6 +6,13 @@ namespace Paridhwani {
  public static class PresentationDemo {
  public static readonly System.Collections.Generic.IReadOnlyList<ReplayChapter> Chapters=Array.AsReadOnly(new[]{ReplayChapter.Arrival,ReplayChapter.River,ReplayChapter.Deed,ReplayChapter.Council});
  public static bool Contains(ReplayChapter chapter) {foreach(var entry in Chapters)if(entry==chapter)return true;return false;}
+ public static TeaProgress Seed(ReplayChapter chapter,TeaProgress preferences) {
+ if(!Contains(chapter))throw new ArgumentOutOfRangeException(nameof(chapter));
+ var prepared=ChapterReplay.Seed(chapter,preferences);
+ // Frame the first conversation from the open lane, away from the timetable prompt.
+ if(chapter==ReplayChapter.Arrival){prepared.position=new Vector3(0,.2f,-4.8f);prepared.heading=-32;}
+ return prepared;
+ }
  public static string Route(ReplayChapter chapter) {
  switch(chapter) {
  case ReplayChapter.Arrival:return "1. Approach the tea stall and talk to Manjunatha.\n2. Greet him and order tea or water.\n3. Ask where the library is.\n4. Open the notebook to show the words and source notes.";
@@ -36,7 +43,7 @@ namespace Paridhwani {
  completedStoryStore=saves;
  }
  presentationDemo=true;PresentationChapter=chapter;
- Progress=ChapterReplay.Seed(chapter,Progress);PracticeChapterName="Presentation demo / "+ChapterReplay.Name(chapter);
+ Progress=PresentationDemo.Seed(chapter,Progress);PracticeChapterName="Presentation demo / "+ChapterReplay.Name(chapter);
  saves=new TeaSaveStore(Path.Combine(Application.temporaryCachePath,"paridhwani-demo-"+Guid.NewGuid().ToString("N")+".json"));
  EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
  }

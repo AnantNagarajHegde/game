@@ -36,18 +36,18 @@ public static class DemoPresentationChecks {
  check(seen.Add(chapter) && PresentationDemo.Contains(chapter),"demo scenes have unique recognised chapter IDs");
  check(!string.IsNullOrWhiteSpace(PresentationDemo.Route(chapter)) && PresentationDemo.Route(chapter).Contains("1.") && PresentationDemo.Route(chapter).Contains("4."),"each demo scene has a four-step presenter route");
  check(!string.IsNullOrWhiteSpace(PresentationDemo.Description(chapter)),"each demo scene explains what it demonstrates");
- var demo=ChapterReplay.Seed(chapter,main);
+ var demo=PresentationDemo.Seed(chapter,main);
  check(demo.brightness==main.brightness && demo.muted && demo.reducedMotion,"demo keeps the presenter's accessibility and display preferences");
  check(demo.arrivalAcknowledged && TeaSaveStore.SupportedPosition(demo.position),"demo begins at a supported prepared spawn");
  check(!demo.storyCompleted && !demo.libraryProtected,"demo does not pre-complete the ending");
  }
  check(!PresentationDemo.Contains((ReplayChapter)(-1)) && !PresentationDemo.Contains((ReplayChapter)99) && !PresentationDemo.Contains(ReplayChapter.Farm),"unlisted and invalid demo scene IDs are rejected");
  check(!main.arrivalAcknowledged && !main.greeted && !main.deedRetrieved && !ChapterReplay.IsUnlocked(main,ReplayChapter.Council),"creating demo snapshots cannot grant main-story progress or replay unlocks");
- var river=ChapterReplay.Seed(ReplayChapter.River,main);
+ var river=PresentationDemo.Seed(ReplayChapter.River,main);
  check(river.riverReportKnown && !river.giriAccountKnown && !river.bookingSlipFound,"river demo leaves observation and inference activities playable");
- var deed=ChapterReplay.Seed(ReplayChapter.Deed,main);
+ var deed=PresentationDemo.Seed(ReplayChapter.Deed,main);
  check(deed.trunkLocationKnown && !deed.trunkOpened && !deed.deedRetrieved,"deed demo leaves the lock and original deed playable");
- var council=ChapterReplay.Seed(ReplayChapter.Council,main);
+ var council=PresentationDemo.Seed(ReplayChapter.Council,main);
  check(FinaleInvestigation.CanPresent(council) && !council.workSuspended,"council demo supplies evidence without granting the review outcome");
  }
 }
