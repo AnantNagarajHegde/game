@@ -86,6 +86,7 @@ namespace Paridhwani.Editor
             Materials();
             Ground();
             Stall();
+            TeaStallSurfaceArt();
             Surroundings();
             var vendor=Character("Manjunatha",V(-4.3f,.28f,1.3f),false);
             vendor.transform.rotation=Quaternion.Euler(0,165,0);

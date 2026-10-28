@@ -10,6 +10,7 @@ Shader "Paridhwani/Village Surface"
         _TextureStrength("Surface texture",Range(0,1))=0
         _TextureScale("World texture scale",Float)=1
         _WindStrength("Foliage wind",Float)=0
+        _VertexSurface("Vertex pigment and wetness",Range(0,1))=0
         _Cull("Cull",Float)=2
     }
     SubShader
@@ -30,7 +31,7 @@ Shader "Paridhwani/Village Surface"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor; float4 _BaseMap_ST;
-                float _Roughness,_Wet,_Grain,_Cull,_TextureStrength,_TextureScale,_WindStrength;
+                float _Roughness,_Wet,_Grain,_Cull,_TextureStrength,_TextureScale,_WindStrength,_VertexSurface;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
             float _VillageWindScale;
@@ -56,12 +57,12 @@ Shader "Paridhwani/Village Surface"
                 float broad=noise(p*1.8), fine=noise(p*_Grain);
                 float wear=noise(p*.32);
                 float variation=.79+.26*broad+.11*fine;
-                float damp=_Wet*smoothstep(.3,.8,wear);
+                float damp=_Wet*lerp(1,saturate(i.color.a),_VertexSurface)*smoothstep(.3,.8,wear);
                 SurfaceData surface=(SurfaceData)0;
                 float3 weights=pow(abs(normalize(i.normalWS)),4);weights/=max(dot(weights,float3(1,1,1)),.0001);
                 float3 tex=float3(1,1,1);
                 if(_TextureStrength>.001) tex=SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,p.yz*_TextureScale).rgb*weights.x+SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,p.xz*_TextureScale).rgb*weights.y+SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,p.xy*_TextureScale).rgb*weights.z;
-                surface.albedo=_BaseColor.rgb*variation*lerp(float3(1,1,1),tex*1.18,_TextureStrength)*lerp(1,.72,damp);
+                surface.albedo=_BaseColor.rgb*variation*lerp(float3(1,1,1),tex*1.18,_TextureStrength)*lerp(1,.72,damp)*lerp(float3(1,1,1),i.color.rgb,_VertexSurface);
                 surface.metallic=0; surface.specular=half3(.04,.04,.04);
                 surface.smoothness=min(.45,saturate(1-_Roughness+damp*.22));
                 surface.normalTS=half3(0,0,1); surface.occlusion=1; surface.alpha=1;

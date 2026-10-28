@@ -1,0 +1,34 @@
+# Tea-stall graphics pass — paused source draft
+
+Status: **source-reviewed draft only; not generated, rendered or visually accepted**. The user is away from the computer and will handle the Windows Security prompt when home. Do not retry desktop input, interact with that prompt, change firewall/network permissions or ask again while waiting. The subsequent instruction explicitly permits independent source fixes and a local source-only commit with this unrendered status.
+
+## Prepared
+
+- `Assets/_Paridhwani/Scripts/Editor/TeaStallSurfaceArt.cs`: a deterministic, local surface pass called after `Stall()` by `TeaStallSceneBuilder.cs`. It uses its own random seed so other world placements are not shifted.
+- Draft geometry covers the tea-stall approach: shallow mud relief and tracks, a drier standing/sheltered region, four irregular rain depressions, stone floor/plinth/drain faces, gravel and a small drain run-out surface. It reuses WetEarth/WeatheredStone through cloned local materials. No new colliders are added; existing colliders and footstep tags are retained. The relevant original renderers are hidden only when the generator runs.
+- `Assets/_Paridhwani/Art/Shaders/VillageSurface.shader`: an opt-in vertex pigment/wetness parameter, default zero for existing materials. The new local materials opt in. No global brightness or reflective-water setting was changed.
+- Runtime/editor/Player-branch source compilation and the current 387 assertions passed. This does not compile the shader in Unity or verify the generated geometry, visuals, collision or input.
+- Source review fixed the patch's hard height/pigment/wetness edge, kept the inherited WetEarth scale aligned, reduced bevels relative to thin-stone thickness, narrowed floor joints, staggered plinth courses and stopped corner surface overlap. The original plinth renderer is retained with the existing dark stone as recessed backing; its collider is untouched. Only the original sheltered slabs and selected drain-stone renderers are hidden.
+- Local rainwater roughness is now 0.78. Its texture setting is applied before asset save, avoiding a reliance on a later unsaved material mutation. The shared shader's new feature still defaults to zero for legacy materials.
+- A temporary .NET source check executed the actual compiled geometry builder for five representative stone shapes: 200 triangles had valid indices, finite vertices, nonzero area and outward winding. All four relief borders and its interior blend were checked. This did not construct Unity meshes/materials or run physics/rendering. The temporary external reflection driver emitted Unity analyzer warning UAC0020; no such loader was added to game code.
+
+No scene regeneration, new generated art assets, after screenshots or art preview upload has happened. Only the reviewed source draft/checkpoint is eligible for this local commit. The concurrent controller changes and the separate NLP integration work must remain outside this graphics batch.
+
+## Preserved baseline
+
+`verification/Temp/TeaStallArt-20261028-100714/` contains the pre-edit dirty-state patch, scene and shader copies, provenance and the actual prior in-game `Arrival-world.png` / `Arrival-conversation.png` captures. Those captures came from the matching 960x540, textScale 1.3, brightness 0.9 rehearsal at `PresentationPlaytests/run-20261028-092152133-3d51775b`; they are existing baseline images, not fresh captures from this paused batch. Current graphics had not been changed by the profiling-only work.
+
+The Windows Security firewall-access prompt for “paridhwani” covered Unity when fresh capture was attempted. No security prompt action was performed. The user explicitly deferred that work until home. Earlier restrictions on the owned Project-pane close action remain in force.
+
+## Resume only after the user says the prompt is closed
+
+1. Inspect current checkout, active tasks and Unity state. The separate NLP task is `01a181fc-2566-748b-93f0-cb469493103d`; avoid its API/adapter files and competing build/index operations. Preserve all uncommitted controller work.
+2. Review this draft before generation. In particular, inspect ground/drain edge blending, stone seams, puddle height/winding and whether the effect is visibly better rather than merely more geometry.
+3. Refresh/compile in Unity. The added generator changes the world recipe signature, so regeneration is required before native play. Preserve any current scene edits first; do not discard unsaved work.
+4. Generate the benchmark through the normal safe Editor workflow. Inspect material/mesh imports and shader errors. Do not call a source check visual verification.
+5. Run the focused presentation rehearsal and compare Arrival/world and tea-conversation captures using the same 960x540 viewport, brightness 0.9, textScale 1.3 and existing fixed poses. Add a useful actual in-game ground/plinth/drain close-up. Inspect the images and iterate as needed, keeping wetness restrained and signs/faces clear.
+6. Verify the actual tea approach, drain crossing, vendor interaction, conversation camera and controller-accessible actions. Existing path/collision anchors must be retained. Recheck unrelated demo routes only as relevant to shared shader/generation changes. No broad performance rerun is required for this preview.
+7. After visual verification, commit only any further fixes and this batch's separable generated assets. The source draft may already be committed locally under the user's later independent-work instruction; that does not establish visual acceptance. The scene/materials already contain unrelated dirty work; do not commit the whole working tree or silently include the controller/NLP implementation. If generated scene changes cannot be separated safely, retain them locally and state that limitation.
+8. Deliver actual screenshots, not concept art. Library create/prepared-upload tools are available, but no upload has been made and no `library_file_id` exists yet. Read the current Library skill/helper instructions, upload the validated preview and return only confirmed IDs/links so it can be attached in the Android conversation. If transfer fails, give exact local paths and the real blocker.
+
+The prior verified runnable archive remains at `My project (1)/Builds/Verified/Paridhwani-ee83297-with-controller-20261028-092644.zip`; it predates this unrendered graphics draft and was not modified. No further push is authorized.

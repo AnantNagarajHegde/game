@@ -1,0 +1,40 @@
+Tea-stall ground/plinth/drain pass — SOURCE-ONLY draft, 28 October 2026
+
+No Unity scene regeneration, shader compilation, new render capture, native
+collision/input acceptance or Library upload is claimed. User is away and the
+Windows Security prompt must be handled by the user later. No UI/security action
+or denied-action retry was performed during this independent source batch.
+
+Reviewed/fixed:
+- Height/pigment/wetness feathering at the four patch borders; inherited texture
+  scale stays aligned with the existing WetEarth materials.
+- Bevel limited by stone thickness, smaller floor joints, staggered plinth seams
+  and non-overlapping front/side stone-strip corners.
+- Original solid plinth retained as dark backing; original colliders, footstep
+  tags, interaction anchors, NPCs, cameras, controls and input code unchanged.
+- Local water roughness 0.78; texture properties set before material saving.
+- Shared shader feature defaults to zero for legacy materials.
+- Separate local RNG; no calls added to the world's placement RNG.
+
+PASSED: runtime/editor/Player-branch source compilation and 387 existing logic
+assertions in the current combined working tree.
+PASSED: separate Editor compilation of the art source against the committed
+baseline, without the uncommitted controller/NLP sources.
+PASSED: temporary .NET reflection check of the actual compiled SurfaceGeometry
+builder — 5 representative stone profiles, 200 valid/finite/nondegenerate/outward
+triangles; 4 relief-border blend cases and an interior case.
+The temporary external check driver emitted UAC0020 for Assembly.LoadFrom;
+it runs outside Unity and is not product/runtime code.
+
+Baseline/backups and source-check output:
+verification/Temp/TeaStallArt-20261028-100714/
+Existing actual before images: Arrival-world.png and Arrival-conversation.png
+from PresentationPlaytests/run-20261028-092152133-3d51775b. They are not new
+captures from this blocked batch. No after image or Library file ID exists.
+
+Next gate: after user confirms the prompt is closed, refresh/regenerate safely,
+inspect shader/material/mesh imports, capture matched arrival/conversation and
+ground/drain close-up views, review appearance, then verify walking/crossing,
+interaction/camera/controller access and deliver actual screenshots to Library.
+No further broad benchmark is needed to judge this graphics draft.
+No push, purchase, new tool, security change or unrelated source commit.
