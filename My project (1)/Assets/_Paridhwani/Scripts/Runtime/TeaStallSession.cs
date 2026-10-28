@@ -308,6 +308,7 @@ namespace Paridhwani
         }
         public void Close()
         {
+            if(ui.Mode=="chapter-replay"){ui.CloseChapterReplay();return;}
             if(ui.Mode=="main-menu"){if(Progress.arrivalAcknowledged)ContinueMainVisit();return;}
             if(ui.Mode=="new-visit-confirm"){ui.ShowMainMenu();return;}
             if(ui.Mode=="pause" && TitleSettings){TitleSettings=false;ui.ShowMainMenu();return;}

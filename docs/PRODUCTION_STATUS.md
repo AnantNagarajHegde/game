@@ -6,7 +6,7 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
 - Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
-- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 287 standalone assertions pass. These standalone checks are not a native Player build.
+- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 292 standalone assertions pass. These standalone checks are not a native Player build.
 - Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. The corrected automated native sequence passed on 28 October: arrival through reunion, original deed, return, council decision, epilogue, credits, completed-story restore, isolated practice and new-visit settings. It advanced 6,800 frames and produced 51 captures. The library approach now walks around Somanna and the bench through the open east side of the veranda.
 - World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
 
@@ -16,7 +16,7 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 - result.txt records VILLAGE_SMOKE_OK, Frames: 6800; Editor.log records PARIDHWANI_EDITOR_SMOKE_EXIT 0.
 - Fixed Game view selected through the Editor UI: 960x540. VILLAGE_DIALOGUE_LAYOUT recorded 960x540 at text scale 1.3. The final capture was visually reviewed: long literal text scrolls beneath the fixed header/footer; Leave, notebook and Original line remain visible. The text assertion targets actual speech labels and matches the original reply, rather than incorrectly including Unity's unrelated TextField label.
 - The route failure was reproduced at player (-5.15, 0.08, 11.20), beside Somanna and the veranda bench. Correcting the scripted approach preserved physical collision and verified archive entry/exit, without teleporting through the obstacle.
-- This is a scripted Editor regression, not a new standalone build, complete human playthrough, performance benchmark or final Kannada acceptance. The small-window layout and story checks passed within that scope.
+- This is a scripted Editor regression, not a new standalone build, complete human playthrough, performance benchmark or final Kannada acceptance. It predates the subsequent typed-NLP, cancellation and menu changes; their added native assertions still need execution. The small-window layout and story checks passed within the recorded run's scope.
 
 ## Engine test workflow
 
@@ -73,3 +73,12 @@ Added IDialogueTextService and DialogueServiceAdapter to bind an engine-specific
 Reproduced and fixed an escaping transport-cancellation callback exception. Request cancellation now contains/counts callback failures, wakes ignored-cancellation requests, preserves reentrant replacements and keeps deadline cleanup separate from a completed transport. The session rejects stale generations immediately before presentation, including completed replies queued before a service change. Provider replacement/detachment cancels pending work, clears optional text and refreshes authored conversation controls. SetOptionalDialogueService provides explicit Unity-thread attachment/detachment; the service owner retains connection disposal.
 
 All runtime/editor sources compile and 287 standalone assertions pass, including 12 lifecycle regression checks. New in-engine smoke assertions cover delayed retired-provider replies, replacement and detach without quest effects, but this pass does not claim their native execution. The actual engine/HTTP/authentication contract remains pending. The generated world recipe is unchanged.
+
+
+## Chapter-menu navigation and settings accessibility pass (28 October 2026)
+
+Chapter practice now remembers whether it was opened from the title, Pause or credits. Its Back button and Escape close path return to the same screen and restore focus to the launching control. Rebuilding the selector retains its origin, while opening it from another screen replaces the old context. Closing title practice cannot release the player into an unacknowledged arrival.
+
+Pause/settings and chapter selection keep a fixed Back control outside their scrollable content. Headings and controls scroll within the remaining space. Changing text size live recalculates both card width and height limits, preserving the slider and its focus instead of rebuilding the screen. Menu scroll areas can shrink in short windows while their contents remain scrollable.
+
+Runtime/editor compilation and 292 standalone assertions pass. Added native assertions cover title/Pause/credits return and focus, arrival protection, live .85-to-1.3 text scaling, settings scrolling and visible Back controls; standalone runs request a 640x480 viewport for those layout checks. The Editor's actual Game-view dimensions may differ. These new native assertions and visual layout have not been executed during this pass because desktop-control tools are unavailable; no new player or rendered acceptance is claimed. No generator recipes were changed.

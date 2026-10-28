@@ -90,9 +90,23 @@ namespace Paridhwani
             AcceptingEvidenceAnswers=false; SelectingBicycleParts=false;
             Mode=mode; modal.Clear(); modal.style.display=DisplayStyle.Flex;
             var card=new VisualElement(); Class(card,cls); modal.Add(card);
+            ApplyCardScale(card,mode);RefreshHUD();return card;
+        }
+        void ApplyCardScale(VisualElement card,string mode)
+        {
             card.style.scale=new Scale(Vector3.one*session.Progress.textScale);
             card.style.maxWidth=Length.Percent((mode=="conversation"?94:92)/session.Progress.textScale);
-            card.style.maxHeight=Length.Percent(85/session.Progress.textScale); RefreshHUD(); return card;
+            card.style.maxHeight=Length.Percent(85/session.Progress.textScale);
+        }
+        ScrollView MenuScroll(VisualElement shell,string name)
+        {
+            var scroll=new ScrollView(ScrollViewMode.Vertical){name=name};Class(scroll,"evidence-scroll");
+            scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;scroll.style.minHeight=48;
+            scroll.contentContainer.style.flexShrink=0;shell.Add(scroll);return scroll;
+        }
+        void FocusLater(VisualElement element)
+        {
+            if(element!=null)element.schedule.Execute(()=>{if(root.Contains(element))element.Focus();});
         }
         void Line(VisualElement parent,TeaLine line,bool choice=false)
         {
@@ -295,25 +309,25 @@ namespace Paridhwani
         }
         public void ShowPause()
         {
-            var shell=Card("pause","paper");shell.style.height=Length.Percent(85);
-            var card=new ScrollView();Class(card,"evidence-scroll");shell.Add(card);
-            Add(card,"PAUSE  /  UNDER THE EAVES","eyebrow"); Add(card,"A moment to yourself","title");
+            var shell=Card("pause","paper");shell.name="pause-card";shell.style.height=Length.Percent(85);
+            Add(shell,session.TitleSettings?"SETTINGS / KALYANAPURA":"PAUSE  /  UNDER THE EAVES","eyebrow").style.flexShrink=0;
+            var back=Button(shell,session.TitleSettings?"Back to title":"Return to the village",session.Close);back.name="pause-back";back.style.flexShrink=0;FocusLater(back);
+            var card=MenuScroll(shell,"pause-scroll");Add(card,"A moment to yourself","title");
             Add(card,"Rain can wait. Your reading and conversations have no countdown.","body");
-            Button(card,session.TitleSettings?"Back to title":"Return to the village",session.Close);
             if(!session.TitleSettings){
             Button(card,"Title menu",session.OpenTitle,"quiet-button");
             Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
             Button(card,"Open field notebook",session.OpenNotebook);
             if(session.IsPracticeVisit) Button(card,"Return to the main visit",session.ReturnToCompletedStory);
-            else Button(card,"Practise an earlier chapter",ShowChapterReplay);
+            else Button(card,"Practise an earlier chapter",ShowChapterReplay).name="pause-practice";
             if(session.Progress.storyCompleted) Button(card,"Credits and phrase recap",ShowCredits);
             Button(card,"Save this visit",()=>{session.Save(); ShowPause();});
             Button(card,"Restore saved visit",session.Load);
             }
             var audio=new Toggle("Mute rain and river"){value=session.Progress.muted};
             audio.RegisterValueChangedCallback(e=>{session.Progress.muted=e.newValue;session.SettingsChanged();}); card.Add(audio);
-            var size=new Slider("Text size",.85f,1.3f){value=session.Progress.textScale};
-            size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;shell.style.scale=new Scale(Vector3.one*e.newValue);shell.style.maxHeight=Length.Percent(85/e.newValue);session.SettingsChanged();}); card.Add(size);
+            var size=new Slider("Text size",.85f,1.3f){name="settings-text-size",value=session.Progress.textScale};
+            size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;ApplyCardScale(shell,"pause");session.SettingsChanged();}); card.Add(size);
             var sensitivity=new Slider("Look sensitivity",.05f,.3f){value=session.Progress.sensitivity};
             sensitivity.RegisterValueChangedCallback(e=>{session.Progress.sensitivity=e.newValue;session.SettingsChanged();}); card.Add(sensitivity);
             var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);

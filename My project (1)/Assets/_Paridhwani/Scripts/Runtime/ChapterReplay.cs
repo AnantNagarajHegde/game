@@ -1,6 +1,14 @@
 using UnityEngine;
 namespace Paridhwani {
  public enum ReplayChapter {Arrival,Library,Mess,Market,River,Temple,Archive,Panchayat,Checkpost,Ridge,Farm,Deed,Return,Council,Epilogue}
+ public sealed class ChapterReplayNavigation {
+ public string OriginMode {get;private set;}="pause";
+ public string BackLabel => OriginMode=="main-menu"?"Back to title":OriginMode=="credits"?"Back to credits":"Back to Pause";
+ public void OpenFrom(string mode) {
+ if(mode=="chapter-replay")return;
+ OriginMode=mode=="main-menu" || mode=="credits"?mode:"pause";
+ }
+ }
  public static class ChapterReplay {
  public static string Name(ReplayChapter c) {string[] names={"Arrival and tea","Library introduction","Shanthakka's mess","Market and timetable","River investigation","Temple witnesses","Library archive","Panchayat notice","Journey to the checkpost","Marked ridge","Gudda Mane reunion","Trunk and original deed","Return with Ananya","Library court council","Later review and epilogue"};return (int)c>=0 && (int)c<names.Length?names[(int)c]:"Unknown chapter";}
  public static bool IsUnlocked(TeaProgress p,ReplayChapter c) {

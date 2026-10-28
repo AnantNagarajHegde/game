@@ -19,7 +19,7 @@ namespace Paridhwani {
  if(feedback!="")Add(card,feedback,"feedback");
  var resume=Button(card,session.IsPracticeVisit?"Continue practice":"Continue visit",session.ContinueMainVisit);resume.SetEnabled(session.HasSavedVisit);
  if(session.IsPracticeVisit)Button(card,"Return to the main visit",session.ReturnToCompletedStory);
- else {Button(card,"Begin a new story",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});Button(card,"Practise a reached chapter",ShowChapterReplay,"quiet-button");}
+ else {Button(card,"Begin a new story",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});Button(card,"Practise a reached chapter",ShowChapterReplay,"quiet-button").name="title-practice";}
  Button(card,"Settings",session.OpenTitleSettings,"quiet-button");Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
  }
  public void ShowNewVisitConfirmation() {

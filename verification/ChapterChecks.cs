@@ -31,6 +31,14 @@ public static class ChapterChecks {
  public string Encode(TeaProgress p) => "{\"version\":"+p.version+",\"sign\":"+(p.signRead?"true":"false")+"}";
  public TeaProgress Decode(string json) => new TeaProgress {version=json.Contains("\"version\":99")?99:1,signRead=json.Contains("\"sign\":true")};
  }
+ static void ReplayMenuChecks() {
+ var menu=new ChapterReplayNavigation();
+ Check(menu.OriginMode=="pause","chapter selector has a safe modal return by default");
+ menu.OpenFrom("main-menu");Check(menu.OriginMode=="main-menu" && menu.BackLabel=="Back to title","title practice returns to title rather than gameplay");
+ menu.OpenFrom("chapter-replay");Check(menu.OriginMode=="main-menu","chapter selector rebuild preserves the original title context");
+ menu.OpenFrom("credits");Check(menu.OriginMode=="credits" && menu.BackLabel=="Back to credits","credits practice replaces the previous title context");
+ menu.OpenFrom("pause");Check(menu.OriginMode=="pause" && menu.BackLabel=="Back to Pause","pause practice does not retain a previous credits return");
+ }
  static void InputChecks() {
  Check(!VillageInputPolicy.ChoiceShortcut("conversation",true),"typing digits cannot choose dialogue");
  Check(!VillageInputPolicy.ChoiceShortcut("evidence",true),"typing lock digits cannot choose evidence");
@@ -201,7 +209,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ public static int Main() { ReplayMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

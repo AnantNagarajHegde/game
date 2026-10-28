@@ -387,14 +387,25 @@ namespace Paridhwani
             Check(session.Progress.libraryProtected && session.Progress.epilogueStarted && session.epilogueSet.activeSelf && !session.finaleSet.activeSelf,"later review reopens library");yield return Shot("45-later-review");session.Close();
             session.StartConversation(companion);session.Choose(0);session.ChooseEnding(StoryEnding.Stay);Check(!session.Progress.storyCompleted,"ending choice still awaits explicit finish");session.FinishStory();
             Check(session.Progress.storyCompleted && session.ui.Mode=="credits","credits reached with recoverable ending");yield return Shot("46-ending-recap");
+            session.ui.ShowChapterReplay();session.Close();yield return new WaitForSecondsRealtime(.1f);
+            Check(session.ui.Mode=="credits" && (session.ui.GetComponent<UIDocument>().rootVisualElement.focusController.focusedElement as VisualElement)?.name=="credits-practice","chapter close returns to credits and its launch control");
+            session.Close();session.ui.ShowPause();session.ui.ShowChapterReplay();session.Close();yield return new WaitForSecondsRealtime(.1f);
+            Check(session.ui.Mode=="pause" && (session.ui.GetComponent<UIDocument>().rootVisualElement.focusController.focusedElement as VisualElement)?.name=="pause-practice","chapter close returns to Pause and its launch control");
+            session.Close();
             session.StartPracticeVisit();Check(session.IsPracticeVisit && !session.Progress.storyCompleted && !session.Progress.deedRetrieved && !session.finaleSet.activeSelf && !session.epilogueSet.activeSelf,"practice resets staging without main story overwrite");
             session.Progress.signRead=true;session.Save();session.ReturnToCompletedStory();
             Check(!session.IsPracticeVisit && session.Progress.storyCompleted && session.Progress.libraryProtected && session.Progress.endingChoice==StoryEnding.Stay,"practice returns to original completed save");
             session.Save();session.Load();Check(session.Progress.storyCompleted && session.Progress.deedRetrieved,"final save survives restoration");
             session.OpenNotebook();yield return Shot("47-completed-notebook");session.Close();
-            session.OpenTitle();Check(session.ui.Mode=="main-menu","title available from completed visit");session.OpenTitleSettings();session.Close();Check(session.ui.Mode=="main-menu","title settings return to title");session.ContinueMainVisit();Check(!session.ui.IsModal,"continue returns to saved visit");
+            session.OpenTitle();Check(session.ui.Mode=="main-menu","title available from completed visit");
+            session.ui.ShowChapterReplay();session.ui.ShowChapterReplay();session.Close();yield return new WaitForSecondsRealtime(.1f);
+            Check(session.ui.Mode=="main-menu" && (session.ui.GetComponent<UIDocument>().rootVisualElement.focusController.focusedElement as VisualElement)?.name=="title-practice","chapter rebuild/close returns to title and its launch control");
+            session.OpenTitleSettings();session.Close();Check(session.ui.Mode=="main-menu","title settings return to title");session.ContinueMainVisit();Check(!session.ui.IsModal,"continue returns to saved visit");
             session.StartChapterPractice(ReplayChapter.Deed);Check(session.IsPracticeVisit && session.Progress.trunkLocationKnown && !session.Progress.trunkOpened && player.transform.position.z>40,"chapter-select practice reaches unopened trunk");session.ReturnToCompletedStory();Check(session.Progress.storyCompleted,"chapter practice preserves main ending");
             session.BeginNewMainVisit();Check(!session.Progress.storyCompleted && !session.Progress.trunkOpened && session.ui.Mode=="arrival","explicit new main visit resets story after archive");
+            session.OpenTitle();session.ui.ShowChapterReplay();session.Close();
+            Check(session.ui.Mode=="main-menu" && !session.Progress.arrivalAcknowledged,"chapter close cannot bypass the new-story arrival gate");
+            session.ContinueMainVisit();Check(session.ui.Mode=="arrival","continue still requires arrival acknowledgment");
             session.Progress.reducedMotion=true;session.Progress.invertY=true;session.Progress.masterVolume=.35f;session.Progress.ambienceVolume=.4f;session.Progress.footstepVolume=.2f;session.Progress.quality=VillageQuality.Low;session.SettingsChanged();
             Check(player.reducedMotion && player.invertY && Mathf.Abs(AudioListener.volume-.35f)<.01f,"accessibility and audio preferences applied");
             yield return null;
@@ -444,6 +455,26 @@ namespace Paridhwani
             Check(session.OptionalDialogueText==null && !session.HasOptionalDialogueLine && session.Turn==authoredTurn && !session.Progress.greeted,"detach restores authored line without a quest effect");
             session.Choose(0);Check(session.Progress.greeted && session.OptionalDialogueInput=="","authored reply retains quest authority and clears the previous draft");session.Close();session.Save();session.Load();
             Check(session.Progress.reducedMotion && session.Progress.invertY && session.Progress.quality==VillageQuality.Low && Mathf.Abs(session.Progress.ambienceVolume-.4f)<.01f && Mathf.Abs(session.Progress.footstepVolume-.2f)<.01f,"presentation and audio preferences survive restoration");
+            int settingsWidth=Screen.width,settingsHeight=Screen.height;var settingsMode=Screen.fullScreenMode;float settingsScale=session.Progress.textScale;
+            Screen.SetResolution(640,480,FullScreenMode.Windowed);yield return new WaitForSecondsRealtime(.4f);
+            session.ui.ShowPause();var menuRoot=session.ui.GetComponent<UIDocument>().rootVisualElement;
+            var textSlider=menuRoot.Q<Slider>("settings-text-size");textSlider.value=.85f;yield return null;textSlider.value=1.3f;
+            yield return new WaitForSecondsRealtime(.15f);
+            foreach(string controlName in new[]{"pause-card","pause-back"}) {
+                var controlBounds=menuRoot.Q(controlName).worldBound;var viewport=menuRoot.worldBound;
+                Check(controlBounds.width>0 && controlBounds.height>0 && controlBounds.xMin>=viewport.xMin-1 && controlBounds.xMax<=viewport.xMax+1 && controlBounds.yMin>=viewport.yMin-1 && controlBounds.yMax<=viewport.yMax+1,"settings control remains inside the viewport after live scaling: "+controlName);
+            }
+            var settingsScroll=menuRoot.Q<ScrollView>("pause-scroll");
+            Check(settingsScroll.contentViewport.worldBound.height>0 && settingsScroll.verticalScroller.highValue>0 && !settingsScroll.Contains(menuRoot.Q("pause-back")),"settings scroll retains a separate fixed Back button");
+            settingsScroll.scrollOffset=new Vector2(0,settingsScroll.verticalScroller.highValue);yield return null;
+            yield return Shot("50-settings-large-text");
+            session.ui.ShowChapterReplay();yield return new WaitForSecondsRealtime(.15f);
+            var chapterBack=menuRoot.Q("chapter-replay-back").worldBound;var chapterViewport=menuRoot.worldBound;
+            Check(chapterBack.xMin>=chapterViewport.xMin-1 && chapterBack.xMax<=chapterViewport.xMax+1 && chapterBack.yMin>=chapterViewport.yMin-1 && chapterBack.yMax<=chapterViewport.yMax+1 && menuRoot.Q<ScrollView>("chapter-replay-scroll").verticalScroller.highValue>0,"chapter list scrolls beneath its visible Back control at maximum text scale");
+            yield return Shot("51-chapter-menu-large-text");session.Close();
+            Check(session.ui.Mode=="pause","large-text chapter selector returns to Pause");
+            session.Progress.textScale=settingsScale;session.SettingsChanged();session.Close();Screen.SetResolution(settingsWidth,settingsHeight,settingsMode);
+            Debug.Log("VILLAGE_MENU_LAYOUT_CHECKED");
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),
                 "VILLAGE_SMOKE_OK\nRender highlights, TPP/FPP transition and return, body visibility, fourteen NPC instances, complete story through protected deed, return, council decision, later review, credits and isolated practice, ridge walking, direct reunion and trunk lead, confirmed checkpost round-trip, route permission, panchayat counter and notice, temple witnesses, enterable archive, explicit day transition, river round-trip, 3D bicycle inspection, nested notebook/evidence return, booking/deduction retries and saved progress passed.\nFrames: "+(Time.frameCount-startFrame));
