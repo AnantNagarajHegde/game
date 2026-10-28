@@ -1,0 +1,831 @@
+{
+    "state": "completed",
+    "startedUtc": "2026-10-28T09:48:49.3054164Z",
+    "completedUtc": "2026-10-28T09:50:02.8303338Z",
+    "currentLocation": "Council / pass 2",
+    "failure": "",
+    "unityVersion": "6000.6.7f1",
+    "operatingSystem": "Windows 11  (10.0.26300)",
+    "processor": "Intel(R) Core(TM) 5 210H",
+    "graphicsDevice": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "graphicsApi": "Direct3D12",
+    "graphicsDriver": "Direct3D 12 [level 12.2]",
+    "processorCount": 12,
+    "systemMemoryMiB": 16011,
+    "graphicsMemoryMiB": 5920,
+    "requestedWidth": 1920,
+    "requestedHeight": 1080,
+    "method": "Two fixed-view passes; 3 seconds warmup then 600 frames per location. Balanced quality, existing VSync/target FPS preserved. Frame intervals include waits. FrameTimingManager data is delayed; non-positive/unavailable timings have zero samples, not measured zero cost. Memory is a whole-process endpoint snapshot, not location-owned memory. Screenshots and file writes occur outside sampling. Development player; no performance threshold or minimum-spec certification.",
+    "locations": [
+        {
+            "name": "Tea",
+            "quality": "Balanced",
+            "csv": "Tea-1.csv",
+            "capture": "Tea-1.png",
+            "pass": 1,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 1299,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 0.0,
+                "y": 0.04699988663196564,
+                "z": -4.800000190734863
+            },
+            "heading": -32.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 233970722,
+                "unityReserved": 843612160,
+                "managedUsed": 14815232,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 234314546,
+                "unityReserved": 843612160,
+                "managedUsed": 14815232,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.966577337589115,
+                "p50": 6.944798864424229,
+                "p95": 6.950290407985449,
+                "p99": 6.951282732188702,
+                "max": 13.892184011638165
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.966538999999999,
+                "p50": 6.9816,
+                "p95": 7.452,
+                "p99": 9.5922,
+                "max": 13.1834
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 4.045552166666667,
+                "p50": 4.1409,
+                "p95": 5.3526,
+                "p99": 6.5028,
+                "max": 9.0706
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 1.1141831666666655,
+                "p50": 1.0499,
+                "p95": 1.6566,
+                "p99": 2.0722,
+                "max": 2.5277
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 2.904049000000001,
+                "p50": 2.7035,
+                "p95": 4.2256,
+                "p99": 4.7401,
+                "max": 7.4976
+            },
+            "gpuMs": {
+                "samples": 589,
+                "mean": 1.6931918234295404,
+                "p50": 1.656832,
+                "p95": 1.916928,
+                "p99": 1.995776,
+                "max": 2.036736
+            }
+        },
+        {
+            "name": "Market",
+            "quality": "Balanced",
+            "csv": "Market-1.csv",
+            "capture": "Market-1.png",
+            "pass": 1,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 831,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 3.200000047683716,
+                "y": 0.04699988663196564,
+                "z": 8.5
+            },
+            "heading": 60.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 234144760,
+                "unityReserved": 843612160,
+                "managedUsed": 16076800,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 234183908,
+                "unityReserved": 843612160,
+                "managedUsed": 14950400,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.955039823272576,
+                "p50": 6.9444021210074425,
+                "p95": 6.950191222131252,
+                "p99": 6.950885988771915,
+                "max": 13.891390524804592
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.955400499999999,
+                "p50": 6.9256,
+                "p95": 7.3309,
+                "p99": 9.3886,
+                "max": 10.716
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.799773833333333,
+                "p50": 3.9323,
+                "p95": 5.0957,
+                "p99": 5.9104,
+                "max": 9.7106
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.9224386666666662,
+                "p50": 0.8942,
+                "p95": 1.3366,
+                "p99": 1.5965,
+                "max": 1.8085
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.1381973333333333,
+                "p50": 2.8789,
+                "p95": 4.4054,
+                "p99": 4.6531,
+                "max": 5.0203
+            },
+            "gpuMs": {
+                "samples": 596,
+                "mean": 1.6747983892617455,
+                "p50": 1.65376,
+                "p95": 1.799168,
+                "p99": 1.849344,
+                "max": 1.917952
+            }
+        },
+        {
+            "name": "River",
+            "quality": "Balanced",
+            "csv": "River-1.csv",
+            "capture": "River-1.png",
+            "pass": 1,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 279,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": -21.0,
+                "y": 0.11499984562397003,
+                "z": 6.5
+            },
+            "heading": -105.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 234625349,
+                "unityReserved": 843612160,
+                "managedUsed": 16293888,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 234626261,
+                "unityReserved": 843612160,
+                "managedUsed": 15286272,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.966588839422911,
+                "p50": 6.944501306861639,
+                "p95": 6.950191222131252,
+                "p99": 6.950694601982832,
+                "max": 13.891687616705894
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.966877499999999,
+                "p50": 6.9742,
+                "p95": 7.2569,
+                "p99": 9.0703,
+                "max": 15.8261
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.481296666666668,
+                "p50": 3.5726,
+                "p95": 4.5679,
+                "p99": 5.025,
+                "max": 11.589
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.7647168333333326,
+                "p50": 0.7249,
+                "p95": 1.0611,
+                "p99": 1.357,
+                "max": 2.0261
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.470816833333332,
+                "p50": 3.464,
+                "p95": 4.5173,
+                "p99": 4.9383,
+                "max": 5.7111
+            },
+            "gpuMs": {
+                "samples": 597,
+                "mean": 1.3983929246231168,
+                "p50": 1.393664,
+                "p95": 1.4592,
+                "p99": 1.50016,
+                "max": 1.609728
+            }
+        },
+        {
+            "name": "RainLane",
+            "quality": "Balanced",
+            "csv": "RainLane-1.csv",
+            "capture": "RainLane-1.png",
+            "pass": 1,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 639,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 1.399999976158142,
+                "y": 0.04699988663196564,
+                "z": 6.5
+            },
+            "heading": 0.0,
+            "pitch": -10.0,
+            "before": {
+                "unityAllocated": 234634364,
+                "unityReserved": 843612160,
+                "managedUsed": 16547840,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 234634268,
+                "unityReserved": 843612160,
+                "managedUsed": 15441920,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.98975246399641,
+                "p50": 6.944501306861639,
+                "p95": 6.950290407985449,
+                "p99": 6.9510843604803085,
+                "max": 34.71660241484642
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.99008266666667,
+                "p50": 6.9768,
+                "p95": 7.2742,
+                "p99": 9.182,
+                "max": 34.6301
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.656438333333333,
+                "p50": 3.6472,
+                "p95": 4.6868,
+                "p99": 5.2425,
+                "max": 34.3711
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.838095833333333,
+                "p50": 0.8036,
+                "p95": 1.178,
+                "p99": 1.5019,
+                "max": 2.2241
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.3173166666666662,
+                "p50": 3.1725,
+                "p95": 4.4414,
+                "p99": 4.595,
+                "max": 5.3018
+            },
+            "gpuMs": {
+                "samples": 598,
+                "mean": 1.4270553043478271,
+                "p50": 1.41824,
+                "p95": 1.526784,
+                "p99": 1.593344,
+                "max": 1.656832
+            }
+        },
+        {
+            "name": "Council",
+            "quality": "Balanced",
+            "csv": "Council-1.csv",
+            "capture": "Council-1.png",
+            "pass": 1,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 741,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": -2.200000047683716,
+                "y": 0.059999898076057434,
+                "z": 7.300000190734863
+            },
+            "heading": 0.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 235304338,
+                "unityReserved": 843612160,
+                "managedUsed": 14917632,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 235304722,
+                "unityReserved": 843612160,
+                "managedUsed": 16097280,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.9550206589822965,
+                "p50": 6.944798864424229,
+                "p95": 6.950191222131252,
+                "p99": 6.950992159545422,
+                "max": 13.886203058063984
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.954870333333333,
+                "p50": 6.947,
+                "p95": 7.3937,
+                "p99": 9.3248,
+                "max": 11.6732
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.895563166666668,
+                "p50": 4.0161,
+                "p95": 5.1574,
+                "p99": 5.8594,
+                "max": 6.785
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.9155685000000001,
+                "p50": 0.8603,
+                "p95": 1.3458,
+                "p99": 1.7011,
+                "max": 2.3263
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.042076833333333,
+                "p50": 2.8463,
+                "p95": 4.3629,
+                "p99": 4.711,
+                "max": 5.0384
+            },
+            "gpuMs": {
+                "samples": 596,
+                "mean": 1.7132602416107376,
+                "p50": 1.69472,
+                "p95": 1.851392,
+                "p99": 1.936384,
+                "max": 2.013184
+            }
+        },
+        {
+            "name": "Tea",
+            "quality": "Balanced",
+            "csv": "Tea-2.csv",
+            "capture": "Tea-2.png",
+            "pass": 2,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 1299,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 0.0,
+                "y": 0.04699988663196564,
+                "z": -4.800000190734863
+            },
+            "heading": -32.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 235099552,
+                "unityReserved": 843612160,
+                "managedUsed": 15015936,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 235121132,
+                "unityReserved": 843612160,
+                "managedUsed": 16150528,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.989754143481453,
+                "p50": 6.944699678570032,
+                "p95": 6.950389593839645,
+                "p99": 6.951091345399618,
+                "max": 34.72329303622246
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.988433999999996,
+                "p50": 6.9541,
+                "p95": 7.2981,
+                "p99": 9.5249,
+                "max": 32.5949
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.995550833333334,
+                "p50": 4.034,
+                "p95": 5.0277,
+                "p99": 5.4774,
+                "max": 32.4611
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 1.0460288333333327,
+                "p50": 1.0201,
+                "p95": 1.511,
+                "p99": 1.6811,
+                "max": 1.75
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 2.976340833333335,
+                "p50": 2.8932,
+                "p95": 4.1518,
+                "p99": 4.3979,
+                "max": 5.8979
+            },
+            "gpuMs": {
+                "samples": 598,
+                "mean": 1.719542581939801,
+                "p50": 1.696768,
+                "p95": 1.860608,
+                "p99": 1.988608,
+                "max": 2.077696
+            }
+        },
+        {
+            "name": "Market",
+            "quality": "Balanced",
+            "csv": "Market-2.csv",
+            "capture": "Market-2.png",
+            "pass": 2,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 831,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 3.200000047683716,
+                "y": 0.04699988663196564,
+                "z": 8.5
+            },
+            "heading": 60.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 235011602,
+                "unityReserved": 843612160,
+                "managedUsed": 15110144,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 235013162,
+                "unityReserved": 843612160,
+                "managedUsed": 16224256,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.943472479470074,
+                "p50": 6.944501306861639,
+                "p95": 6.950184237211943,
+                "p99": 6.950892973691225,
+                "max": 6.951488088816404
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.943507499999992,
+                "p50": 6.9508,
+                "p95": 7.2957,
+                "p99": 9.3075,
+                "max": 10.4332
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.6426321666666657,
+                "p50": 3.7225,
+                "p95": 4.7407,
+                "p99": 5.2898,
+                "max": 5.77
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.8808906666666678,
+                "p50": 0.8533,
+                "p95": 1.2306,
+                "p99": 1.3938,
+                "max": 1.8174
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.284152666666666,
+                "p50": 3.2984,
+                "p95": 4.3736,
+                "p99": 4.6635,
+                "max": 5.366
+            },
+            "gpuMs": {
+                "samples": 599,
+                "mean": 1.663647839732889,
+                "p50": 1.649664,
+                "p95": 1.769472,
+                "p99": 1.820672,
+                "max": 1.84832
+            }
+        },
+        {
+            "name": "River",
+            "quality": "Balanced",
+            "csv": "River-2.csv",
+            "capture": "River-2.png",
+            "pass": 2,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 279,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": -21.0,
+                "y": 0.11499984562397003,
+                "z": 6.5
+            },
+            "heading": -105.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 234980334,
+                "unityReserved": 843612160,
+                "managedUsed": 15224832,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 234980574,
+                "unityReserved": 843612160,
+                "managedUsed": 16363520,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.978197967788826,
+                "p50": 6.944699678570032,
+                "p95": 6.950191222131252,
+                "p99": 6.950892973691225,
+                "max": 27.773497626185417
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.9786091666666605,
+                "p50": 6.9304,
+                "p95": 7.2637,
+                "p99": 9.065,
+                "max": 28.226
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.4761850000000027,
+                "p50": 3.5216,
+                "p95": 4.5513,
+                "p99": 5.043,
+                "max": 28.1372
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.780369333333334,
+                "p50": 0.7292,
+                "p95": 1.1301,
+                "p99": 1.363,
+                "max": 2.4421
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.4876215000000026,
+                "p50": 3.4044,
+                "p95": 4.5774,
+                "p99": 4.8456,
+                "max": 5.0803
+            },
+            "gpuMs": {
+                "samples": 599,
+                "mean": 1.4072307178631043,
+                "p50": 1.398784,
+                "p95": 1.492992,
+                "p99": 1.599488,
+                "max": 1.649664
+            }
+        },
+        {
+            "name": "RainLane",
+            "quality": "Balanced",
+            "csv": "RainLane-2.csv",
+            "capture": "RainLane-2.png",
+            "pass": 2,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 639,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": 1.399999976158142,
+                "y": 0.04699988663196564,
+                "z": 6.5
+            },
+            "heading": 0.0,
+            "pitch": -10.0,
+            "before": {
+                "unityAllocated": 235039370,
+                "unityReserved": 843612160,
+                "managedUsed": 15376384,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 235039522,
+                "unityReserved": 843612160,
+                "managedUsed": 16510976,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.943441009304176,
+                "p50": 6.9444021210074425,
+                "p95": 6.950191222131252,
+                "p99": 6.950694601982832,
+                "max": 6.951587274670601
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.943324166666661,
+                "p50": 6.9464,
+                "p95": 7.2408,
+                "p99": 9.1568,
+                "max": 10.7475
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.5871084999999954,
+                "p50": 3.7187,
+                "p95": 4.6832,
+                "p99": 5.2627,
+                "max": 6.113
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.8398144999999999,
+                "p50": 0.7993,
+                "p95": 1.1904,
+                "p99": 1.3918,
+                "max": 1.6901
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.3405871666666656,
+                "p50": 3.2787,
+                "p95": 4.4852,
+                "p99": 4.7207,
+                "max": 5.4582
+            },
+            "gpuMs": {
+                "samples": 597,
+                "mean": 1.436932716917922,
+                "p50": 1.42848,
+                "p95": 1.533952,
+                "p99": 1.574912,
+                "max": 1.6128
+            }
+        },
+        {
+            "name": "Council",
+            "quality": "Balanced",
+            "csv": "Council-2.csv",
+            "capture": "Council-2.png",
+            "pass": 2,
+            "width": 1920,
+            "height": 1080,
+            "vSyncCount": 1,
+            "targetFrameRate": 60,
+            "focusedFrames": 600,
+            "visibleRenderers": 741,
+            "renderScale": 0.8999999761581421,
+            "position": {
+                "x": -2.200000047683716,
+                "y": 0.059999898076057434,
+                "z": 7.300000190734863
+            },
+            "heading": 0.0,
+            "pitch": 17.0,
+            "before": {
+                "unityAllocated": 235646297,
+                "unityReserved": 843612160,
+                "managedUsed": 15855616,
+                "processWorkingSet": 0
+            },
+            "after": {
+                "unityAllocated": 235647633,
+                "unityReserved": 843612160,
+                "managedUsed": 17068032,
+                "processWorkingSet": 0
+            },
+            "frameMs": {
+                "samples": 600,
+                "mean": 6.989760136542221,
+                "p50": 6.944593042135239,
+                "p95": 6.950191222131252,
+                "p99": 6.950786337256432,
+                "max": 34.72428396344185
+            },
+            "cpuTotalMs": {
+                "samples": 600,
+                "mean": 6.990303333333338,
+                "p50": 6.953,
+                "p95": 7.2628,
+                "p99": 9.349,
+                "max": 30.9575
+            },
+            "mainThreadMs": {
+                "samples": 600,
+                "mean": 3.7363903333333366,
+                "p50": 3.7109,
+                "p95": 4.7184,
+                "p99": 5.2942,
+                "max": 30.8563
+            },
+            "renderThreadMs": {
+                "samples": 600,
+                "mean": 0.8653730000000007,
+                "p50": 0.8371,
+                "p95": 1.2167,
+                "p99": 1.3706,
+                "max": 1.5254
+            },
+            "presentWaitMs": {
+                "samples": 600,
+                "mean": 3.237338166666667,
+                "p50": 3.1346,
+                "p95": 4.3803,
+                "p99": 4.5482,
+                "max": 8.0782
+            },
+            "gpuMs": {
+                "samples": 599,
+                "mean": 1.6965201202003333,
+                "p50": 1.6896,
+                "p95": 1.779712,
+                "p99": 1.836032,
+                "max": 1.942528
+            }
+        }
+    ]
+}

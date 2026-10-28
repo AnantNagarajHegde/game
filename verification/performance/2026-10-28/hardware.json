@@ -1,0 +1,14 @@
+{
+  "os": "Windows 11 Home Single Language 10.0.26300",
+  "processor": "Intel Core 5 210H",
+  "physicalCores": 8,
+  "logicalProcessors": 12,
+  "ramGiB": 15.64,
+  "display": "1920x1200 144 Hz",
+  "powerPlan": "Balanced",
+  "gpus": [
+    "Intel Graphics driver 32.0.101.7076",
+    "NVIDIA GeForce RTX 4050 Laptop GPU driver 32.0.16.1692"
+  ],
+  "note": "Read-only Windows inventory. Active rendering GPU is recorded separately by Unity SystemInfo."
+}

@@ -87,8 +87,9 @@ namespace Paridhwani
 #if UNITY_EDITOR
             smoke|=UnityEditor.SessionState.GetBool(AutomatedTestKey,false);
 #endif
-            IsAutomatedTest=smoke;
-            IsIsolatedTestVisit=smoke;
+            bool locationProfile=VillageLocationProfile.Requested;
+            IsAutomatedTest=smoke || locationProfile;
+            IsIsolatedTestVisit=smoke || locationProfile;
 #if UNITY_EDITOR
             IsIsolatedTestVisit|=UnityEditor.SessionState.GetBool(IsolatedTestKey,false);
 #endif
@@ -106,11 +107,12 @@ namespace Paridhwani
             player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);
             CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
-            if(!smoke) { ui.ShowMainMenu(); SetCursor(true); }
+            if(!smoke && !locationProfile) { ui.ShowMainMenu(); SetCursor(true); }
             if(Debug.isDebugBuild)
             {
                 if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
-                if(smoke) gameObject.AddComponent<VillageSmokeCheck>().Begin(this);
+                if(locationProfile) gameObject.AddComponent<VillageLocationProfile>().Begin(this);
+                else if(smoke) gameObject.AddComponent<VillageSmokeCheck>().Begin(this);
             }
         }
         void ApplyState()
