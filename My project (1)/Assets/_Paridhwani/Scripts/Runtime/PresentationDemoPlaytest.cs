@@ -177,6 +177,13 @@ namespace Paridhwani
                     yield return WalkTo(new Vector3(-4.2f, 0, -4.8f));
                     yield return WalkTo(new Vector3(-4.2f, 0, -1.65f));
                     session.player.SetLookAngles(0, 17); yield return new WaitForSecondsRealtime(.4f);
+                    if(session.Nearby!="Talk to Manjunatha")
+                    {
+                        var tea=Array.Find(session.villagers,n=>n && n.role==VillageNpcRole.TeaVendor);
+                        Physics.Linecast(session.player.EyePosition,tea.eyes.position,out var hit,~(1<<2),QueryTriggerInteraction.Ignore);
+                        yield return Capture("Arrival-approach-failed");
+                        Check(false,"demo tea approach: nearby="+session.Nearby+", player="+session.player.transform.position+", vendor="+tea.transform.position+", eyes="+tea.eyes.position+", sightHit="+(hit.collider?hit.collider.name:"none")+", forward="+session.player.view.transform.forward+", transition="+session.player.IsTransitioning+", modal="+session.ui.Mode);
+                    }
                     Check(session.Nearby == "Talk to Manjunatha", "demo tea route reaches the vendor");
                     session.Interact(); yield return new WaitForSecondsRealtime(.9f);
                     session.Choose(0); session.Choose(0); session.Choose(0);

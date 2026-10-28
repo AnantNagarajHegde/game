@@ -98,7 +98,10 @@ namespace Paridhwani.Editor
             var rng = new System.Random(8421);
             var earthMaterial = TeaSurfaceMaterial("TeaApronEarth", "Earth", "795A44", .94f, .8f);
             var stoneMaterial = TeaSurfaceMaterial("TeaApronStone", "StoneDark", "777669", .94f, .6f);
-            var waterMaterial = TeaSurfaceMaterial("TeaApronRainwater", "StoneDark", "647064", .78f, .8f, .12f);
+            var waterMaterial = TeaSurfaceMaterial("TeaApronRainwater", "StoneDark", "51483A", .62f, .8f, .12f);
+            Color waterPigment = waterMaterial.GetColor("_BaseColor").linear;
+            Color mudPigment = earthMaterial.GetColor("_BaseColor").linear;
+            var waterEdge = new Color(mudPigment.r/waterPigment.r*.9f,mudPigment.g/waterPigment.g*.9f,mudPigment.b/waterPigment.b*.9f,.2f);
             // Keep the inherited earth/lane texture scale aligned at the edge of the local patch.
             Color heroColor = earthMaterial.GetColor("_BaseColor").linear;
             var earth = new SurfaceGeometry(); var stone = new SurfaceGeometry(); var water = new SurfaceGeometry(); var gravel = new SurfaceGeometry();
@@ -130,13 +133,13 @@ namespace Paridhwani.Editor
             }
             foreach (var pool in teaDepressions)
             {
-                int center = water.Point(V(pool.center.x, .041f, pool.center.y), new Color(.86f, .9f, .87f, 1));
+                int center = water.Point(V(pool.center.x, .041f, pool.center.y), new Color(.72f, .76f, .7f, 1));
                 const int sides = 15;
                 for (int side = 0; side < sides; side++)
                 {
                     float angle = side * Mathf.PI * 2 / sides, irregular = .88f + .1f * Mathf.Sin(side * 2.8f + pool.center.x);
                     water.Point(V(pool.center.x + Mathf.Cos(angle) * pool.radius.x * irregular, .041f,
-                        pool.center.y + Mathf.Sin(angle) * pool.radius.y * irregular), new Color(1.05f, 1.04f, 1, 1));
+                        pool.center.y + Mathf.Sin(angle) * pool.radius.y * irregular), waterEdge);
                 }
                 for (int side = 0; side < sides; side++) water.Triangle(center, center + 1 + (side + 1) % sides, center + 1 + side);
             }

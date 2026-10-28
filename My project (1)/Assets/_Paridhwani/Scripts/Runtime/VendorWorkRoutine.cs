@@ -33,10 +33,11 @@ namespace Paridhwani
         {
             random=new Random(seed);
             stops=role==VendorWorkRole.Tea ? new[] {
-                new Stop(0,.50f,180,VendorWorkTask.Rest,2.5f,3),
-                new Stop(-.88f,.55f,195,VendorWorkTask.CheckBoiler,3,2.5f),
-                new Stop(.80f,.50f,175,VendorWorkTask.ArrangeCups,4,3),
-                new Stop(0,.50f,165,VendorWorkTask.Rest,4,4)
+                // Keep the existing front approach inside its 3.35 m interaction range.
+                new Stop(0,.352f,180,VendorWorkTask.Rest,2.5f,3),
+                new Stop(-.35f,.352f,210,VendorWorkTask.CheckBoiler,3,2.5f),
+                new Stop(.45f,.352f,175,VendorWorkTask.ArrangeCups,4,3),
+                new Stop(0,.352f,165,VendorWorkTask.Rest,4,4)
             } : new[] {
                 new Stop(.40f,-.25f,180,VendorWorkTask.CheckLedger,4.5f,3.5f),
                 new Stop(0,0,215,VendorWorkTask.Rest,3,4),

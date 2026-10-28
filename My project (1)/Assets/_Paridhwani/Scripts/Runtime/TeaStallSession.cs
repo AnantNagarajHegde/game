@@ -178,7 +178,7 @@ namespace Paridhwani
             if(villagers!=null) foreach(var npc in villagers)
             {
                 if(!npc || !npc.eyes || !npc.gameObject.activeInHierarchy) continue;
-                float d=Vector3.Distance(player.transform.position,npc.transform.position);
+                float d=NpcInteractionDistance(npc);
                 Vector3 sight=npc.eyes.position-player.EyePosition;
                 if(d>nearest || Vector3.Dot(player.view.transform.forward,sight.normalized)<.05f) continue;
                 if(Physics.Linecast(player.EyePosition,npc.eyes.position,out RaycastHit hit,~(1<<2),QueryTriggerInteraction.Ignore) &&

@@ -52,7 +52,7 @@ public static class VendorWorkChecks
     static void LongRun(VendorWorkRole role,int seed)
     {
         var a=new VendorWorkRoutine(role,seed);var tasks=new HashSet<VendorWorkTask>();
-        int boundFailures=0,speedFailures=0,footprintFailures=0;
+        int boundFailures=0,speedFailures=0,footprintFailures=0,approachFailures=0;
         bool clearedTeaCounter=false;
         for(int i=0;i<12000;i++)
         {
@@ -63,6 +63,8 @@ public static class VendorWorkChecks
             if(role==VendorWorkRole.Tea)
             {
                 float x=-4.3f+a.X,z=1.3f+a.Z;
+                // Exact established demo approach, conservatively using player root y=0.
+                if((x+4.2f)*(x+4.2f)+(z+1.65f)*(z+1.65f)+.28f*.28f>=3.35f*3.35f)approachFailures++;
                 // Authored starting anchor already clips the counter. Once escaped,
                 // every later anchor/segment must clear counter, boiler and bench.
                 bool counter=Intersects(x,z,-6.2f,-2.2f,.51f,1.37f);
@@ -78,6 +80,7 @@ public static class VendorWorkChecks
         Check(boundFailures==0,"long run stays inside reachable work patch");
         Check(speedFailures==0,"all travel samples respect walking speed");
         Check(footprintFailures==0,"authored horizontal work paths clear counter/bench/boiler/crate footprints after initial escape");
+        Check(approachFailures==0,"existing tea demo approach retains interaction range throughout work");
         if(role==VendorWorkRole.Tea)Check(clearedTeaCounter,"tea worker leaves pre-existing counter overlap");
         Check(tasks.Contains(VendorWorkTask.Walk)&&tasks.Contains(VendorWorkTask.Rest),"travel alternates with rest");
         Check(tasks.Contains(role==VendorWorkRole.Tea?VendorWorkTask.CheckBoiler:VendorWorkTask.CheckLedger),"first occupational action reached repeatedly");

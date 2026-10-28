@@ -1,6 +1,6 @@
 # Vendor liveliness prototype - source implementation
 
-28 October 2026. **Implemented in source; native import, rendering and playtest acceptance pending.** This is a small implementation of the short routines/work presentation in UNITY_GAME_PLAN sections 8 and 10, not a percentage of a completed living-world system.
+28 October 2026. **Native scripted verification completed; broader human acceptance remains.** This is a small implementation of the short routines/work presentation in UNITY_GAME_PLAN sections 8 and 10, not a percentage of a completed living-world system. See the native follow-up below for current evidence; the earlier source-only record is retained.
 
 ## Behaviors
 
@@ -36,3 +36,15 @@ After the user clears the prompt, safely import the source and check:
 4. Save/load, enter/leave chapter practice/demo, stage Friday, and return to the epilogue. Confirm no routine pulls a staged actor back to the stall or alters story state.
 
 Then capture actual in-game clips/stills of the routines alongside the separately pending tea-stall art preview. Do not treat these source checks as playtesting. No further source feature is needed before this gate.
+
+## Native follow-up after prompt clearance
+
+The user's live visit was saved before stopping Play mode; it retained the shopping note and market lead. The user separately reported that their controller testing worked. This is hands-on user feedback, not exhaustive device or route acceptance.
+
+The first native presentation run failed at the tea approach. The tea route was tightened, and the original service anchor now keeps the prompt reachable while its vendor moves; eye/camera focus still uses the moving actor. Finale/external staging uses the actor's actual position. Added exact-approach offline coverage brings the focused count to **173 assertions**.
+
+The focused four-route native rehearsal passed **93 checks**, producing 15 captures at 960x540, text scale 1.3 and brightness 0.9: `verification/Temp/PresentationPlaytests/run-20261028-155532953-95163a8b/`. The vendor-native run passed **4,252 frame/sample and transition checks**, including repeated occupational cycles, actual collision queries, conversation/notebook/Pause/resumption, isolated save/load and finale staging: `verification/Temp/VendorNative/20261028-155938936/`. Eleven captures were produced; representative work poses, conversation framing and ground/drain views were inspected. The test's first attempt exposed an immediate post-modal assertion before the interaction scan ran; its corrected sequencing waits for camera/scan recovery.
+
+Native import/execution is no longer blocked by the security prompt. No security changes were made by the agent. No fresh standalone build or exhaustive keyboard/controller usability test was performed in this pass. The scripted checks do not establish final animation quality, real prop handling, production art or Kannada acceptance.
+
+Four matched before/after arrival and conversation PNGs are staged in `verification/Temp/ArtPreview-20261028/`. Library transfer failed first at DNS and the escalated upload was rejected by automatic approval review for lacking explicit permission for that destination. No file was uploaded. An explicit upload question is pending; do not retry without the user's answer.

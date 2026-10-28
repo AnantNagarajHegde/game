@@ -15,6 +15,7 @@ namespace Paridhwani
         readonly System.Func<float,float,float,float,bool> allowMovement;
         Vector3 lastPosition;
         Transform player;
+        public bool AtWorkplace => routine.PresentationEnabled;
 
         public VillageVendorWork(VillageNpc npc,VillageCharacter character)
         {
@@ -77,6 +78,19 @@ namespace Paridhwani
                 if(!Physics.ComputePenetration(body,old,root.rotation,obstacle,obstacle.transform.position,obstacle.transform.rotation,out _,out float oldDepth) || depth>=oldDepth-.0001f) return false;
             }
             return true;
+        }
+    }
+
+    public sealed partial class TeaStallSession
+    {
+        float NpcInteractionDistance(VillageNpc npc)
+        {
+            float distance=Vector3.Distance(player.transform.position,npc.transform.position);
+            // Keep a service counter reachable while its vendor moves behind it.
+            // Finales/external staging continue to use the actor's actual position.
+            if(vendorWork.TryGetValue(npc,out var work) && work.AtWorkplace && actorOrigins.TryGetValue(npc.transform,out var anchor))
+                distance=Mathf.Min(distance,Vector3.Distance(player.transform.position,anchor));
+            return distance;
         }
     }
 }
