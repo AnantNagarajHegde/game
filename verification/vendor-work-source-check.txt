@@ -1,0 +1,29 @@
+Vendor liveliness source milestone - 28 October 2026
+
+Scope: Manjunatha and Basavaraju; short local work loops and procedural gestures,
+pause/resume, local movement clearance and story-staging priority.
+No scene generation, input/controller/NLP edits, save-schema or quest changes.
+
+PASS: Verify-VendorWork.ps1 - 167 focused assertions and 72,000 long-run movement
+samples. Actual VendorWorkRoutine.cs executed in .NET. Covers interruptions,
+obstructions, invalid/long frame times, reset, role timing/rest variation and
+selected authored horizontal obstacle footprints. Not Unity physics.
+PASS: Verify-Sources.ps1 - Runtime/Editor/Player-source-branch compilation using
+cached Unity references; 387 existing assertions in combined dirty workspace.
+PASS: separate Runtime source compilation of HEAD baseline plus this batch,
+without concurrent uncommitted controller/NLP code.
+
+NOT RUN: native import/execution, Unity physics/pose alignment, camera/controller
+interaction, save/load/practice/finale rehearsal, rendered screenshots/acceptance.
+Reason: user will handle the pending Windows Security prompt when home; native
+work remains paused. No prompt/security action or denied-window retry attempted.
+
+Known native review point: original tea anchor clips the counter slightly.
+The runtime guard permits only escape that reduces existing penetration; after
+escape the mathematical route clears the sampled authored counter footprint.
+Real collision behavior must be checked in Unity.
+
+Raw local outputs: verification/Temp/VendorWorkVerification/ and
+verification/Temp/vendor-work-combined-source.log
+Full resume checklist: docs/VENDOR_LIVELINESS_CHECKPOINT.md
+Local source milestone only; no push or new verified build.
