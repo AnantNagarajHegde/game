@@ -1,0 +1,25 @@
+2026-10-28 library/mess/market frontage art checkpoint
+Source parent: 72f9c43 plus preserved shared dirty controller/NLP/generated state.
+Scope: VillageFrontageArt.cs + generator call; focused mode in PresentationDemoPlaytest.
+Uses existing WetEarth/WeatheredStone and private materials; no collider/anchor/save/input changes.
+Before native: Temp/PresentationPlaytests/run-20261028-175201706-d583b346/report.json PASSED 22 checks, 10 PNGs.
+Rejected visual draft: run-20261028-175922340-ae71a8bc technically passed 1801 checks, but generated mesh bounds were stale origin unit cubes.
+Corrected by deriving bounds from authored transforms/local collider dimensions; final native bounds checks added.
+Final native: Temp/PresentationPlaytests/run-20261028-180510144-0c64d149/report.json PASSED 6042 checks, 10 PNGs, 960x540.
+Source digest: 0cd08e8f26137412b43f51aa8636a2746fe38c1b673e79586dfbc19b83526526
+6,042 includes individual vertex checks, not 6,042 gameplay scenarios.
+Actual local threshold walks: library; mess crossing/serving approach; market exposed stones/raised floor.
+All three expected interactions/conversations opened; isolated save/load and demo return passed.
+Four floor/crossing skins match live collider footprint/center/top; original colliders retained; new art has no colliders.
+Inspected all nine before and nine final after frontage captures.
+Source compilation Runtime/Editor/Player branches + 387 assertions PASSED: Temp/FrontageArt-20261028/bounds-fixed-source.log
+Preserved: 516 Cartoon*.asset mesh hashes, zero changed.
+Main save SHA256 unchanged: FE156A5D14BE07CA28C8E15F725151B7A8AECF911FB8A9F4CE6A41FABBE40DFA
+Before scene/manifest: Temp/FrontageArt-20261028/
+Preview pairs: Temp/FrontagePreview-20261028/Before/ and After/
+Earlier intermittent store failure remains unresolved: Temp/cartoon-cast-final-source.log; unchanged passing rerun Temp/cartoon-cast-source-rerun.log.
+Pre-existing close Somanna conversation face crop appears before/after; not fixed by this surface pass.
+Not run: standalone, exhaustive hardware/controller, full-story/vendor-cycle, performance or fluent Kannada acceptance.
+New generated outputs and shared dirty scene/controller/NLP work excluded from source commit; regenerate benchmark to reproduce.
+No push, security change, purchase or Library transfer retry. Outbound prepare_uploads capability remains unavailable.
+Next: hero banyan/nearby palms; then distant-terrain and remaining location groups; separate close-conversation camera correction.

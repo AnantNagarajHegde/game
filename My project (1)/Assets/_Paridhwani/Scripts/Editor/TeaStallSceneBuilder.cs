@@ -135,6 +135,7 @@ namespace Paridhwani.Editor
             events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             ExpandVillage(session);
             AddMarketChapter(session);
+            VillageFrontageArt();
             AddRiverChapter(session);
             AddTempleChapter(session);
             AddArchiveChapter(session);

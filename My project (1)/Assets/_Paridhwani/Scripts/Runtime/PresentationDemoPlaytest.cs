@@ -16,6 +16,7 @@ namespace Paridhwani
     {
         const string Menu = "Paridhwani/Run Presentation Demo Playtest";
         const string PendingKey = "Paridhwani.PresentationDemoPlaytest";
+        const string FrontageKey = "Paridhwani.FrontageArtPlaytest";
         [Serializable]
         sealed class Report
         {
@@ -27,7 +28,7 @@ namespace Paridhwani
         TeaStallSession session;
         string output;
         float deadline;
-        bool finished, originalBackground;
+        bool finished, originalBackground, frontageOnly;
         int originalWidth, originalHeight;
         FullScreenMode originalMode;
 
@@ -48,6 +49,16 @@ namespace Paridhwani
             catch { SessionState.SetBool(PendingKey, false); throw; }
         }
 
+        [MenuItem("Paridhwani/Run Frontage Art Playtest", true)]
+        static bool FrontageAvailable()=>Available();
+        [MenuItem("Paridhwani/Run Frontage Art Playtest")]
+        static void RunFrontages()
+        {
+            if(!Available())return;
+            SessionState.SetBool(FrontageKey,true);
+            try {RunFromMenu();}catch {SessionState.SetBool(FrontageKey,false);throw;}
+        }
+
         [InitializeOnLoadMethod]
         static void Register()
         {
@@ -64,6 +75,7 @@ namespace Paridhwani
 
         void Begin()
         {
+            frontageOnly=SessionState.GetBool(FrontageKey,false);SessionState.SetBool(FrontageKey,false);
             originalBackground = Application.runInBackground;
             originalWidth = Screen.width; originalHeight = Screen.height; originalMode = Screen.fullScreenMode;
             Application.runInBackground = true;
@@ -335,6 +347,12 @@ namespace Paridhwani
             // The Editor controls Game-view dimensions; record actual dimensions rather than claiming a requested resolution.
             report.width = Screen.width; report.height = Screen.height;
             yield return Capture("00-title");
+            if(frontageOnly)
+            {
+                yield return FrontageChecks();
+                Check(SourceDigest()==report.sourceSha256,"frontage source/assets stayed unchanged during run");
+                yield break;
+            }
             foreach (var chapter in PresentationDemo.Chapters)
             {
                 session.ui.ShowPresentationDemo(); session.StartPresentationDemo(chapter);
@@ -373,6 +391,51 @@ namespace Paridhwani
                 session.OpenTitle();
             }
             Check(SourceDigest() == report.sourceSha256, "source and scene assets remained unchanged throughout the run");
+        }
+        IEnumerator FrontageChecks()
+        {
+            session.ui.ShowPresentationDemo();session.StartPresentationDemo(ReplayChapter.Arrival);session.Close();
+            var roles=new[]{VillageNpcRole.Librarian,VillageNpcRole.MessOwner,VillageNpcRole.MarketVendor};
+            var names=new[]{"Library","Mess","Market"};
+            var starts=new[]{new Vector3(-4.6f,.2f,8.9f),new Vector3(4,.2f,-.5f),new Vector3(4.7f,.2f,8.9f)};
+            var ends=new[]{new Vector3(-4.6f,.2f,10.55f),new Vector3(7.4f,.2f,.75f),new Vector3(8.15f,.2f,8.85f)};
+            for(int i=0;i<roles.Length;i++)
+            {
+                session.Close();session.player.Restore(starts[i],0);session.player.SetLookAngles(0,22);session.player.blocked=true;
+                yield return new WaitForSecondsRealtime(.7f);yield return Capture("Frontage-"+names[i]+"-approach");
+                if(i==1){yield return WalkTo(new Vector3(5.5f,.2f,-.5f));yield return WalkTo(new Vector3(7.4f,.2f,-.5f));}
+                yield return WalkTo(ends[i]);session.player.SetLookAngles(0,45);
+                yield return new WaitForSecondsRealtime(.7f);yield return Capture("Frontage-"+names[i]+"-threshold");
+                var npc=Array.Find(session.villagers,n=>n && n.role==roles[i]);
+                session.player.SetLookAngles(0,17);yield return new WaitForSecondsRealtime(.7f);
+                Check(session.Nearby=="Talk to "+npc.displayName,"frontage walk retains interaction: "+names[i]+"; nearby="+session.Nearby);
+                session.Interact();yield return new WaitForSecondsRealtime(.8f);
+                Check(session.ActiveNpc==npc && session.ui.Mode=="conversation","frontage conversation opens: "+names[i]);
+                yield return Capture("Frontage-"+names[i]+"-conversation");session.Close();
+            }
+            var art=GameObject.Find("Village Frontage Surface Art");
+            if(art)
+            {
+                Check(art.GetComponentsInChildren<Collider>().Length==0,"frontage art adds no collision");
+                var floorNames=new[]{"Library public veranda","Mess stone threshold","Market raised stone floor","Mess drain crossing"};
+                var skins=new[]{"LibraryFrontageStone","MessFrontageStone","MarketFrontageStone","MessCrossingStone"};
+                for(int i=0;i<floorNames.Length;i++)
+                {
+                    var floor=GameObject.Find("Environment").transform.Find(floorNames[i]).GetComponent<BoxCollider>();
+                    var skin=art.transform.Find(skins[i]).GetComponent<MeshRenderer>().bounds;var bounds=floor.bounds;
+                    Check(Vector2.Distance(new Vector2(skin.center.x,skin.center.z),new Vector2(bounds.center.x,bounds.center.z))<.02f,"frontage skin centered on floor: "+skins[i]);
+                    Check(Mathf.Abs(skin.size.x-bounds.size.x)<.03f && Mathf.Abs(skin.size.z-bounds.size.z)<.03f,"frontage skin matches floor footprint: "+skins[i]);
+                    Check(Mathf.Abs(skin.max.y-bounds.max.y)<.005f,"frontage skin retains walking height: "+skins[i]);
+                    Check(floor.enabled && !floor.GetComponent<MeshRenderer>().enabled,"frontage retains original floor collider: "+skins[i]);
+                }
+                foreach(var filter in art.GetComponentsInChildren<MeshFilter>())
+                {
+                    var mesh=filter.sharedMesh;Check(mesh && mesh.vertexCount>3,"frontage visual mesh exists");
+                    foreach(var point in mesh.vertices)Check(float.IsFinite(point.x)&&float.IsFinite(point.y)&&float.IsFinite(point.z),"finite frontage vertex");
+                }
+            }
+            session.Save();session.Load();Check(session.LastSaveSucceeded,"frontage isolated save/load");
+            session.ReturnToCompletedStory();yield return null;Check(!session.IsPracticeVisit,"frontage returns to isolated main visit");
         }
     }
 }
