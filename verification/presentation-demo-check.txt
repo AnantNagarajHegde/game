@@ -1,0 +1,33 @@
+Presentation demo verification tooling batch - 28 October 2026
+
+Baseline: 96103d6 (existing controller/scene/runner changes preserved separately).
+Added: Paridhwani > Run Presentation Demo Playtest, isolated Editor-only test.
+Coverage when executed: shaped sign bounds/shared atlases, literal guides and
+focus/layout at 1.3 text scale, four demo entries, guide reopen, Pause/selector
+return, main evidence/chapter gates/position/heading/preferences restoration.
+Captures: title and guide/world arrival for each demo scene.
+Report: actual viewport, timestamps, content SHA-256, assertion count, captures,
+passed/failed status; interruption and timeout are failures.
+
+PASSED: Verify-Sources.ps1, runtime/editor/Player-branch source compilation and
+387 assertions with the concurrent workspace changes present.
+PASSED: independently compiled HEAD sources plus PresentationDemo.cs and
+PresentationDemoPlaytest.cs; runtime/editor/Player branches and 367 assertions.
+Independent snapshot: verification/Temp/PresentationCompile-bfeeec7eac524236bd29641099146320
+
+NOT RUN: new focused native presentation test. Native Unity still exposed the
+old menu after Assets > Refresh and Ctrl+R; cached Assembly-CSharp.dll remained
+timestamped 28 October 14:24:53 local, predating the new test script. No fresh
+PresentationPlaytests report or new captures were produced. Import/invocation
+is pending, not denied. Its cause is uncertain; no licensing/accounts changed.
+
+Separate concurrent evidence, not acceptance of this new test harness:
+verification/Temp/StandalonePlaytests/run-20261028-085549450-d3bbacff/report.json
+records buildResult Succeeded, state passed, playerExitCode 0, smokePassed true,
+and VILLAGE_SMOKE_OK with 17,195 frames. Village and tea dialogue captures from
+the earlier run-20261028-085203 were inspected; these remain prototype visuals.
+
+NOT RUN: full manual four-scene route, physical controller, fluent Kannada
+acceptance, performance profiling or a new standalone build of this harness.
+Next: import/execute the focused test, inspect all guide/world captures, then
+rehearse the four routes and fix observed blocking/composition issues.

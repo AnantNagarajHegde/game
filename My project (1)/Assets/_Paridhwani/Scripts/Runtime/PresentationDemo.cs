@@ -66,7 +66,7 @@ namespace Paridhwani {
  Button(card,"Review this demo scene's instructions",ShowPresentationArrival,"quiet-button").name="settings-demo-guide";
  }
  }
- void ShowPresentationArrival() {
+ public void ShowPresentationArrival() {
  var shell=Card("practice-arrival","paper");shell.name="demo-arrival-card";shell.style.height=Length.Percent(85);
  Add(shell,"PRESENTATION DEMO / TEMPORARY VISIT","eyebrow").style.flexShrink=0;
  var enter=Button(shell,"Enter the demo scene",session.Close);enter.name="demo-enter";enter.style.flexShrink=0;FocusLater(enter);
