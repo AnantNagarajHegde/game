@@ -43,7 +43,6 @@ namespace Paridhwani.Editor {
  AddJourneyNpc(s,all,"Raghavendra",V(7.5f,.1f,-3.5f),VillageNpcRole.AutoDriver,"AUTO PICKUP");
  AddJourneyNpc(s,all,"Raghavendra",V(57,.1f,-3),VillageNpcRole.CheckpostDriver,"RETURN TO VILLAGE");
  var kencha=AddJourneyNpc(s,all,"Kencha",V(51,.1f,3.7f),VillageNpcRole.ForestGuard,"FOREST CHECKPOST");
- foreach(var r in kencha.GetComponentsInChildren<Renderer>()) if(r.name=="Work shirt") r.sharedMaterial=mats["GuardKhaki"];
  s.villagers=all.ToArray(); AutoRickshaw(V(10,.05f,-3)); AutoRickshaw(V(61,.05f,-4));
  }
  static Transform Anchor(string name,Vector3 p) { var t=new GameObject(name).transform; t.position=p; return t; }

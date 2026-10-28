@@ -171,11 +171,21 @@ namespace Paridhwani
             var tea=Array.Find(session.villagers,n=>n && n.role==VillageNpcRole.TeaVendor);
             if(!session.player.visual.Find("Head/CartoonPlayer_Face"))yield break;
             Check(!ShaderUtil.ShaderHasError(Shader.Find("Paridhwani/CharacterInk")),"character sample shader compiles");
-            foreach(var actor in new[]{session.player.gameObject,tea.gameObject})
+            var actors=new System.Collections.Generic.List<GameObject>{session.player.gameObject};
+            foreach(var npc in session.villagers)if(npc)actors.Add(npc.gameObject);
+            foreach(var actor in actors)
             {
-                var rig=actor.GetComponentInChildren<VillageCharacter>();
+                var rig=actor.GetComponentInChildren<VillageCharacter>(true);
                 Check(rig && rig.head && rig.leftArm && rig.rightArm && rig.leftLeg && rig.rightLeg,"sample preserves animation pivots");
-                foreach(var filter in actor.GetComponentsInChildren<MeshFilter>())
+                Check(Mathf.Abs(rig.head.localPosition.y-1.66f)<.0001f,"cast retains interaction head height");
+                if(actor!=session.player.gameObject)
+                {
+                    var body=actor.GetComponent<CapsuleCollider>();
+                    Check(body && Mathf.Abs(body.radius-.28f)<.0001f && Mathf.Abs(body.height-1.8f)<.0001f,"cast retains body collision");
+                    var npc=actor.GetComponent<VillageNpc>();Check(npc.eyes==rig.head,"cast retains NPC eye binding");
+                    Check(rig.head.Find("Cartoon"+actor.name.Replace(" ","")+"_Face"),"cast has shaped face: "+actor.name);
+                }
+                foreach(var filter in actor.GetComponentsInChildren<MeshFilter>(true))
                 {
                     var mesh=filter.sharedMesh;if(!mesh || !mesh.name.StartsWith("Cartoon"))continue;
                     var points=mesh.vertices;var indices=mesh.triangles;
@@ -208,6 +218,31 @@ namespace Paridhwani
             yield return Capture("Character-Manjunatha-left");
             camera.transform.position=tea.transform.position+new Vector3(0,1.55f,1.7f);camera.transform.LookAt(tea.transform.position+Vector3.up*1.5f);
             yield return Capture("Character-Manjunatha-rear");
+            var seen=new System.Collections.Generic.HashSet<string>{"Manjunatha"};
+            foreach(var npc in session.villagers)
+            {
+                if(!npc || !seen.Add(npc.displayName))continue;
+                var rig=npc.GetComponentInChildren<VillageCharacter>(true);bool enabled=rig.enabled;var rotation=rig.head.localRotation;
+                var inactive=new System.Collections.Generic.List<GameObject>();
+                for(var node=npc.transform;node;node=node.parent)if(!node.gameObject.activeSelf)inactive.Add(node.gameObject);
+                foreach(var node in inactive)node.SetActive(true);
+                rig.enabled=false;rig.head.localRotation=Quaternion.identity;
+                camera.transform.position=npc.transform.position+npc.transform.forward*2.1f+Vector3.up*1.15f;
+                camera.transform.LookAt(npc.transform.position+Vector3.up*1.03f);
+                yield return Capture("Cast-"+npc.displayName.Replace(" ","-")+"-front");
+                camera.transform.position=npc.transform.position+npc.transform.right*1.0f+Vector3.up*1.55f;
+                camera.transform.LookAt(npc.transform.position+Vector3.up*1.50f);
+                yield return Capture("Cast-"+npc.displayName.Replace(" ","-")+"-side");
+                if(npc.role==VillageNpcRole.Ananya || npc.role==VillageNpcRole.Kamalamma || npc.role==VillageNpcRole.FlowerSeller || npc.role==VillageNpcRole.MessOwner)
+                {
+                    float rearDistance=npc.role==VillageNpcRole.MessOwner?.35f:.65f;
+                    camera.transform.position=npc.transform.position-npc.transform.forward*rearDistance+Vector3.up*1.61f;
+                    camera.transform.LookAt(npc.transform.position+Vector3.up*1.60f);
+                    yield return Capture("Cast-"+npc.displayName.Replace(" ","-")+"-rear");
+                }
+                rig.head.localRotation=rotation;rig.enabled=enabled;
+                foreach(var node in inactive)node.SetActive(false);
+            }
             root.style.display=display;session.ui.HideModal();session.player.enabled=true;
             session.player.Restore(savedPosition,savedHeading);session.player.visual.rotation=savedVisual;
             yield return new WaitForSecondsRealtime(.7f);

@@ -465,49 +465,7 @@ namespace Paridhwani.Editor
             go.GetComponent<Renderer>().sharedMaterial=mats[id%2==0?"Leaf":"LeafLight"];
         }
         static GameObject Character(string name,Vector3 position,bool player,bool female=false)
-        {
-            if(name=="Player" || name=="Manjunatha")return CartoonCharacter(name,position,player);
-            var root=new GameObject(name); root.transform.position=position;
-            var model=new GameObject("Character visual").transform; model.SetParent(root.transform,false);
-            var rig=model.gameObject.AddComponent<VillageCharacter>();
-            var hips=Ellipsoid("Trousers waist",V(0,.86f,0),V(.4f,.3f,.26f),"Trousers",model);
-            Ellipsoid("Work shirt",V(0,1.2f,0),V(.5f,.65f,.31f),player?"Green":female?"ClayLight":"Shirt",model);
-            Cylinder("Neck",V(0,1.53f,0),.065f,.13f,"Skin",false,model);
-            var head=new GameObject("Head").transform; head.SetParent(model,false); head.localPosition=V(0,1.66f,0);
-            rig.head=head;
-            Ellipsoid("Face",V(0,0,0),V(.235f,.3f,.245f),"Skin",head);
-            Ellipsoid("Hair",V(0,.095f,-.026f),V(.246f,.16f,.23f),"Hair",head);
-            Ellipsoid("Nose",V(0,-.012f,.122f),V(.048f,.066f,.052f),"SkinLight",head);
-            foreach(float side in new[]{-1,1})
-            {
-                Ellipsoid("Ear",V(side*.119f,-.012f,0),V(.043f,.078f,.045f),"Skin",head);
-                Ellipsoid("Eye",V(side*.047f,.026f,.109f),V(.025f,.013f,.016f),"Hair",head);
-                Box("Brow",V(side*.046f,.046f,.11f),V(.04f,.009f,.012f),"Hair",false,head);
-            }
-            Box("Mouth",V(0,-.078f,.107f),V(.053f,.009f,.012f),"Wood",false,head);
-            if(!player && !female) Ellipsoid("Moustache",V(0,-.052f,.121f),V(.085f,.026f,.027f),"Hair",head);
-            for(int side=-1;side<=1;side+=2)
-            {
-                var arm=new GameObject("Arm pivot").transform; arm.SetParent(model,false); arm.localPosition=V(side*.24f,1.43f,0);
-                var sleeve=Shape("Shirt sleeve",PrimitiveType.Capsule,V(0,-.10f,0),V(.16f,.145f,.17f),player?"Green":"Shirt",false,arm);
-                Shape("Forearm",PrimitiveType.Capsule,V(0,-.36f,.025f),V(.11f,.29f,.12f),"Skin",false,arm);
-                Ellipsoid("Hand",V(0,-.53f,.04f),V(.11f,.13f,.08f),"Skin",arm);
-                var leg=new GameObject("Leg pivot").transform; leg.SetParent(model,false); leg.localPosition=V(side*.115f,.83f,0);
-                Shape("Trouser leg",PrimitiveType.Capsule,V(0,-.33f,0),V(.17f,.66f,.19f),"Trousers",false,leg);
-                Ellipsoid("Shoe",V(0,-.75f,.055f),V(.17f,.115f,.3f),"Hair",leg);
-                if(side<0) {rig.leftArm=arm;rig.leftLeg=leg;} else {rig.rightArm=arm;rig.rightLeg=leg;}
-            }
-            if(female) Ellipsoid("Hair bun",V(0,.03f,-.14f),V(.18f,.17f,.15f),"Hair",head);
-            if(!player) Box("Shoulder towel",V(-.14f,1.3f,.17f),V(.13f,.55f,.025f),"Cream",false,model);
-            else
-            {
-                Box("Canvas shoulder bag",V(-.28f,1.0f,-.015f),V(.18f,.33f,.28f),"WoodLight",false,model);
-                Beam("Bag strap",V(-.28f,1.03f,.16f),V(.17f,1.47f,.17f),.019f,"Wood",model);
-            }
-            if(!player) { var body=root.AddComponent<CapsuleCollider>(); body.height=1.8f; body.center=V(0,.9f,0); body.radius=.28f; }
-            SetLayer(root,player?2:0);
-            return root;
-        }
+        { return CartoonCharacter(name,position,player); }
         static void SetLayer(GameObject root,int layer)
         { root.layer=layer; foreach(Transform child in root.transform) SetLayer(child.gameObject,layer); }
 

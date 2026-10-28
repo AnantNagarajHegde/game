@@ -39,8 +39,6 @@ The four before/after art previews were offered through the required prepared Li
 
 No files were uploaded, no uncertain mutation is pending, and no Library IDs exist. The blocked action was `exec_command` running the current `library_upload.py` helper for four PNG creates under `verification/Temp/ArtPreview-20261028/`, targeting the user's private ChatGPT Library retention. No alternate upload route was attempted. The current blocker is helper capability, not missing user permission. Preserve the local images for supported parent-side delivery.
 
-## Village-wide consistency follow-up
-
 ## Hair correction checkpoint — 2026-10-28
 
 The player and Manjunatha now use a continuous fitted hair shell, a rounded lower crown, shaped forehead/temple/nape edges and subtle surface combing. Detached triangular fringe and the exposed scalp bands in the original sample are removed. This changes hair only: all 63 generated non-hair meshes matched their pre-correction SHA-256 values. Face, clothing, animation pivots, root collision and camera scale are retained.
@@ -53,7 +51,9 @@ The user's feedback attachment `libfile_a0b3ec928c6c8191b8c97bc87f13708f` was no
 
 No new standalone build, exhaustive physical-controller pass, or full animation acceptance was run for this hair-only change. The user subsequently approved the player/NPC appearance and continuing this style; remaining identities need individual age, hair and clothing variants rather than copies of Manjunatha.
 
-After the user judges the sample, apply the accepted character language to the remaining cast with role/age/clothing variation. Review environments in coherent location groups:
+## Village-wide consistency follow-up
+
+The user approved continuing this style at 17:09 UTC on 28 October. The remaining cast rollout is recorded in `docs/CARTOON_CAST_CHECKPOINT.md`. Review environments in coherent location groups:
 
 | Group | Review and production work |
 |---|---|

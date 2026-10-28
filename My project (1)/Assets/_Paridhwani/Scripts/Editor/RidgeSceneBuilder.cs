@@ -54,8 +54,6 @@ namespace Paridhwani.Editor
             var all=new List<VillageNpc>(s.villagers);
             var ananya=AddJourneyNpc(s,all,"Ananya",V(46,.13f,41.1f),VillageNpcRole.Ananya,"GUDDA MANE VERANDA");
             var elder=AddJourneyNpc(s,all,"Kamalamma",V(50,.13f,41.1f),VillageNpcRole.Kamalamma,"FAMILY ARCHIVE");
-            foreach(var r in ananya.GetComponentsInChildren<Renderer>()) if(r.name=="Work shirt") r.sharedMaterial=mats["AnanyaMustard"];
-            foreach(var r in elder.GetComponentsInChildren<Renderer>()) if(r.name=="Work shirt") r.sharedMaterial=mats["KamalammaCloth"];
             s.villagers=all.ToArray();
         }
     }

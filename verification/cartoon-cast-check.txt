@@ -1,0 +1,28 @@
+2026-10-28 approved cartoon cast rollout, local checkpoint
+Parent source: 5efeac2 plus preserved dirty controller/NLP/generated state.
+Scope: 12 remaining identities; 13 including Manjunatha across 14 NPC roles.
+Both Raghavendra driver instances share identity meshes/materials.
+Source: CartoonCastLooks, CartoonCharacterSample, Character dispatcher; remove obsolete primitive-shirt recolors.
+Native scene generated/imported in Unity 6000.6.7f1.
+Source compilation Runtime/Editor/Player-source branches PASSED; 387 existing assertions PASSED.
+Latest passing source log: Temp/cartoon-cast-mesh-refresh-source.log
+Earlier failure retained: Temp/cartoon-cast-final-source.log, isolated store 'recovery writes fresh primary'.
+Unchanged rerun passed: Temp/cartoon-cast-source-rerun.log; cause unestablished; save code not changed.
+Final native presentation: Temp/PresentationPlaytests/run-20261028-173817275-2397e932/report.json
+Source digest 4292f4b066484507830a67ef9d01779f6dfd1b2a5cade978111f570ee262321d
+PASSED 100888 checks (mostly mesh vertices/triangles), 51 PNGs at 960x540; four demo routes.
+All NPCs checked for animation pivots, eye bindings, 1.66m head anchor and 1.8m/.28m body capsule.
+Inspected all 28 Cast portraits, ordinary arrival/conversation and four world-route views.
+Rear camera fixes avoid farm walls; mess rear is tight. Counter occlusion in front views is retained.
+Kurta serialized/render mismatch fixed with explicit character mesh setters + UploadMeshData(false).
+Final capture visibly confirms continuous kurta; dark footwear separate from grey hair.
+Vendor native: Temp/VendorNative/20261028-172434040/report.json PASSED 4256 sampled checks, 11 captures.
+Two cycles per vendor, physics, modal pause/resumption, isolated save/load, finale staging.
+Approved sample preservation: 67 mesh files, 0 SHA256 changes.
+Main save unchanged SHA256: FE156A5D14BE07CA28C8E15F725151B7A8AECF911FB8A9F4CE6A41FABBE40DFA
+Previews: Temp/CartoonCastPreview-20261028/ (28 Cast portraits plus Gameplay/Conversation).
+No new standalone, exhaustive hardware-controller, fluent Kannada, facial rig or full cloth-animation acceptance.
+No push. Generated scene/assets and unrelated controller/NLP changes excluded from commit.
+Delivery blockers unchanged: inbound Library Windows metadata finalization lacks os.setxattr; outbound prepare_uploads unavailable.
+No transfer retried and no confirmed Library IDs exist.
+Environment consistency review started; next bounded pass is library/mess/market stone thresholds/edges.

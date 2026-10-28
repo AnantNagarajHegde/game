@@ -6,7 +6,7 @@ namespace Paridhwani.Editor
 {
     public static partial class TeaStallSceneBuilder
     {
-        // Original mesh sample for two characters only, pending the user's style review.
+        // Original procedural character language, approved on the player/vendor sample.
         // Ring meshes shape the silhouette; no capsule/sphere body primitives are used.
         readonly struct CharacterRing
         {
@@ -37,7 +37,17 @@ namespace Paridhwani.Editor
         static GameObject CharacterPart(string key,Mesh mesh,Material material,Transform parent,Vector3 offset=default)
         {
             var item=new GameObject(key,typeof(MeshFilter),typeof(MeshRenderer));item.transform.SetParent(parent,false);item.transform.localPosition=offset;
-            mesh.name=key;item.GetComponent<MeshFilter>().sharedMesh=Save(mesh,Root+"/Generated/Meshes/"+key+".asset");item.GetComponent<MeshRenderer>().sharedMaterial=material;return item;
+            mesh.name=key;string path=Root+"/Generated/Meshes/"+key+".asset";
+            var saved=UnityEditor.AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if(saved)
+            {
+                // Explicit mesh setters invalidate the existing graphics buffers.
+                // CopySerialized alone can leave a loaded renderer showing old geometry.
+                saved.Clear();saved.vertices=mesh.vertices;saved.normals=mesh.normals;saved.triangles=mesh.triangles;saved.bounds=mesh.bounds;
+                saved.UploadMeshData(false);UnityEditor.EditorUtility.SetDirty(saved);UnityEngine.Object.DestroyImmediate(mesh);
+            }
+            else saved=Save(mesh,path);
+            item.GetComponent<MeshFilter>().sharedMesh=saved;item.GetComponent<MeshRenderer>().sharedMaterial=material;return item;
         }
         static float FaceSurface(float x)=>.123f*Mathf.Sqrt(Mathf.Max(.05f,1-x*x/(.155f*.155f)));
         static Mesh FaceOval(float x,float y,float width,float height,float raised)
@@ -119,18 +129,20 @@ namespace Paridhwani.Editor
         }
         static GameObject CartoonCharacter(string name,Vector3 position,bool player)
         {
-            bool mature=!player;string id=player?"CartoonPlayer":"CartoonManjunatha";
+            bool sample=player || name=="Manjunatha";var look=LookFor(name);
+            bool mature=!player && name!="Ananya";string id="Cartoon"+name.Replace(" ","");
             var root=new GameObject(name);root.transform.position=position;
             var model=new GameObject("Character visual").transform;model.SetParent(root.transform,false);
             var rig=model.gameObject.AddComponent<VillageCharacter>();
-            var skin=CharacterColour(player?"PlayerSkin":"VendorSkin",player?"B17B56":"A9704F");
-            var shirt=CharacterColour(player?"ForestShirt":"CottonShirt",player?"526D5C":"C6BEA3");
-            var trousers=CharacterColour("CharcoalCloth","394441");var hair=CharacterColour("Hair","262521");
+            var skin=CharacterColour(sample?(player?"PlayerSkin":"VendorSkin"):id+"Skin",sample?(player?"B17B56":"A9704F"):look.skin);
+            var shirt=CharacterColour(sample?(player?"ForestShirt":"CottonShirt"):id+"Cloth",sample?(player?"526D5C":"C6BEA3"):look.cloth);
+            var trousers=CharacterColour(sample?"CharcoalCloth":id+"Lower",sample?"394441":look.lower);var hair=CharacterColour(sample?"Hair":id+"Hair",sample?"262521":look.hair);
             var hairLight=CharacterColour("HairLight","3C3830");var ink=CharacterColour("FaceInk","332825");
             var white=CharacterColour("EyeWhite","E5DDD0");var iris=CharacterColour("Iris","704D32");var light=CharacterColour("EyeGlint","FFF2D5");
-            var trim=CharacterColour("CottonTrim",player?"718272":"A99E7B");
-            CharacterPart(id+"_Shirt",CharacterLoft(new[]{new CharacterRing(.85f,.188f,.114f),new CharacterRing(.94f,.197f,.124f),new CharacterRing(1.12f,.202f,.127f),new CharacterRing(1.30f,.235f,.13f),new CharacterRing(1.40f,.239f,.108f),new CharacterRing(1.445f,.09f,.075f)}),shirt,model);
-            CharacterPart(id+"_Waist",CharacterLoft(new[]{new CharacterRing(.76f,.168f,.107f),new CharacterRing(.88f,.187f,.12f),new CharacterRing(.94f,.184f,.112f)}),trousers,model);
+            var trim=CharacterColour(sample?"CottonTrim":id+"Trim",player?"718272":look.elder?"B5AA92":"A99E7B");
+            var shirtRings=name=="Ananya" ? new[]{new CharacterRing(.57f,.207f,.137f),new CharacterRing(.78f,.205f,.135f),new CharacterRing(.94f,.201f,.132f),new CharacterRing(1.12f,.202f,.127f),new CharacterRing(1.30f,.235f,.13f),new CharacterRing(1.40f,.239f,.108f),new CharacterRing(1.445f,.09f,.075f)} : new[]{new CharacterRing(.85f,.188f,.114f),new CharacterRing(.94f,.197f,.124f),new CharacterRing(1.12f,.202f,.127f),new CharacterRing(1.30f,.235f,.13f),new CharacterRing(1.40f,.239f,.108f),new CharacterRing(1.445f,.09f,.075f)};
+            CharacterPart(id+"_Shirt",CharacterLoft(shirtRings),shirt,model);
+            if(name!="Ananya")CharacterPart(id+"_Waist",CharacterLoft(new[]{new CharacterRing(.76f,.168f,.107f),new CharacterRing(.88f,.187f,.12f),new CharacterRing(.94f,.184f,.112f)}),trousers,model);
             CharacterPart(id+"_Neck",CharacterLoft(new[]{new CharacterRing(1.40f,.067f,.064f),new CharacterRing(1.52f,.064f,.06f)}),skin,model);
             // Collar and placket follow the shaped shirt, rather than a box torso.
             CharacterPart(id+"_Placket",FaceStroke(new[]{new Vector2(0,1.39f),new Vector2(0,1.28f),new Vector2(0,1.06f)},.013f,.009f),trim,model);
@@ -143,10 +155,11 @@ namespace Paridhwani.Editor
                 CharacterPart(id+"_"+suffix+"Hand",CharacterLoft(new[]{new CharacterRing(-.603f,.029f,.021f,.027f),new CharacterRing(-.57f,.048f,.026f,.03f),new CharacterRing(-.51f,.045f,.032f,.026f),new CharacterRing(-.48f,.035f,.032f,.025f)},12),skin,arm);
                 var leg=new GameObject(suffix+" leg pivot").transform;leg.SetParent(model,false);leg.localPosition=V(side*.10f,.83f,0);
                 CharacterPart(id+"_"+suffix+"Trouser",CharacterLoft(new[]{new CharacterRing(-.715f,.059f,.066f,.008f),new CharacterRing(-.56f,.064f,.066f),new CharacterRing(-.36f,.073f,.078f,.006f),new CharacterRing(-.13f,.084f,.093f),new CharacterRing(.04f,.083f,.092f)}),trousers,leg);
-                CharacterPart(id+"_"+suffix+"Shoe",CharacterLoft(new[]{new CharacterRing(-.827f,.071f,.134f,.044f),new CharacterRing(-.794f,.078f,.151f,.055f),new CharacterRing(-.742f,.067f,.125f,.035f),new CharacterRing(-.69f,.057f,.067f)}),hair,leg);
+                CharacterPart(id+"_"+suffix+"Shoe",CharacterLoft(new[]{new CharacterRing(-.827f,.071f,.134f,.044f),new CharacterRing(-.794f,.078f,.151f,.055f),new CharacterRing(-.742f,.067f,.125f,.035f),new CharacterRing(-.69f,.057f,.067f)}),sample?hair:CharacterColour("Footwear","37382F"),leg);
                 if(side<0){rig.leftArm=arm;rig.leftLeg=leg;}else{rig.rightArm=arm;rig.rightLeg=leg;}
             }
             var head=new GameObject("Head").transform;head.SetParent(model,false);head.localPosition=V(0,1.66f,0);head.localScale=Vector3.one*.85f;rig.head=head;
+            if(!sample)head.localScale=V(look.female?.81f:look.elder?.87f:.85f,.85f,.85f);
             CharacterPart(id+"_Face",CharacterLoft(CharacterFaceRings(mature),28),skin,head);
             foreach(float side in new[]{-1f,1f})
             {
@@ -164,16 +177,20 @@ namespace Paridhwani.Editor
             CharacterPart(id+"_Mouth",FaceStroke(new[]{new Vector2(-.030f,-.111f),new Vector2(0,-.116f),new Vector2(.030f,-.111f)},.004f,.006f),ink,head);
             CharacterPart(id+"_HairCrown",HairCrown(mature),hair,head);
             CharacterPart(id+"_HairCombing",HairCombing(mature),hairLight,head);
-            if(mature)
+            if(mature && (sample || look.moustache))
             {
                 CharacterPart(id+"_Moustache",FaceStroke(new[]{new Vector2(-.058f,-.082f),new Vector2(-.025f,-.070f),new Vector2(0,-.078f),new Vector2(.025f,-.070f),new Vector2(.058f,-.082f)},.014f,.012f),hair,head);
+            }
+            if(name=="Manjunatha" || name=="Gurumurthy")
+            {
                 Box("Shoulder towel",V(-.145f,1.24f,.139f),V(.10f,.47f,.025f),"Cream",false,model);
             }
-            else
+            if(player)
             {
                 Box("Canvas shoulder bag",V(-.255f,1.02f,-.015f),V(.17f,.30f,.24f),"WoodLight",false,model);
                 Beam("Bag strap",V(-.26f,1.04f,.155f),V(.17f,1.43f,.15f),.015f,"Wood",model);
             }
+            if(!sample)CastDetails(name,id,look,model,head,hair,ink,trim,trousers);
             if(!player){var body=root.AddComponent<CapsuleCollider>();body.height=1.8f;body.center=V(0,.9f,0);body.radius=.28f;}
             SetLayer(root,player?2:0);return root;
         }

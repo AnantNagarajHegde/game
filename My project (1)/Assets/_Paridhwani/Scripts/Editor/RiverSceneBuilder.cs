@@ -61,7 +61,6 @@ namespace Paridhwani.Editor
             Text("REPAIR SHED  /  GIRI",V(-25.3f,2.42f,2.29f),.045f,false,0);
             var actor=Character("Giri",V(-23.5f,.16f,4.65f),false);
             actor.transform.rotation=Quaternion.Euler(0,180,0);
-            foreach(var r in actor.GetComponentsInChildren<Renderer>()) if(r.name=="Work shirt") r.sharedMaterial=mats["GiriShirt"];
             var npc=actor.AddComponent<VillageNpc>(); npc.role=VillageNpcRole.RiverKeeper; npc.displayName="Giri"; npc.roleLabel="RIVER REPAIR SHED";
             npc.eyes=actor.GetComponentInChildren<VillageCharacter>().head;
             actor.GetComponentInChildren<VillageCharacter>().lookTarget=session.player.transform;
