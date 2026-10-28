@@ -412,3 +412,10 @@ The updated batch workflow was actually retried. It stopped at licensing initial
 ## Typed NLP boundary (28 October 2026)
 
 Added a transport-independent IDialogueTextService with immutable request snapshots, unique request IDs, version/turn/request correlation and cancellation forwarding. DialogueServiceAdapter binds it to the existing optional text delegate. Empty, oversized or unrelated responses fall back without story effects; legacy responses are copied after validation. The real engine remains external and unconfigured. The proposed HTTP/JSON mapping and ownership/lifecycle recommendations are documented separately, without claiming they are the engine's existing contract. Source compilation and 275 standalone assertions pass, including 13 new service-boundary checks; no network or new native playthrough is claimed.
+
+
+## NLP request lifecycle regression repair (28 October 2026)
+
+A standalone regression first reproduced a transport callback escaping Cancel into gameplay. Cancellation is now fault-contained, runs callbacks outside the state lock and wakes uncooperative requests. Deadline cleanup no longer cancels already-completed transport work; setup failures still cancel partially started work. Generation checks prevent already-completed queued responses from appearing after provider replacement, turn change or detach. Disposed coordinators reject new requests, and reentrant replacement retains its busy state.
+
+Added Unity-thread SetOptionalDialogueService attachment/detachment and made the existing delegate setter invalidate pending/visible optional text. Native smoke assertions now simulate a throwing cancellation callback, retired-provider late reply, working replacement and detach without quest effects. These are authored/compiled, not newly executed here. Runtime/editor compilation and 287 standalone assertions pass, including 12 new lifecycle checks. Real engine integration is unchanged and remains pending its supplied contract.

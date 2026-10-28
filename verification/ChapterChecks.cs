@@ -145,6 +145,50 @@ public static class ChapterChecks {
  Check(rejected && service.Calls==before,"cancelled requests never call the service");
  }
  }
+ static void DialogueCancellationChecks() {
+ using(var requests=new DialogueTextRequests()) {
+ var pending=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();
+ var old=requests.Send(token=>{token.Register(()=>throw new InvalidOperationException("broken transport cancellation"));return pending.Task;});
+ bool safe=true;try {requests.Cancel();}catch(AggregateException){safe=false;}
+ pending.SetResult(new TeaLine("","","Late reply"));
+ Check(safe && old.GetAwaiter().GetResult().Status==DialogueTextStatus.Superseded && !requests.Busy,"transport cancellation callback cannot escape into gameplay");
+ Check(requests.CancellationCallbackFailures==1,"callback failures remain available as a diagnostic count");
+ }
+ using(var requests=new DialogueTextRequests()) {
+ System.Threading.CancellationToken completedToken=default;
+ var ready=requests.Send(token=>{completedToken=token;token.Register(()=>throw new InvalidOperationException("must not cancel a completed transport"));return System.Threading.Tasks.Task.FromResult(new TeaLine("","","Complete"));}).GetAwaiter().GetResult();
+ Check(ready.Status==DialogueTextStatus.Ready && !completedToken.IsCancellationRequested && requests.CancellationCallbackFailures==0,"normal completion only stops the deadline, without cancelling the transport");
+ requests.Cancel();Check(!requests.IsCurrent(ready),"completed response queued for presentation is invalidated by cancellation");
+ }
+ using(var requests=new DialogueTextRequests()) {
+ System.Threading.CancellationToken failedToken=default;
+ var failed=requests.Send(token=>{failedToken=token;throw new InvalidOperationException("transport setup failed");}).GetAwaiter().GetResult();
+ Check(failed.Status==DialogueTextStatus.Unavailable && failedToken.IsCancellationRequested,"synchronous setup failure cancels partially started transport work");
+ var missing=requests.Send(token=>{failedToken=token;return null;}).GetAwaiter().GetResult();
+ Check(missing.Status==DialogueTextStatus.Unavailable && failedToken.IsCancellationRequested,"missing transport task still cancels its setup token");
+ }
+ using(var requests=new DialogueTextRequests()) {
+ var unfinished=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();
+ var timed=requests.Send(token=>{token.Register(()=>throw new InvalidOperationException("broken timeout cleanup"));return unfinished.Task;},10).GetAwaiter().GetResult();
+ Check(timed.Status==DialogueTextStatus.TimedOut && requests.CancellationCallbackFailures==1 && !requests.Busy,"timeout survives transport cancellation callback failure");
+ unfinished.SetException(new InvalidOperationException("late service fault"));
+ }
+ using(var requests=new DialogueTextRequests()) {
+ var oldWork=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();var newWork=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();
+ System.Threading.Tasks.Task<DialogueTextResult> replacementTask=null;
+ var old=requests.Send(token=>{token.Register(()=>{replacementTask=requests.Send(_=>newWork.Task);});return oldWork.Task;});
+ requests.Cancel();Check(replacementTask!=null && requests.Busy,"cancellation callback can start a replacement without deadlock");
+ oldWork.SetResult(new TeaLine("","","Old"));Check(old.GetAwaiter().GetResult().Status==DialogueTextStatus.Superseded && requests.Busy,"old cleanup preserves replacement busy state");
+ newWork.SetResult(new TeaLine("","","New"));var replacementResult=replacementTask.GetAwaiter().GetResult();
+ Check(replacementResult.Status==DialogueTextStatus.Ready && requests.IsCurrent(replacementResult) && !requests.Busy,"replacement response remains current");
+ }
+ var disposed=new DialogueTextRequests();var disposedWork=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();
+ var disposing=disposed.Send(token=>{token.Register(()=>throw new InvalidOperationException("broken shutdown cleanup"));return disposedWork.Task;});disposed.Dispose();
+ Check(disposing.GetAwaiter().GetResult().Status==DialogueTextStatus.Superseded && !disposed.Busy,"shutdown contains cancellation faults and wakes a non-cooperative service");
+ bool invoked=false;var afterDispose=disposed.Send(token=>{invoked=true;return System.Threading.Tasks.Task.FromResult(new TeaLine("","","Unexpected"));}).GetAwaiter().GetResult();
+ Check(!invoked && afterDispose.Status==DialogueTextStatus.Unavailable && !disposed.IsCurrent(afterDispose),"disposed coordinator never starts a new service request");
+ disposedWork.SetResult(new TeaLine("","","Late after shutdown"));disposed.Dispose();
+ }
  static void AsyncDialogueChecks() {
  using(var requests=new DialogueTextRequests()) {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","",new string('x',4097)))).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"oversized external response rejected");
@@ -157,7 +201,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks();
+ public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

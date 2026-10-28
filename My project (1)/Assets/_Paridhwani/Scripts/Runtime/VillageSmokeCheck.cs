@@ -430,7 +430,19 @@ namespace Paridhwani
             Debug.Log("VILLAGE_DIALOGUE_LAYOUT "+Screen.width+"x"+Screen.height+" TextScale="+session.Progress.textScale);
             yield return Shot("49-long-response-large-text");session.UseAuthoredDialogue();
             session.Progress.textScale=oldTextScale;session.SettingsChanged();session.ui.ShowConversation();Screen.SetResolution(oldWidth,oldHeight,oldMode);yield return new WaitForSecondsRealtime(.5f);
-            session.OptionalDialogueText=null;session.Choose(0);Check(session.Progress.greeted && session.OptionalDialogueInput=="","authored reply retains quest authority and clears the previous draft");session.Close();session.Save();session.Load();
+            var retiredReply=new System.Threading.Tasks.TaskCompletionSource<TeaLine>();
+            session.OptionalDialogueText=(prompt,token)=>{token.Register(()=>throw new InvalidOperationException("test transport cancellation callback"));return retiredReply.Task;};
+            session.OptionalDialogueInput="Please repeat that.";session.AskOptionalDialogue();
+            Check(session.OptionalDialogueBusy,"replacement regression starts with a pending service");
+            session.OptionalDialogueText=(prompt,token)=>System.Threading.Tasks.Task.FromResult(new TeaLine("","","Replacement reply"));
+            Check(!session.OptionalDialogueBusy && !session.HasOptionalDialogueLine,"service replacement cancels the pending presentation");
+            retiredReply.SetResult(new TeaLine("","","Retired service reply"));yield return new WaitForSecondsRealtime(.1f);
+            Check(!session.HasOptionalDialogueLine,"retired service cannot display a late reply");
+            session.AskOptionalDialogue();yield return new WaitForSecondsRealtime(.1f);
+            Check(session.HasOptionalDialogueLine && session.VisibleConversationLine.English=="Replacement reply","new provider remains usable after replacement");
+            session.SetOptionalDialogueService(null);
+            Check(session.OptionalDialogueText==null && !session.HasOptionalDialogueLine && session.Turn==authoredTurn && !session.Progress.greeted,"detach restores authored line without a quest effect");
+            session.Choose(0);Check(session.Progress.greeted && session.OptionalDialogueInput=="","authored reply retains quest authority and clears the previous draft");session.Close();session.Save();session.Load();
             Check(session.Progress.reducedMotion && session.Progress.invertY && session.Progress.quality==VillageQuality.Low && Mathf.Abs(session.Progress.ambienceVolume-.4f)<.01f && Mathf.Abs(session.Progress.footstepVolume-.2f)<.01f,"presentation and audio preferences survive restoration");
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");
             File.WriteAllText(Path.Combine(output,"result.txt"),

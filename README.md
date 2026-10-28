@@ -14,7 +14,7 @@ If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark**
 
 ## Verification
 
-The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 275 standalone assertions also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
+The latest recorded native Editor regression passed on 28 October 2026, covering the main story through its epilogue and isolated practice visit. Runtime/editor source compilation and 287 standalone assertions also pass. These checks do **not** constitute a fresh standalone Player build or full human acceptance test.
 
 From this repository root, run source and logic checks in PowerShell:
 
@@ -35,3 +35,5 @@ See [current production status](docs/PRODUCTION_STATUS.md) for verified results 
 ## NLP integration
 
 Dialogue currently uses local authored content. The project includes an optional cancellable text-service adapter, but no real NLP endpoint, authentication, or transport is configured. See the [proposed service contract](docs/NLP_SERVICE_CONTRACT_PROPOSAL.md).
+
+Service attachment/detachment uses SetOptionalDialogueService on the Unity thread. Switching providers invalidates old replies; cancellation and shutdown contain transport callback failures while preserving the authored conversation.

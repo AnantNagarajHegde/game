@@ -57,7 +57,7 @@ Current Unity limits: learner input is at most 512 UTF-16 code units, cut at tex
 5. Whether the service supplies text only or intent candidates; stable per-turn intent IDs if the latter.
 6. Expected latency, rate limits, errors, cancellation and deduplication behavior.
 
-Once these are supplied, implement the concrete transport behind IDialogueTextService, bind it at session setup, and run local mock-server plus real-service tests for success, wrong IDs/schema, delayed/out-of-order responses, cancellation, errors, limits and offline fallback. The current C# adapter tests do not establish HTTP or deployed-engine integration.
+Once these are supplied, implement the concrete transport behind IDialogueTextService, bind it at session setup with SetOptionalDialogueService(service) on the Unity thread (pass null to detach), and run local mock-server plus real-service tests for success, wrong IDs/schema, delayed/out-of-order responses, cancellation, errors, limits and offline fallback. The current C# adapter tests do not establish HTTP or deployed-engine integration.
 
 ## Reference documentation
 
@@ -66,3 +66,5 @@ Once these are supplied, implement the concrete transport behind IDialogueTextSe
 - [UnityWebRequest Abort](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Networking.UnityWebRequest.Abort.html)
 - [Microsoft HTTP resilience and retry behavior](https://learn.microsoft.com/en-us/dotnet/core/resilience/http-resilience)
 - [OWASP REST security guidance](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
+
+The Unity coordinator contains transport cancellation callback exceptions and rejects retired-provider results. The transport should still keep cancellation callbacks short and nonblocking, and marshal UnityWebRequest operations to the Unity thread. The session cancels requests but does not dispose a shared service connection.

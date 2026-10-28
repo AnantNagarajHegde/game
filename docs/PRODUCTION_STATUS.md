@@ -6,7 +6,7 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
 - Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
-- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 275 standalone assertions pass. These standalone checks are not a native Player build.
+- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 287 standalone assertions pass. These standalone checks are not a native Player build.
 - Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. The corrected automated native sequence passed on 28 October: arrival through reunion, original deed, return, council decision, epilogue, credits, completed-story restore, isolated practice and new-visit settings. It advanced 6,800 frames and produced 51 captures. The library approach now walks around Somanna and the bench through the open east side of the veranda.
 - World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
 
@@ -66,3 +66,10 @@ The implemented story source does not establish final art quality, complete engi
 ## NLP boundary implementation pass (28 October 2026)
 
 Added IDialogueTextService and DialogueServiceAdapter to bind an engine-specific transport without changing the local story provider. Immutable request context and version/request/turn matching reject unrelated replies; cancellation reaches the service. Legacy provider responses are copied after validation. All runtime/editor sources compile and 275 standalone assertions pass. This pass does not connect a real engine, implement HTTP/authentication or claim a new native playthrough. See NLP_SERVICE_CONTRACT_PROPOSAL.md for the recommended transport and remaining contract decisions.
+
+
+## NLP cancellation and service lifecycle pass (28 October 2026)
+
+Reproduced and fixed an escaping transport-cancellation callback exception. Request cancellation now contains/counts callback failures, wakes ignored-cancellation requests, preserves reentrant replacements and keeps deadline cleanup separate from a completed transport. The session rejects stale generations immediately before presentation, including completed replies queued before a service change. Provider replacement/detachment cancels pending work, clears optional text and refreshes authored conversation controls. SetOptionalDialogueService provides explicit Unity-thread attachment/detachment; the service owner retains connection disposal.
+
+All runtime/editor sources compile and 287 standalone assertions pass, including 12 lifecycle regression checks. New in-engine smoke assertions cover delayed retired-provider replies, replacement and detach without quest effects, but this pass does not claim their native execution. The actual engine/HTTP/authentication contract remains pending. The generated world recipe is unchanged.
