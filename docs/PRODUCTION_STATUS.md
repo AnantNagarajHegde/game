@@ -6,7 +6,7 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
 - Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
-- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 262 standalone assertions pass. These standalone checks are not a native Player build.
+- Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 275 standalone assertions pass. These standalone checks are not a native Player build.
 - Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. The corrected automated native sequence passed on 28 October: arrival through reunion, original deed, return, council decision, epilogue, credits, completed-story restore, isolated practice and new-visit settings. It advanced 6,800 frames and produced 51 captures. The library approach now walks around Somanna and the bench through the open east side of the veranda.
 - World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
 
@@ -57,7 +57,12 @@ No fresh standalone Player build or additive-package run has been verified in th
 | Conversation and accessibility | Scrollable literal replies, original-line restore, text scale, reduced motion, language support | Kannada shaping, additional viewport/input and comfort review |
 | World and rendering | Regenerated prototype locations, seven surface maps, quality profiles and culling | Production characters/rigs, terrain, vegetation, textures, animation, composition and authored audio |
 | Packaging and performance | Optional additive exporter/loader, profiling tools | Execute additive export/build, frame-time/memory measurements and release packaging |
-| NLP | Optional cancellable text-only adapter | Connect the separately built real service once its contract is supplied; see NLP_UNITY_BOUNDARY.md |
+| NLP | Optional cancellable text-only adapter, immutable versioned service messages and response correlation | Connect the separately built real service once its contract is supplied; see NLP_UNITY_BOUNDARY.md |
 | Language and play quality | Authored Kannada-learning tasks and source gates | Fluent Kannada/regional review and player usability testing |
 
 The implemented story source does not establish final art quality, complete engine verification or a finished game percentage.
+
+
+## NLP boundary implementation pass (28 October 2026)
+
+Added IDialogueTextService and DialogueServiceAdapter to bind an engine-specific transport without changing the local story provider. Immutable request context and version/request/turn matching reject unrelated replies; cancellation reaches the service. Legacy provider responses are copied after validation. All runtime/editor sources compile and 275 standalone assertions pass. This pass does not connect a real engine, implement HTTP/authentication or claim a new native playthrough. See NLP_SERVICE_CONTRACT_PROPOSAL.md for the recommended transport and remaining contract decisions.

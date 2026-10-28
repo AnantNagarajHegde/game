@@ -15,7 +15,7 @@ See [play and build instructions](docs/TEA_STALL_BENCHMARK.md). Open Assets/_Par
 
 ## Current readiness and verification
 
-Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 262 standalone assertions pass. Desktop Unity generation, benchmark checks and the complete scripted Editor regression pass (6,800 frames, 51 captures), including the corrected library route and long dialogue at 960x540 with maximum text scale. A fresh standalone build and broader human acceptance are still pending.
+Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 275 standalone assertions pass. Desktop Unity generation, benchmark checks and the complete scripted Editor regression pass (6,800 frames, 51 captures), including the corrected library route and long dialogue at 960x540 with maximum text scale. A fresh standalone build and broader human acceptance are still pending.
 
 The project now includes reached-chapter practice, recovery/archival safeguards, title/settings/exit flow, quality and motion preferences, reusable source textures, additive world packaging and an optional cancellable text adapter. Final production art, the real separate NLP service, language review and full in-engine release testing remain outstanding.
 
@@ -24,3 +24,5 @@ From the master workspace root, run `./game/verification/Verify-Sources.ps1` for
 Use **Paridhwani > Play Isolated Test Visit** for manual testing on a temporary save, or **Run Automated Editor Playtest** for the scripted native regression. Open the project through Unity Hub if a shell launch fails to reach its licensing client.
 
 For a fresh standalone build/test from the open desktop Editor, use **Paridhwani > Build and Run Standalone Playtest** after Assets > Refresh finishes. It builds before launching, monitors the isolated test, and writes report.json/player.log beneath game/verification/Temp/StandalonePlaytests. This command has passed source compilation; native execution remains pending. Existing generated scenes remain valid when only this verification tool changes.
+
+The NLP boundary now supports immutable correlated service messages through IDialogueTextService. See [the proposed service contract](docs/NLP_SERVICE_CONTRACT_PROPOSAL.md); the actual endpoint, authentication and transport remain unconfigured.

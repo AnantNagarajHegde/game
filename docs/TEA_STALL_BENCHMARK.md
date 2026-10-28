@@ -407,3 +407,8 @@ The batch verifier now writes reports even on failure, stops early at an explici
 The standalone runner is excluded from world recipe hashing because it creates no geometry/bindings. The checked-in world retains its recipe match. Regression checks cover ignored tooling edits and still detect changed/new world recipe files. Runtime/editor compilation and 262 standalone assertions pass. Fresh standalone acceptance is still pending; the preceding 6,800-frame Editor story pass remains the latest successful native run.
 
 The updated batch workflow was actually retried. It stopped at licensing initialization failure, wrote Legacy-20261028-112727976.json under verification/Temp/UnityVerification with both pass flags false, and did not launch an old player. This confirms failure reporting, not a successful standalone build.
+
+
+## Typed NLP boundary (28 October 2026)
+
+Added a transport-independent IDialogueTextService with immutable request snapshots, unique request IDs, version/turn/request correlation and cancellation forwarding. DialogueServiceAdapter binds it to the existing optional text delegate. Empty, oversized or unrelated responses fall back without story effects; legacy responses are copied after validation. The real engine remains external and unconfigured. The proposed HTTP/JSON mapping and ownership/lifecycle recommendations are documented separately, without claiming they are the engine's existing contract. Source compilation and 275 standalone assertions pass, including 13 new service-boundary checks; no network or new native playthrough is claimed.

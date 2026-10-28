@@ -109,6 +109,42 @@ public static class ChapterChecks {
  Check(!System.IO.File.Exists(file+".tmp"),"atomic write leaves no temp file");
  } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
  }
+ sealed class StubDialogueService : IDialogueTextService {
+ public System.Func<DialogueServiceRequest,System.Threading.CancellationToken,System.Threading.Tasks.Task<DialogueServiceReply>> Handler;
+ public int Calls;
+ public System.Threading.Tasks.Task<DialogueServiceReply> ReplyAsync(DialogueServiceRequest request,System.Threading.CancellationToken cancellation){Calls++;return Handler(request,cancellation);}
+ }
+ static void DialogueServiceChecks() {
+ var turn=new LocalTeaConversation().Start(new TeaProgress());var prompt=new DialoguePrompt("Manjunatha",turn,"Hello");
+ var snapshot=new DialogueServiceRequest(prompt);var second=new DialogueServiceRequest(prompt);
+ Check(snapshot.Version==1 && snapshot.RequestId.Length==32 && snapshot.RequestId!=second.RequestId,"each service request has a version and unique correlation ID");
+ string original=snapshot.AuthoredLine.English,choice=snapshot.AvailableReplies[0].English;
+ prompt.AuthoredLine.English="changed";prompt.AvailableReplies[0].English="changed";
+ Check(snapshot.AuthoredLine.English==original && snapshot.AvailableReplies[0].English==choice,"service request owns immutable text snapshots");
+ bool readOnly=false;try {((System.Collections.Generic.IList<DialogueServiceText>)snapshot.AvailableReplies)[0]=null;}catch(System.NotSupportedException){readOnly=true;}
+ Check(readOnly,"service cannot mutate the available reply collection");
+ var service=new StubDialogueService();var handler=DialogueServiceAdapter.Bind(service);
+ using(var requests=new DialogueTextRequests()) {
+ service.Handler=(r,c)=>System.Threading.Tasks.Task.FromResult(new DialogueServiceReply(r.Version,r.RequestId,r.TurnId,new DialogueServiceText("","","<b>Hello</b>")));
+ var ready=requests.Send(c=>handler(prompt,c)).GetAwaiter().GetResult();
+ Check(ready.Status==DialogueTextStatus.Ready && ready.Line.English=="<b>Hello</b>","matching service response preserves literal text");
+ foreach(string invalid in new[]{"version","request","turn","missing","empty","oversized"}) {
+ service.Handler=(r,c)=>System.Threading.Tasks.Task.FromResult(invalid=="missing"?null:new DialogueServiceReply(invalid=="version"?99:r.Version,invalid=="request"?"other-request":r.RequestId,invalid=="turn"?"other-turn":r.TurnId,new DialogueServiceText("","",invalid=="empty"?"":invalid=="oversized"?new string('x',4097):"Reply")));
+ Check(requests.Send(c=>handler(prompt,c)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"reject incompatible service response: "+invalid);
+ }
+ var source=new TeaLine("","","Original reply");var copied=requests.Send(c=>System.Threading.Tasks.Task.FromResult(source)).GetAwaiter().GetResult();source.English="changed after validation";
+ Check(copied.Line.English=="Original reply","legacy delegate response is copied before presentation");
+ var late=new System.Threading.Tasks.TaskCompletionSource<DialogueServiceReply>();DialogueServiceRequest pending=null;System.Threading.CancellationToken forwarded=default;
+ service.Handler=(r,c)=>{pending=r;forwarded=c;return late.Task;};
+ Check(requests.Send(c=>handler(prompt,c),10).GetAwaiter().GetResult().Status==DialogueTextStatus.TimedOut && forwarded.IsCancellationRequested,"timeout cancels the actual service token");
+ late.SetResult(new DialogueServiceReply(pending.Version,pending.RequestId,pending.TurnId,new DialogueServiceText("","","Late")));
+ }
+ using(var cancelled=new System.Threading.CancellationTokenSource()) {
+ cancelled.Cancel();int before=service.Calls;bool rejected=false;
+ try {handler(prompt,cancelled.Token).GetAwaiter().GetResult();}catch(System.OperationCanceledException){rejected=true;}
+ Check(rejected && service.Calls==before,"cancelled requests never call the service");
+ }
+ }
  static void AsyncDialogueChecks() {
  using(var requests=new DialogueTextRequests()) {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","",new string('x',4097)))).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"oversized external response rejected");
@@ -121,7 +157,7 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks();
+ public static int Main() { InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks();
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

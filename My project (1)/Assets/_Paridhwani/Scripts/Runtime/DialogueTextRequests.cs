@@ -26,10 +26,16 @@ namespace Paridhwani {
  var deadline=Task.Delay(Math.Max(1,timeoutMs),cancel.Token);var completed=await Task.WhenAny(work,deadline);
  if(id!=generation)return Result(DialogueTextStatus.Superseded);
  if(completed!=work)return Result(cancel.IsCancellationRequested?DialogueTextStatus.Cancelled:DialogueTextStatus.TimedOut);
- var line=await work;if(line==null || (string.IsNullOrWhiteSpace(line.Kannada) && string.IsNullOrWhiteSpace(line.English)) || (line.Kannada?.Length??0)>4096 || (line.Roman?.Length??0)>4096 || (line.English?.Length??0)>4096)return Result(DialogueTextStatus.Unavailable);
+ var line=Snapshot(await work);if(line==null)return Result(DialogueTextStatus.Unavailable);
  return new DialogueTextResult{Status=DialogueTextStatus.Ready,Line=line};
  } catch(OperationCanceledException){return Result(id==generation?DialogueTextStatus.Cancelled:DialogueTextStatus.Superseded);}catch(Exception){return Result(id==generation?DialogueTextStatus.Unavailable:DialogueTextStatus.Superseded);}
  finally {if(active==cancel){active=null;Busy=false;}cancel.Cancel();cancel.Dispose();}
+ }
+ internal static TeaLine Snapshot(TeaLine source) {
+ if(source==null)return null;
+ var line=new TeaLine(source.Kannada,source.Roman,source.English);
+ if((string.IsNullOrWhiteSpace(line.Kannada) && string.IsNullOrWhiteSpace(line.English)) || (line.Kannada?.Length??0)>4096 || (line.Roman?.Length??0)>4096 || (line.English?.Length??0)>4096)return null;
+ return line;
  }
  static DialogueTextResult Result(DialogueTextStatus status) => new DialogueTextResult{Status=status};
  public void Dispose(){Cancel();}
