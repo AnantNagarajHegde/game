@@ -119,7 +119,7 @@ namespace Paridhwani
             Button(header,"Leave  [Esc]",session.Close,"quiet-button").name="dialogue-leave";
             var scroll=new ScrollView(ScrollViewMode.Vertical){name="dialogue-scroll"};Class(scroll,"dialogue-scroll");card.Add(scroll);
             scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;
-            var speech=new VisualElement(); Class(speech,"speech"); scroll.Add(speech); Line(speech,session.VisibleConversationLine);
+            var speech=new VisualElement(){name="dialogue-speech"}; Class(speech,"speech"); scroll.Add(speech); Line(speech,session.VisibleConversationLine);
             if(session.OptionalDialogueText!=null) {
                 var input=new TextField("Ask in your own words"){name="dialogue-input",value=session.OptionalDialogueInput,maxLength=512};input.RegisterValueChangedCallback(e=>session.OptionalDialogueInput=e.newValue);scroll.Add(input);
                 var ask=Button(scroll,"Ask",session.AskOptionalDialogue,"quiet-button");ask.name="dialogue-ask";ask.SetEnabled(!session.OptionalDialogueBusy);

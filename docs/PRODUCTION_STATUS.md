@@ -7,12 +7,20 @@ The main story is authored from arrival to epilogue. The revision-3 benchmark wo
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.
 - Native benchmark generation and Run Benchmark Checks passed on 27 October, and native checks passed again on 28 October. These exercise story gates, Unity JSON save/recovery, fourteen NPC instances, scene references and shader checks.
 - Runtime/editor source compilation, runtime branches without Editor/diagnostic defines (using cached references), and 259 standalone assertions pass. These standalone checks are not a native Player build.
-- Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. Automated testing exercises TPP/FPP transitions, evidence tasks, save/restore, river walking and temple witnesses. The previous run stopped at the library veranda approach; a complete latest-revision run is still pending.
+- Direct Editor playtesting confirmed title, arrival handoff, rain/world rendering and the isolated test HUD. The corrected automated native sequence passed on 28 October: arrival through reunion, original deed, return, council decision, epilogue, credits, completed-story restore, isolated practice and new-visit settings. It advanced 6,800 frames and produced 51 captures. The library approach now walks around Somanna and the bench through the open east side of the veranda.
 - World signs have a UI theme and literal text. Generated asset names match their filenames. Dedicated manual and automated Editor test menus use temporary saves and do not migrate a player's visit.
+
+## Latest native regression evidence (28 October 2026)
+
+- Run directory: C:/Users/amogh/AppData/Local/Temp/ParidhwaniSmoke/run-20261028-052700.
+- result.txt records VILLAGE_SMOKE_OK, Frames: 6800; Editor.log records PARIDHWANI_EDITOR_SMOKE_EXIT 0.
+- Fixed Game view selected through the Editor UI: 960x540. VILLAGE_DIALOGUE_LAYOUT recorded 960x540 at text scale 1.3. The final capture was visually reviewed: long literal text scrolls beneath the fixed header/footer; Leave, notebook and Original line remain visible. The text assertion targets actual speech labels and matches the original reply, rather than incorrectly including Unity's unrelated TextField label.
+- The route failure was reproduced at player (-5.15, 0.08, 11.20), beside Somanna and the veranda bench. Correcting the scripted approach preserved physical collision and verified archive entry/exit, without teleporting through the obstacle.
+- This is a scripted Editor regression, not a new standalone build, complete human playthrough, performance benchmark or final Kannada acceptance. The small-window layout and story checks passed within that scope.
 
 ## Engine test workflow
 
-Open the project through Unity Hub. Use **Paridhwani > Create Tea Stall Benchmark** after changing generator recipes, then **Run Benchmark Checks**. **Play Isolated Test Visit** opens the normal title/arrival flow on a temporary save. **Run Automated Editor Playtest** runs the scripted native regression in the Game view and returns to Edit mode on completion/failure. The HUD labels test visits. The automated sequence uses real CharacterController movement for authored walking routes, while conversation/activity actions are invoked programmatically; this does not replace keyboard/controller acceptance testing.
+Open the project through Unity Hub. After external source edits, run **Assets > Refresh** and wait for script compilation before testing. Use **Paridhwani > Create Tea Stall Benchmark** after changing generator recipes, then **Run Benchmark Checks**. **Play Isolated Test Visit** opens the normal title/arrival flow on a temporary save. **Run Automated Editor Playtest** runs the scripted native regression in the Game view and returns to Edit mode on completion/failure. The HUD labels test visits. The automated sequence uses real CharacterController movement for authored walking routes, while conversation/activity actions are invoked programmatically; this does not replace keyboard/controller acceptance testing.
 
 Automated test captures and result.txt or failure.txt are written below the OS temporary directory at ParidhwaniSmoke/run-<timestamp>. Success requires VILLAGE_SMOKE_OK; reaching an intermediate screenshot is not a pass. Editor output also records PARIDHWANI_EDITOR_SMOKE_EXIT (0 success, 2 failure).
 
@@ -21,6 +29,8 @@ On 28 October, a shell-launched Editor again refused the licensing IPC connectio
 From the master workspace root:
 
     ./game/verification/Verify-Sources.ps1
+
+Standalone compiler outputs live under game/verification/Temp, outside Unity's project Temp directory so Editor startup cannot remove them mid-check.
 
 With this project's Editor closed, a normal desktop shell can run the fresh-build workflow:
 
@@ -33,10 +43,10 @@ No fresh standalone Player build or additive-package run has been verified in th
 
 | Area | Implemented | Still required |
 |---|---|---|
-| Story and replay | All 15 beats, evidence gates, return, endings, reached-chapter practice | Complete fresh/resumed native regression and replay spawn checks |
+| Story and replay | All 15 beats, evidence gates, return, endings, reached-chapter practice | Broader fresh/resumed human playthroughs and all replay spawn checks |
 | Persistence and session | Atomic recovery/archive, transactional restore, main/practice isolation, title/settings/exit | Runtime failure cases and full menu/input acceptance |
-| Movement and audio | Input focus policy, normalized movement, tagged ground footsteps and independent mixes | Resolve walking failures, hardware input and listening review |
-| Conversation and accessibility | Scrollable literal replies, original-line restore, text scale, reduced motion, language support | Short-window native layout, Kannada shaping and comfort review |
+| Movement and audio | Input focus policy, normalized movement, tagged ground footsteps and independent mixes | Broader route coverage, hardware input and listening review |
+| Conversation and accessibility | Scrollable literal replies, original-line restore, text scale, reduced motion, language support | Kannada shaping, additional viewport/input and comfort review |
 | World and rendering | Regenerated prototype locations, seven surface maps, quality profiles and culling | Production characters/rigs, terrain, vegetation, textures, animation, composition and authored audio |
 | Packaging and performance | Optional additive exporter/loader, profiling tools | Execute additive export/build, frame-time/memory measurements and release packaging |
 | NLP | Optional cancellable text-only adapter | Connect the separately built real service once its contract is supplied; see NLP_UNITY_BOUNDARY.md |

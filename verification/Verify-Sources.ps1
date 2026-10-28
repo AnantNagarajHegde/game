@@ -20,7 +20,8 @@ foreach($surface in $surfaceNames) {
  if(!$guid -or $surfaceGuids.ContainsKey($guid)){throw "Missing or duplicated surface GUID: $surface"};$surfaceGuids[$guid]=$true
 }
 Write-Output 'SURFACE_SOURCES_OK: seven 512px PNGs with supported TextureImporter metadata and unique GUIDs'
-$outputRoot=Join-Path $projectRoot 'Temp\IterationVerification'
+# Unity clears its project Temp directory on startup. Keep independent compiler outputs outside it.
+$outputRoot=Join-Path $PSScriptRoot 'Temp\IterationVerification'
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 $runtimeResponse=Get-ChildItem (Join-Path $projectRoot 'Library\Bee\artifacts') -Recurse -Filter 'Assembly-CSharp.rsp' | Select-Object -First 1
 $editorResponse=Get-ChildItem (Join-Path $projectRoot 'Library\Bee\artifacts') -Recurse -Filter 'Assembly-CSharp-Editor.rsp' | Select-Object -First 1
@@ -32,9 +33,9 @@ try {
  foreach($kind in @('Runtime','Editor')) {
  $response=if($kind -eq 'Runtime'){$runtimeResponse}else{$editorResponse}
  $argsText=Get-Content -LiteralPath $response.FullName | Where-Object {$_ -notmatch '^"Assets/' -and $_ -notmatch '^-(out|refout):'}
- if($kind -eq 'Editor') { $argsText=$argsText -replace 'Library/Bee/artifacts/[^/]+/Assembly-CSharp.ref.dll','Temp/IterationVerification/Assembly-CSharp.dll' }
+ if($kind -eq 'Editor') { $argsText=$argsText -replace 'Library/Bee/artifacts/[^/]+/Assembly-CSharp.ref.dll','../verification/Temp/IterationVerification/Assembly-CSharp.dll' }
  $assembly=if($kind -eq 'Runtime'){'Assembly-CSharp'}else{'Assembly-CSharp-Editor'}
- $argsText+='-out:"Temp/IterationVerification/'+$assembly+'.dll"'
+ $argsText+='-out:"../verification/Temp/IterationVerification/'+$assembly+'.dll"'
  $argsText+=Get-ChildItem (Join-Path $projectRoot "Assets\_Paridhwani\Scripts\$kind") -Filter *.cs | ForEach-Object {'"'+$_.FullName+'"'}
  $responsePath=Join-Path $outputRoot "$kind.rsp"
  $argsText | Set-Content -Encoding utf8 -LiteralPath $responsePath
@@ -49,13 +50,13 @@ try {
  if($symbols) {'-define:'+($symbols -join ';')}
  } else {$_}
  }
- $playerArgs+='-out:"Temp/IterationVerification/Assembly-CSharp-PlayerBranches.dll"'
+ $playerArgs+='-out:"../verification/Temp/IterationVerification/Assembly-CSharp-PlayerBranches.dll"'
  $playerResponse=Join-Path $outputRoot 'PlayerBranches.rsp';$playerArgs | Set-Content -Encoding utf8 -LiteralPath $playerResponse
  & $dotnet $csc "@$playerResponse"
  if($LASTEXITCODE -ne 0) {throw 'Runtime source branches without Editor/diagnostic symbols failed compilation'}
  Write-Output 'PLAYER_SOURCE_BRANCHES_OK (cached Editor references; not a native Player build)'
  $argsText=Get-Content (Join-Path $outputRoot 'Runtime.rsp') | Where-Object { $_ -notmatch '^".*\.cs"$' -and $_ -notmatch '^-(out|refout|target):' -and $_ -notmatch '^/analyzer' }
- $argsText+=@('-target:exe','-out:"Temp/IterationVerification/ChapterChecks.dll"','-r:"Temp/IterationVerification/Assembly-CSharp.dll"','"../verification/ChapterChecks.cs"')
+ $argsText+=@('-target:exe','-out:"../verification/Temp/IterationVerification/ChapterChecks.dll"','-r:"../verification/Temp/IterationVerification/Assembly-CSharp.dll"','"../verification/ChapterChecks.cs"')
  $responsePath=Join-Path $outputRoot 'Checks.rsp'; $argsText | Set-Content -Encoding utf8 -LiteralPath $responsePath
  & $dotnet $csc "@$responsePath"
  if($LASTEXITCODE -ne 0) { throw 'Chapter runner compilation failed' }

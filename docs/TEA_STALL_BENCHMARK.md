@@ -385,3 +385,14 @@ The desktop Inspector identified WetEarth as a Cubemap. Explicit Texture2D prepr
 Added Play Isolated Test Visit and Run Automated Editor Playtest. Both isolate saves from the normal visit; automated tests return to Edit mode and report failures to disk. Manual title/arrival/world rendering was observed. The automated run reached river and temple tasks but stopped approaching the library veranda at (-5.25, 0, 12.30). A complete run is not claimed. The walking timeout now reports actual player position and nearby colliders instead of the misleading generic river-route message.
 
 Source compilation and 259 standalone assertions pass. On 28 October, direct shell launching again failed licensing IPC, but launching the project through Unity Hub worked. Current status is recorded in PRODUCTION_STATUS.md.
+
+
+## Native regression completion (28 October 2026)
+
+Reproduced the library blockage with actual position/collider diagnostics: the scripted straight approach squeezed between Somanna and the veranda bench. The test now takes the open east side before entering the existing doorway. Physical CharacterController walking passed archive entry/exit and continued through panchayat, checkpost, ridge, reunion, trunk/deed, return, council, epilogue, credits, practice and completed-save restoration.
+
+An overbroad literal-text assertion was corrected to inspect the speech container, match the original optional reply exactly and require rich text disabled on its labels. The old assertion incorrectly included Unity's built-in TextField label. The fixed Game view was set through the native UI to 960x540. At 1.3 text scale, scroll overflow and fixed action bounds passed; the final capture was visually reviewed and preserves literal markup characters. The actual resolution is now logged.
+
+The final run, ParidhwaniSmoke/run-20261028-052700 under the OS temporary directory, emitted VILLAGE_SMOKE_OK and PARIDHWANI_EDITOR_SMOKE_EXIT 0, advanced 6,800 frames and wrote 51 PNG captures. All runtime/editor source checks and 259 standalone assertions also pass. This is native scripted Editor coverage; it does not claim a new standalone build, final language/art approval or human input acceptance.
+
+Standalone verification compiler outputs moved to game/verification/Temp, outside the Unity project Temp folder which Editor startup clears. This avoids the compilation-output deletion observed when starting Unity alongside a source check. After external C# edits, use Assets > Refresh and wait for compilation before starting an Editor playtest.

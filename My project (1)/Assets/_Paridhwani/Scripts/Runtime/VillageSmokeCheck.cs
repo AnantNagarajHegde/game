@@ -273,6 +273,8 @@ namespace Paridhwani
             Check(session.Turn.Id=="rest","catalogue returns to Somanna rest offer");
             session.Choose(1); Check(!session.Progress.thursdayStarted,"rest can be declined");
             yield return new WaitForSecondsRealtime(.9f); player.blocked=true;
+            // Take the open east side of the veranda, rather than squeezing between Somanna and his bench.
+            yield return WalkTo(new Vector3(-3.5f,0,9.8f)); yield return WalkTo(new Vector3(-3.5f,0,12.3f));
             yield return WalkTo(new Vector3(-5.25f,0,12.3f)); yield return WalkTo(new Vector3(-5.25f,0,14.7f));
             yield return WalkTo(new Vector3(-4.5f,0,15.2f));
             player.SetLookAngles(0,17); yield return new WaitForSecondsRealtime(.6f);
@@ -420,7 +422,12 @@ namespace Paridhwani
                 var control=uiRoot.Q(action);var bounds=control.worldBound;var screen=uiRoot.worldBound;
                 Check(bounds.width>0 && bounds.height>0 && bounds.xMin>=screen.xMin-1 && bounds.xMax<=screen.xMax+1 && bounds.yMin>=screen.yMin-1 && bounds.yMax<=screen.yMax+1,"fixed dialogue action remains inside the viewport: "+action);
             }
-            foreach(var label in dialogueScroll.Query<Label>().ToList())Check(!label.enableRichText,"external dialogue remains literal text");
+            var renderedSpeech=dialogueScroll.Q("dialogue-speech");
+            Check(renderedSpeech!=null,"conversation exposes its rendered speech");
+            var speechLabels=renderedSpeech.Query<Label>().ToList();
+            Check(speechLabels.Exists(label=>label.text==replyText),"external reply keeps its literal markup characters");
+            foreach(var label in speechLabels)Check(!label.enableRichText,"external dialogue remains literal text");
+            Debug.Log("VILLAGE_DIALOGUE_LAYOUT "+Screen.width+"x"+Screen.height+" TextScale="+session.Progress.textScale);
             yield return Shot("49-long-response-large-text");session.UseAuthoredDialogue();
             session.Progress.textScale=oldTextScale;session.SettingsChanged();session.ui.ShowConversation();Screen.SetResolution(oldWidth,oldHeight,oldMode);yield return new WaitForSecondsRealtime(.5f);
             session.OptionalDialogueText=null;session.Choose(0);Check(session.Progress.greeted && session.OptionalDialogueInput=="","authored reply retains quest authority and clears the previous draft");session.Close();session.Save();session.Load();

@@ -2,7 +2,7 @@
 
 Owns the learner-facing product experience: product concept, world and location design, story, characters, quests, game progression, and UI/UX coordination.
 
-This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. The checked-in revision-3 benchmark has been regenerated in Unity; the existing standalone executable is older. Native benchmark checks pass, while complete latest-revision playthrough verification remains in progress. The current art is procedural prototype work.
+This is the independent Unity game repository in the Paridhwani workspace. The authored source now covers the main story from village arrival through the ridge/farmhouse reunion, original deed, return with Ananya, public council review and epilogue. It includes a separate practice visit that preserves the main completed save. The checked-in revision-3 benchmark has been regenerated in Unity; the existing standalone executable is older. Native benchmark checks and the scripted full-story Editor regression pass. The current art is procedural prototype work.
 
 
 ## Unity 3D implementation plan
@@ -15,7 +15,7 @@ See [play and build instructions](docs/TEA_STALL_BENCHMARK.md). Open Assets/_Par
 
 ## Current readiness and verification
 
-Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 259 standalone assertions pass. Desktop Unity generation and benchmark checks pass; the automated walking regression exposed a library-veranda approach blocker under investigation.
+Read [current production status](docs/PRODUCTION_STATUS.md) for executed checks and blocked acceptance gates. Runtime/editor source compilation and 259 standalone assertions pass. Desktop Unity generation, benchmark checks and the complete scripted Editor regression pass (6,800 frames, 51 captures), including the corrected library route and long dialogue at 960x540 with maximum text scale. A fresh standalone build and broader human acceptance are still pending.
 
 The project now includes reached-chapter practice, recovery/archival safeguards, title/settings/exit flow, quality and motion preferences, reusable source textures, additive world packaging and an optional cancellable text adapter. Final production art, the real separate NLP service, language review and full in-engine release testing remain outstanding.
 
