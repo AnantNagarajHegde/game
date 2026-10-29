@@ -146,6 +146,14 @@ namespace Paridhwani
                 if(session.OptionalDialogueBusy)Button(scroll,"Cancel reply",session.CancelOptionalDialogue,"quiet-button").name="dialogue-cancel";
                 if(session.OptionalDialogueStatus.Length>0)Add(scroll,session.OptionalDialogueStatus,"small");
             }
+            if(session.CanAssessTea) {
+                var assessmentInput=new TextField("Order in Romanised Kannada"){name="tea-assessment-input",value=session.TeaAssessmentInput,maxLength=512};
+                assessmentInput.RegisterValueChangedCallback(e=>session.TeaAssessmentInput=e.newValue);scroll.Add(assessmentInput);
+                Button(scroll,"Submit order",session.AskTeaAssessment).SetEnabled(!session.TeaAssessmentBusy);
+                if(session.TeaAssessmentBusy)Button(scroll,"Cancel order reply",session.CancelTeaAssessment,"quiet-button");
+                Button(scroll,"Ordering hint / example",session.TeaAssessmentHint,"quiet-button");
+            }
+            if(session.TeaAssessmentFeedback.Length>0)Add(scroll,session.TeaAssessmentFeedback,"small");
             Add(scroll,"YOUR REPLY","eyebrow");
             var choices=new VisualElement(); Class(choices,"choices"); scroll.Add(choices);
             for(int i=0;i<t.Choices.Count;i++)

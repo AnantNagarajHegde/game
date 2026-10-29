@@ -1,0 +1,35 @@
+TEA PRODUCTION ASSESSMENT WIRING - 29 October 2026
+Runtime/Editor/Player-source compilation: PASS (Unity cached references; not Player build).
+Existing chapter checks: 405 assertions PASS.
+Existing text dialogue HTTP checks: 108 assertions PASS, plus 8 portable fixtures.
+Production assessment checks: 47 assertions PASS using real Python evaluator JSON
+and the actual production mapping/codec/consumer/HTTP transport with injected
+in-memory handler. No sockets opened. Coordinator stale-result check passes.
+Python: 26 original functions + 12 unittest methods PASS; held-out 178/178 all-five
+fields; authored policy 210/210 with supplied player context; 171 envelope checks.
+No expected labels changed. One existing training diagnostic ambiguity retained.
+
+Approved rules: accepted mapped actions advance through Choose; corrected mapped
+actions also advance with correction; Romanised input and explicit tea beku mixing.
+Coffee/milk/food cannot be mapped to tea from a_tea. Greeting/refusal remain authored.
+Settings, notebook, original-line and authored fallback controls remain available.
+
+NOT RUN: live HTTP exchange; native submit/advance/correction/cancel/help/fallback;
+controller focus/layout; fresh Player build; fluent-language acceptance.
+Prior loopback AccessDenied respected: no listener/connect retry, network/security
+change or alternate-route bypass. Host source and socket-free routing tests added
+to sibling language-engine working folder; host was not started.
+
+Native UI inspection: inventory returned Unity window 329162, accessibility capture
+was unavailable, screenshot instead displayed another foreground app. No UI input
+was sent; no visit/save/Play state was changed. This does not establish native
+acceptance. Isolated-save native playthrough remains required.
+
+Git scope: game files only; no push or submodule-pointer update. Language-engine
+Git metadata access to paridhwani/.git/modules/language-engine was already denied;
+no bypass attempted. Host/test changes there and prior evaluator work remain intact
+and uncommitted. The optional game adapter compiles independently and keeps offline
+authored gameplay when the separately hosted service is unavailable.
+
+Reproduce: .\verification\Verify-TeaAssessment.ps1 (game root).
+Handoff: docs/TEA_ASSESSMENT_INTEGRATION.md.

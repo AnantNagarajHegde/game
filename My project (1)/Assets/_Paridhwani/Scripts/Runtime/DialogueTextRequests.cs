@@ -93,13 +93,15 @@ namespace Paridhwani {
  public bool HasOptionalDialogueLine => optionalLine!=null;
  public void UseAuthoredDialogue() {
  if(ui.Mode!="conversation" || Turn==null)return;
+ teaAssessmentRequests.Cancel();
  textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="Original conversation line. Your supported replies are unchanged.";ui.ShowConversation();
  }
- void NewDialogueTurn(){textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="";OptionalDialogueInput="";}
- void SuspendDialogueText(){bool waiting=textRequests.Busy;textRequests.Cancel();if(waiting)OptionalDialogueStatus="Reply cancelled. Your conversation is still here.";}
+ void NewDialogueTurn(){ResetTeaAssessment();textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="";OptionalDialogueInput="";}
+ void SuspendDialogueText(){teaAssessmentRequests.Cancel();bool waiting=textRequests.Busy;textRequests.Cancel();if(waiting)OptionalDialogueStatus="Reply cancelled. Your conversation is still here.";}
  public void CancelOptionalDialogue(){textRequests.Cancel();OptionalDialogueStatus="You can continue with the supported replies.";if(ui.Mode=="conversation")ui.ShowConversation();}
  public async void AskOptionalDialogue() {
  if(OptionalDialogueText==null || ui.Mode!="conversation" || Turn==null || string.IsNullOrWhiteSpace(OptionalDialogueInput))return;
+ teaAssessmentRequests.Cancel();
  optionalLine=null;var turn=Turn;var npc=ActiveNpc;var prompt=new DialoguePrompt(npc?npc.displayName:"",turn,OptionalDialogueInput);
  OptionalDialogueInput=prompt.LearnerText;var handler=OptionalDialogueText;
  var pending=textRequests.Send(token=>handler(prompt,token));
@@ -111,6 +113,6 @@ namespace Paridhwani {
  else OptionalDialogueStatus=reply.Status==DialogueTextStatus.TimedOut?"That reply took too long. Try again or use a supported reply.":"A reply is unavailable. Try again or use a supported reply.";
  ui.ShowConversation();
  }
- void OnDestroy(){textRequests.Dispose();}
+ void OnDestroy(){teaAssessmentRequests.Dispose();textRequests.Dispose();}
  }
 }
