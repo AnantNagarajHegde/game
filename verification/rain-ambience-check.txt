@@ -1,0 +1,17 @@
+2026-10-29 source-only rain/shelter transition checkpoint
+Parent b998a0b; tracked checkout initially clean.
+Scope: RainShelterMix policy, TeaAmbience adapter, focused assertions and evidence.
+Runtime/Editor/Player-source-branch compilation PASSED.
+405 aggregate assertions PASSED, including 18 focused ambience checks.
+Log: Temp/RainAmbience-20261029/source-check.log
+Tests execute real policy for roof-edge hysteresis, crossfades, authored steady gains,
+mute/focus/zero immediate silence, muted roof tracking, resume/disable fade, slider scaling,
+30/120 Hz agreement, non-finite/negative time/gain and long-frame bound.
+Adapter ray now uses QueryTriggerInteraction.Ignore; native raycast behaviour NOT RUN.
+Audio clips/settings/scene/river/footstep/cast/controller/NLP code unchanged.
+Main save SHA256 before/after: 87E29421458FF41E87774019B4B9EF27CA6C946A1D73C328BFFE47DC4E39F8E0
+Not run: Unity playback/listening, device input, native physics, standalone or performance acceptance.
+UI tools absent; no alternate automation/security/loopback action attempted.
+Earlier intermittent save-recovery failure remains unresolved; passing run does not erase it.
+Native acceptance route is in docs/RAIN_AMBIENCE_CHECKPOINT.md.
+No push. Vegetation final renders and close Somanna camera repair remain separate pending work.

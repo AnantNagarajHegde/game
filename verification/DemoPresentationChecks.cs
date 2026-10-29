@@ -20,7 +20,35 @@ public static class DemoPresentationChecks {
  check(VillageSignLayout.Fit(100,float.NaN,20,400,100)==100 && VillageSignLayout.Fit(100,20,20,float.NaN,100)==100,"invalid shaping measurements cannot produce a non-finite font size");
  check(VillageSignLayout.Fit(float.NaN,20,20,400,100)==1,"invalid current font size has a safe fallback");
  }
+ static void RainChecks(Action<bool,string> check) {
+ void RunFor(RainShelterMix mix,bool roof,bool audible,float gain,int frames,float dt=1f/60) {for(int i=0;i<frames;i++)mix.Step(roof,audible,gain,dt);}
+ bool Near(float actual,float expected)=>Math.Abs(actual-expected)<.0001f;
+ var outdoor=new RainShelterMix();RunFor(outdoor,false,true,1,120);
+ check(Near(outdoor.RainGain,.34f)&&Near(outdoor.EaveGain,.03f),"outdoor rain retains authored settled levels");
+ RunFor(outdoor,true,true,1,6);check(!outdoor.Sheltered,"brief overhead obstruction cannot switch to shelter");
+ RunFor(outdoor,false,true,1,2);RunFor(outdoor,true,true,1,6);check(!outdoor.Sheltered,"roof confirmation requires continuous cover");
+ RunFor(outdoor,true,true,1,120);check(outdoor.Sheltered&&Near(outdoor.RainGain,.13f)&&Near(outdoor.EaveGain,.16f),"sustained roof transitions to muffled rain and eaves");
+ RunFor(outdoor,false,true,1,12);check(outdoor.Sheltered,"brief tiled-eave gap retains shelter");
+ RunFor(outdoor,false,true,1,120);check(!outdoor.Sheltered&&Near(outdoor.RainGain,.34f)&&Near(outdoor.EaveGain,.03f),"leaving shelter restores outdoor mix");
+ var flicker=new RainShelterMix();bool continuous=true;
+ for(int i=0;i<240;i++){float old=flicker.RainGain;flicker.Step(i%2==0,true,1,1f/60);continuous&=Math.Abs(flicker.RainGain-old)<.025f&&!flicker.Sheltered;}
+ check(continuous,"alternating roof-edge samples neither pump shelter state nor pop rain gain");
+ outdoor.Step(false,false,1,1f/60);check(outdoor.RainGain==0&&outdoor.EaveGain==0,"mute/focus loss silences both channels immediately");
+ RunFor(outdoor,true,false,1,120);check(outdoor.Sheltered&&outdoor.RainGain==0,"shelter detection continues while inaudible");
+ outdoor.Step(true,true,1,1f/60);check(outdoor.RainGain>0&&outdoor.RainGain<.01f,"focus return fades in under the current roof");
+ RunFor(outdoor,true,true,.25f,120);check(Near(outdoor.RainGain,.13f*.25f)&&Near(outdoor.EaveGain,.16f*.25f),"ambience slider scales both sheltered channels");
+ outdoor.Step(true,true,0,0);check(outdoor.RainGain==0&&outdoor.EaveGain==0,"zero ambience silences without waiting for another frame");
+ RunFor(outdoor,true,true,1,120);outdoor.Silence();check(outdoor.RainGain==0&&outdoor.EaveGain==0,"disable/listener loss can reset audibility immediately");
+ outdoor.Step(true,true,1,1f/60);check(outdoor.RainGain<.01f,"re-enable does not restore stale full gain");
+ var slow=new RainShelterMix();var fast=new RainShelterMix();RunFor(slow,true,true,1,15,1f/30);RunFor(fast,true,true,1,60,1f/120);
+ check(Math.Abs(slow.RainGain-fast.RainGain)<.015f&&Math.Abs(slow.EaveGain-fast.EaveGain)<.015f,"30 and 120 Hz transitions agree within one probe frame");
+ var invalid=new RainShelterMix();invalid.Step(true,true,float.NaN,float.PositiveInfinity);
+ check(invalid.RainGain==0&&invalid.EaveGain==0&&!invalid.Sheltered,"non-finite time/gain cannot contaminate audio or shelter state");
+ invalid.Step(true,true,1,-1);check(invalid.RainGain==0&&!invalid.Sheltered,"negative time cannot advance ambience");
+ invalid.Step(true,true,1,60);check(!invalid.Sheltered&&invalid.RainGain<=.06801f,"long frame is bounded instead of snapping to a full new mix");
+ }
  public static void Run(Action<bool,string> check) {
+ RainChecks(check);
  SignChecks(check);
  check(PresentationPolicy.Brightness(float.NaN)==PresentationPolicy.DefaultBrightness && PresentationPolicy.Brightness(float.PositiveInfinity)==PresentationPolicy.DefaultBrightness,"invalid display exposure has a finite default");
  check(PresentationPolicy.Brightness(-9)==-.5f && PresentationPolicy.Brightness(9)==1.5f,"display exposure is bounded");

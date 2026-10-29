@@ -10,6 +10,7 @@ namespace Paridhwani
         VillageFootsteps footsteps;
         public float volume=1,footstepVolume=1;
         AudioClip noiseClip, dripClip;
+        readonly RainShelterMix mix=new RainShelterMix();
         void Start()
         {
             rainSource=gameObject.AddComponent<AudioSource>();
@@ -41,19 +42,21 @@ namespace Paridhwani
         }
         void Update()
         {
-            if(!rainSource || !listener) return;
+            if(!rainSource || !shelterSource) return;
+            if(!listener) {SilenceSources();return;}
             if(rain) {
                 var target=listener.position+Vector3.up*7;
                 if((rain.transform.position-target).sqrMagnitude>900) rain.Clear();
                 rain.transform.position=target;
             }
             if(footsteps) footsteps.volume=footstepVolume;
-            bool sheltered=Physics.Raycast(listener.position+Vector3.up*1.5f,Vector3.up,4,~(1<<2));
-            float gain=PresentationPolicy.Volume(volume);
-            if(muted || !Application.isFocused || gain<=0) {rainSource.volume=shelterSource.volume=0;return;}
-            rainSource.volume=Mathf.MoveTowards(rainSource.volume,(sheltered?.13f:.34f)*gain,Time.deltaTime*.2f);
-            shelterSource.volume=Mathf.MoveTowards(shelterSource.volume,(sheltered?.16f:.03f)*gain,Time.deltaTime*.2f);
+            bool sheltered=Physics.Raycast(listener.position+Vector3.up*1.5f,Vector3.up,4,~(1<<2),QueryTriggerInteraction.Ignore);
+            mix.Step(sheltered,!muted && Application.isFocused,PresentationPolicy.Volume(volume),Time.unscaledDeltaTime);
+            rainSource.volume=mix.RainGain;shelterSource.volume=mix.EaveGain;
         }
+        void SilenceSources()
+        {mix.Silence();if(rainSource)rainSource.volume=0;if(shelterSource)shelterSource.volume=0;}
+        void OnDisable() {SilenceSources();}
         void OnDestroy() { if(noiseClip) Destroy(noiseClip); if(dripClip) Destroy(dripClip); if(footsteps) Destroy(footsteps); }
     }
 }
