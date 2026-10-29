@@ -63,6 +63,22 @@ public static class ChapterChecks {
  menu.OpenFrom("pause");Check(menu.OriginMode=="pause" && menu.BackLabel=="Back to Pause","pause practice does not retain a previous credits return");
  }
  static void InputChecks() {
+ foreach(string mode in new[]{"","conversation","evidence","inspection","notebook"})
+ Check(VillageInputPolicy.ControllerNotebookShortcut(mode,false),"controller notebook preserves supported modal context: "+mode);
+ foreach(string mode in new[]{"arrival","main-menu","pause","chapter-replay","new-visit-confirm","quit-save-error","world-update-required","credits"})
+ Check(!VillageInputPolicy.ControllerNotebookShortcut(mode,false),"controller notebook cannot bypass protected screen: "+mode);
+ Check(!VillageInputPolicy.ControllerNotebookShortcut("conversation",true),"controller shortcut respects text entry");
+ var stick=new UnityEngine.Vector2(.6f,.8f);
+ var slow=VillageInputPolicy.ControllerLookDelta(stick,1f/30,.12f);
+ var fast=VillageInputPolicy.ControllerLookDelta(stick,1f/120,.12f);
+ Check(Math.Abs(slow.x*30-fast.x*120)<.0001 && Math.Abs(slow.y*30-fast.y*120)<.0001,"controller turn rate is independent of frame rate");
+ Check(Math.Abs(slow.x-3)<.0001 && Math.Abs(slow.y-4)<.0001,"controller has a useful default angular velocity");
+ var gentle=VillageInputPolicy.ControllerLookDelta(new UnityEngine.Vector2(.3f,.4f),1f/30,.12f);
+ Check(Math.Abs(gentle.x*2-slow.x)<.0001,"controller preserves analogue look strength");
+ var sensitive=VillageInputPolicy.ControllerLookDelta(stick,1f/30,.24f);
+ Check(Math.Abs(sensitive.x-2*slow.x)<.0001,"look sensitivity applies equally to the controller");
+ Check(VillageInputPolicy.ControllerLookDelta(stick,0,.12f)==UnityEngine.Vector2.zero,"paused frame cannot turn camera");
+ Check(VillageInputPolicy.ControllerLookDelta(stick,float.NaN,.12f)==UnityEngine.Vector2.zero,"invalid frame time cannot turn camera");
  Check(!VillageInputPolicy.ChoiceShortcut("conversation",true),"typing digits cannot choose dialogue");
  Check(!VillageInputPolicy.ChoiceShortcut("evidence",true),"typing lock digits cannot choose evidence");
  Check(VillageInputPolicy.ChoiceShortcut("conversation",false) && VillageInputPolicy.ChoiceShortcut("evidence",false),"authored numeric shortcuts retained");

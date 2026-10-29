@@ -136,6 +136,7 @@ namespace Paridhwani.Editor
             ExpandVillage(session);
             AddMarketChapter(session);
             VillageFrontageArt();
+            VillageVegetationArt();
             AddRiverChapter(session);
             AddTempleChapter(session);
             AddArchiveChapter(session);

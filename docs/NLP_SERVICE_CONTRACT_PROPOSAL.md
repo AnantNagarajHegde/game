@@ -1,6 +1,6 @@
 # Proposed Unity / NLP service contract
 
-Status: integration proposal, 28 October 2026. This is not an existing engine endpoint. The language-engine and integration-pipeline working directories currently contain no readable implementation/contract. Keep the authored game playable until the real contract and service are supplied.
+Status: integration proposal, 28 October 2026. The mapping below now has an executable, loopback-only development implementation: see [HTTP v1 contract, mock and checks](NLP_HTTP_V1.md). That document defines the concrete local route, limits and validation; remote deployment guidance here remains a proposal. This is not an existing engine endpoint. The language-engine and integration-pipeline working directories currently contain no readable implementation/contract. Keep the authored game playable until the real contract and service are supplied.
 
 ## Recommended transport and ownership
 
@@ -57,7 +57,7 @@ Current Unity limits: learner input is at most 512 UTF-16 code units, cut at tex
 5. Whether the service supplies text only or intent candidates; stable per-turn intent IDs if the latter.
 6. Expected latency, rate limits, errors, cancellation and deduplication behavior.
 
-Once these are supplied, implement the concrete transport behind IDialogueTextService, bind it at session setup with SetOptionalDialogueService(service) on the Unity thread (pass null to detach), and run local mock-server plus real-service tests for success, wrong IDs/schema, delayed/out-of-order responses, cancellation, errors, limits and offline fallback. The current C# adapter tests do not establish HTTP or deployed-engine integration.
+The [loopback HTTP v1 transport](NLP_HTTP_V1.md) now maps this text-only proposal behind IDialogueTextService and supplies a mock and test runner. Once the engine decisions above are supplied, agree any contract differences and provide a reviewed production transport, bind it at session setup with SetOptionalDialogueService(service) on the Unity thread (pass null to detach), and run real-service tests for success, wrong IDs/schema, delayed/out-of-order responses, cancellation, errors, limits and offline fallback. Passing in-memory HTTP-handler tests do not establish socket or deployed-engine integration.
 
 ## Reference documentation
 

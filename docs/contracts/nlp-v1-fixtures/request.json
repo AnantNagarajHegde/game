@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "request_id": "0123456789abcdef0123456789abcdef",
+  "turn_id": "fixture-greeting",
+  "speaker": "Synthetic speaker",
+  "learner_text": "Synthetic greeting",
+  "authored_line": {"kn": "", "roman": "Namaskara.", "en": "Hello."},
+  "available_replies": [{"kn": "", "roman": "", "en": "Hello."}]
+}

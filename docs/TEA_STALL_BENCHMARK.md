@@ -22,6 +22,31 @@ A Windows development player is generated at My project (1)/Builds/TeaStall/Pari
 | Escape | Leave conversation, close notebook, or pause |
 | F5 / F9 | Save / restore this visit |
 
+### Controller
+
+Connect a controller recognized by Unity's Input System as a Gamepad before or during play. Keyboard and mouse remain available; HUD prompts follow the last input used. PlayStation controllers show Cross/Circle in the shared controller guidance.
+
+| Controller input | Action |
+|---|---|
+| Left stick | Walk with analogue speed |
+| Hold right trigger (RT / R2) | Jog |
+| Right stick | Orbit camera in exploration; scroll documents and menus while a panel is open |
+| A / Cross | Interact in the world; activate the focused menu control or reply |
+| B / Circle | Back / close the current panel; dismiss a dropdown before leaving settings |
+| D-pad / left stick | Navigate replies, evidence answers, notebook actions, settings and chapter lists |
+| D-pad left / right | Adjust a focused slider |
+| A / Cross, then D-pad up / down | Open a dropdown and select an option; A / Cross confirms |
+| View / Share | Open or close field notes, including during dialogue and evidence tasks |
+| Menu / Options | Pause in exploration; return through the current panel's normal close path |
+
+Save and restore are available through Pause. The trunk's plus/minus buttons allow all four digits to be set without typing; focus stays on the digit after each adjustment. Optional free-text dialogue still uses keyboard entry; every authored story response is available by controller.
+
+Controller camera sensitivity and vertical inversion use the existing Look sensitivity and Invert vertical look settings. Stick look uses a time-based angular rate, while mouse look uses mouse displacement. Sticks retain the Input System's deadzone processing. Modal panels block world movement and look. Removing the active controller pauses exploration; reconnecting and pressing a control resumes controller navigation through Pause.
+
+The development smoke playtest injects a temporary virtual gamepad through InputSystem and checks the actual runtime movement, camera, UI submit/cancel, settings, scrolling, notebook return and disconnect paths. It uses the smoke run's isolated save. Physical controller/driver compatibility still requires testing on the target hardware.
+
+Verified on 28 October 2026: runtime/editor and Player-branch source compilation passed with 387 standalone assertions. Unity 6000.6.7f1 built a fresh Windows development player, which passed the complete story smoke sequence across 17,195 advancing frames and exited with code 0. The virtual-gamepad checks passed for movement, camera, interaction, dialogue, notebook suspension/return, sliders, dropdown dismissal, chapter navigation, scrolling, disconnect, repeated trunk-digit adjustment and evidence-answer navigation. No runtime exceptions were recorded in this final player log. The run report is `verification/Temp/StandalonePlaytests/run-20261028-085549450-d3bbacff/report.json`; its `player.log` contains the controller and full-story success markers. Reproduce through **Paridhwani > Build and Run Standalone Playtest** in the desktop Editor.
+
 Approach the tea stall on the left and look roughly towards Manjunatha. A prompt appears within speaking distance when no wall blocks the view. Greet him, order tea or water, and ask for the library. Both drinks are valid; declining tea gets a polite clarification.
 
 Walk up the lane and left to the library veranda. Somanna stands outside. Introduce yourself and ask politely about the door or Ananya. He explains the master/duplicate keys and directs you to Shanthakka across the lane. The reading-room interior remains closed.

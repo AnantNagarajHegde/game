@@ -4,7 +4,7 @@ The full story runs through authored local conversation providers. Unity owns tu
 
 ## Optional text adapter
 
-`TeaStallSession.OptionalDialogueText` accepts an injected delegate taking a `DialoguePrompt`, cancellation token and returning a `Task<TeaLine>`. It is a Unity-side adapter surface, not an HTTP/service protocol or a new language engine. No endpoint, backend model, key or transport is configured or shipped.
+`TeaStallSession.OptionalDialogueText` accepts an injected delegate taking a `DialoguePrompt`, cancellation token and returning a `Task<TeaLine>`. It is a Unity-side adapter surface, not a new language engine. No endpoint, backend model or key is configured by default. An optional loopback HTTP transport is now supplied for local development; see [HTTP v1 mock integration](NLP_HTTP_V1.md).
 
 A prompt contains copied current-turn text, copied available reply text, speaker/turn identity and bounded learner input. It exposes no quest-effect commands or full hidden story state. A reply supplies text only. Authored reply selection remains responsible for all consequences. Recognised intents and any future backend API must be agreed with the engine team before replacing that flow.
 
@@ -22,7 +22,7 @@ session.SetOptionalDialogueService(null);
 
 DialogueServiceAdapter.Bind(service) also remains available for direct delegate integration. Setting or replacing OptionalDialogueText invalidates pending work and clears the previous optional reply. These are configuration operations, not per-frame calls. The service owner retains responsibility for disposing its connection/client; the session only cancels its own requests.
 
-The service implementation is supplied by the integration team. No implementation, endpoint or credential is installed by this change. DialogueServiceRequest and DialogueServiceReply are immutable in-process C# types, not JsonUtility DTOs or an assertion about the external engine's actual schema. A transport must map the agreed wire contract to them.
+The service implementation is supplied by the integration team. The [HTTP v1 development boundary](NLP_HTTP_V1.md) now provides an opt-in loopback-only transport and synthetic mock; no remote endpoint or credential is configured. DialogueServiceRequest and DialogueServiceReply are immutable in-process C# types, not JsonUtility DTOs or an assertion about the external engine's actual schema. DialogueHttpContract maps the local wire contract to them.
 
 Each request has version 1, a unique request ID, turn ID, speaker display name, bounded learner input and immutable copies of the current authored line/replies. The collection cannot be modified by a service. Responses must echo the exact request ID, turn ID and version, and provide nonempty bounded text. Invalid responses become the existing unavailable/fallback state. Cancellation is checked before calling the service and after its response; the same token reaches the transport. Existing request management still applies its deadline and discards superseded work.
 
@@ -42,6 +42,6 @@ Every result carries its coordinator generation. The session checks that generat
 
 Standalone tests cover missing/failing services, null/oversized replies, timeout with a non-cooperative task, stale replies after cancellation, copied authored choices, immutable service context, unique IDs, response correlation/version validation, forwarding cancellation, callback failures, reentrant replacement, stale completed results, setup failure cleanup and shutdown. All runtime/editor sources compile and 287 assertions pass. They simulate transport behavior without network calls. The preceding native Editor playthrough exercised optional text presentation, literal text and large-response scrolling through the legacy delegate; the new typed service boundary and real transport still need in-engine/network acceptance.
 
-The integration team must still supply the real contract, allowed-fact policy, service availability, transport implementation and reviewed language behavior. This adapter does not claim NLP integration is complete.
+The integration team must still agree the real engine contract, allowed-fact policy, service availability, remote transport/authentication and reviewed language behavior. The mock-compatible HTTP implementation does not claim NLP integration is complete.
 
 The cancellation-callback regression was reproduced against the previous implementation before the fix. Native smoke assertions now cover provider replacement/detachment with a delayed old reply and a throwing cancellation callback. They compile but have not been executed in a new Unity playthrough during this pass.

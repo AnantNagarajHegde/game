@@ -93,8 +93,13 @@ namespace Paridhwani.Editor
                     else active.playerExitCode=player.ExitCode;
                 }
                 if(failure==null && File.Exists(active.playerLog))
-                    foreach(string line in File.ReadAllLines(active.playerLog))
-                        if(line.StartsWith("VILLAGE_SMOKE_OK ",StringComparison.Ordinal)) active.smokeSuccessLine=line;
+                    // Unity's logging handle may still be closing after the process signals exit.
+                    using(var stream=new FileStream(active.playerLog,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete))
+                    using(var reader=new StreamReader(stream))
+                    {
+                        string line;while((line=reader.ReadLine())!=null)
+                            if(line.StartsWith("VILLAGE_SMOKE_OK ",StringComparison.Ordinal)) active.smokeSuccessLine=line;
+                    }
                 active.smokePassed=failure==null && active.buildResult=="Succeeded" && active.playerExitCode==0 && !string.IsNullOrEmpty(active.smokeSuccessLine);
                 active.failure=failure??(active.smokePassed?"":"Player verification failed; inspect player.log for the failure or missing completion marker.");
                 active.state=active.smokePassed?"passed":"failed";active.completedUtc=DateTime.UtcNow.ToString("O");

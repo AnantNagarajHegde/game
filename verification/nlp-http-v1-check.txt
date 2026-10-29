@@ -1,0 +1,43 @@
+NLP_HTTP_V1_DEVELOPMENT_BOUNDARY_CHECK
+Date: 28 October 2026
+Base checkout: d7e2d8a (codex/village-progression), with unrelated graphics/controller changes preserved.
+Isolation: integration-specific files only; own ignored verification/Temp/NlpVerification compiler outputs.
+
+PASSED
+- Runtime, Editor and runtime source branches without Editor/diagnostic defines compile using Unity 6000.6.7f1 cached references. No new package dependency.
+- Existing ChapterChecks + DemoPresentationChecks: 387 assertions.
+- DialogueHttpChecks: 82 assertions using the real HTTP service, codec, adapter and coordinator with an injected in-memory HttpMessageHandler. No sockets in passing run.
+- JSON Schema document syntax and required request/response envelope structure inspected.
+- No edits to shared session/UI/controller, scene, materials, settings, graphics generator or existing verification files.
+
+HTTP checks cover explicit opt-in, endpoint rejection, exact payload shape, Unicode, copied text without effects, learner/text/choice/body bounds, successful correlated replies, wrong IDs/turn/version/types, missing/null/empty text, extra commands, duplicate/malformed JSON, invalid UTF-8, declared and streamed oversize bodies, redirects, 401/403/429/503, wrong content type/encoding, no application retry, coordinator and transport deadlines (headers/body), worker-thread cancellation, supersession, concurrent independent correlation, sanitized failures, owner disposal and connectivity fallback.
+
+FAILED / BLOCKED
+- Initial real loopback HTTP success check returned Dialogue transport: Connectivity.
+- A minimal independent TCP connection to an ephemeral literal 127.0.0.1 listener returned SocketException AccessDenied. The execution environment denies loopback client connections.
+- Outcome is denied, not uncertain: no successful HTTP exchange was observed. No permission escalation, firewall change, prompt dismissal, external request or credential setup was attempted. The attempted payload was synthetic.
+- Do not interpret in-memory handler results as real socket or native Unity acceptance. The mock listener/server source compiles, but its full network exchange remains unverified.
+
+NOT RUN
+- Fresh Unity Editor / standalone Player attach, submit, cancel, supersede, detach and offline-play acceptance. The graphics task owns the Editor and a Windows Security prompt is pending for the user; do not interact with it.
+- IL2CPP, WebGL, mobile, real NLP, language/spoiler review, production authentication/hosting.
+
+COMMANDS (PowerShell, game repository root)
+.\verification\Verify-Nlp.ps1                  # passing default: no sockets; compile + 387 + 82 assertions
+.\verification\Verify-Nlp.ps1 -CompileOnly     # cached source compilation only
+.\verification\Verify-Nlp.ps1 -NetworkChecks   # pending until local socket access is available
+.\verification\Verify-Nlp.ps1 -ServeMock       # loopback-only synthetic server; port 8765; Ctrl+C stops
+
+When the user has resolved the desktop prompt and socket access is available through the normal environment, run NetworkChecks once, start ServeMock, then use Paridhwani > NLP mock > Attach loopback service (port 8765) during Play mode. Confirm optional text does not advance quests, cancel/leave/new-turn drops old replies, supported choices continue with server stopped, and Detach restores authored text. No remote connection is implemented.
+
+Contract and limitations: docs/NLP_HTTP_V1.md and docs/contracts/nlp-v1.schema.json.
+
+SOCKET-FREE BACKEND HANDOFF MILESTONE (28 October 2026)
+- Added docs/contracts/nlp-v1-fixtures: one synthetic request, eight response cases, manifest and backend handoff instructions. Some rejection files intentionally contain duplicate keys, malformed Unicode or trailing JSON; preserve their bytes.
+- Fixture request is compared with the game's encoder. Responses are checked through the production decoder, including nested commands, duplicate nested text, unpaired surrogate, numeric text, trailing JSON, wrong correlation, accepted Unicode and literal markup.
+- Added saved-response --check-response mode with explicit expected request/turn IDs; file reads are bounded, no service is constructed and no body is logged.
+- Additional tests cover the exact supplementary-Unicode UTF-16 reply limit, invalid/null expected context, deep JSON, and cancellation isolation between simultaneous callers sharing one service.
+- No real socket retry, Unity launch, firewall/security action, permission request, backend/model implementation or external data transfer was attempted in this milestone.
+- Current verification: 108 HTTP/contract assertions plus the unchanged 387 regression assertions; runtime/Editor/Player-source compilation passes. The earlier 82 assertions describe the first milestone; portable corpus/concurrency coverage extends that suite.
+- Saved-response command exit codes verified: Unicode/literal accepted (0), nested command rejected (1), and mismatched expected correlation rejected (1). Expected rejection reports a fixed failure code and never the response body.
+- Backend handoff: docs/contracts/nlp-v1-fixtures/README.md. Socket and native acceptance blockers remain unchanged.

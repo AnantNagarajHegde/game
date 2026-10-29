@@ -17,10 +17,11 @@ namespace Paridhwani
         const string Menu = "Paridhwani/Run Presentation Demo Playtest";
         const string PendingKey = "Paridhwani.PresentationDemoPlaytest";
         const string FrontageKey = "Paridhwani.FrontageArtPlaytest";
+        const string VegetationKey = "Paridhwani.VegetationArtPlaytest";
         [Serializable]
         sealed class Report
         {
-            public string state = "running", startedUtc, completedUtc, unityVersion, sourceSha256, failure;
+            public string state = "running", startedUtc, completedUtc, unityVersion, sourceSha256, failure, environmentPhysicsSha256;
             public int checks, width, height;
             public List<string> captures = new List<string>();
         }
@@ -28,7 +29,7 @@ namespace Paridhwani
         TeaStallSession session;
         string output;
         float deadline;
-        bool finished, originalBackground, frontageOnly;
+        bool finished, originalBackground, frontageOnly, vegetationOnly;
         int originalWidth, originalHeight;
         FullScreenMode originalMode;
 
@@ -58,6 +59,14 @@ namespace Paridhwani
             SessionState.SetBool(FrontageKey,true);
             try {RunFromMenu();}catch {SessionState.SetBool(FrontageKey,false);throw;}
         }
+        [MenuItem("Paridhwani/Run Vegetation Art Playtest",true)]
+        static bool VegetationAvailable()=>Available();
+        [MenuItem("Paridhwani/Run Vegetation Art Playtest")]
+        static void RunVegetation()
+        {
+            if(!Available())return;SessionState.SetBool(VegetationKey,true);
+            try {RunFromMenu();}catch {SessionState.SetBool(VegetationKey,false);throw;}
+        }
 
         [InitializeOnLoadMethod]
         static void Register()
@@ -76,6 +85,7 @@ namespace Paridhwani
         void Begin()
         {
             frontageOnly=SessionState.GetBool(FrontageKey,false);SessionState.SetBool(FrontageKey,false);
+            vegetationOnly=SessionState.GetBool(VegetationKey,false);SessionState.SetBool(VegetationKey,false);
             originalBackground = Application.runInBackground;
             originalWidth = Screen.width; originalHeight = Screen.height; originalMode = Screen.fullScreenMode;
             Application.runInBackground = true;
@@ -347,6 +357,12 @@ namespace Paridhwani
             // The Editor controls Game-view dimensions; record actual dimensions rather than claiming a requested resolution.
             report.width = Screen.width; report.height = Screen.height;
             yield return Capture("00-title");
+            if(vegetationOnly)
+            {
+                yield return VegetationChecks();
+                Check(SourceDigest()==report.sourceSha256,"vegetation source/assets stayed unchanged during run");
+                yield break;
+            }
             if(frontageOnly)
             {
                 yield return FrontageChecks();
@@ -391,6 +407,42 @@ namespace Paridhwani
                 session.OpenTitle();
             }
             Check(SourceDigest() == report.sourceSha256, "source and scene assets remained unchanged throughout the run");
+        }
+        string EnvironmentPhysicsDigest()
+        {
+            Physics.SyncTransforms();var rows=new List<string>();var culture=System.Globalization.CultureInfo.InvariantCulture;
+            foreach(var body in GameObject.Find("Environment").GetComponentsInChildren<Collider>(true))
+            {
+                var b=body.bounds;var p=b.center;var s=b.size;
+                rows.Add(body.name+"|"+body.GetType().Name+"|"+body.enabled+"|"+body.isTrigger+"|"+p.x.ToString("F4",culture)+","+p.y.ToString("F4",culture)+","+p.z.ToString("F4",culture)+"|"+s.x.ToString("F4",culture)+","+s.y.ToString("F4",culture)+","+s.z.ToString("F4",culture));
+            }
+            rows.Sort(StringComparer.Ordinal);using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n",rows)))).Replace("-","").ToLowerInvariant();
+        }
+        IEnumerator VegetationChecks()
+        {
+            session.ui.ShowPresentationDemo();session.StartPresentationDemo(ReplayChapter.Arrival);session.Close();yield return null;
+            report.environmentPhysicsSha256=EnvironmentPhysicsDigest();WriteReport();
+            var art=GameObject.Find("Village Vegetation Art");
+            if(art)
+            {
+                Check(art.GetComponentsInChildren<Collider>().Length==0,"vegetation adds no colliders");
+                foreach(var filter in art.GetComponentsInChildren<MeshFilter>())
+                {
+                    var mesh=filter.sharedMesh;var points=mesh.vertices;var indices=mesh.triangles;
+                    foreach(var p in points)Check(float.IsFinite(p.x)&&float.IsFinite(p.y)&&float.IsFinite(p.z),"finite vegetation vertex");
+                    for(int i=0;i<indices.Length;i+=3)Check(Vector3.Cross(points[indices[i+1]]-points[indices[i]],points[indices[i+2]]-points[indices[i]]).sqrMagnitude>1e-14f,"nondegenerate vegetation triangle: "+mesh.name);
+                }
+            }
+            var camera=session.player.view;var position=camera.transform.position;var rotation=camera.transform.rotation;
+            session.player.enabled=false;session.ui.ShowInspection("Vegetation view","","","");var display=Root.style.display;Root.style.display=DisplayStyle.None;
+            var poses=new[]{new Vector3(-1,2.9f,5.4f),new Vector3(-5.5f,1.65f,8.1f),new Vector3(1,2.1f,-10.5f)};
+            var targets=new[]{new Vector3(-9,3.3f,9.4f),new Vector3(-9,3.3f,9.4f),new Vector3(-11,6.5f,5)};
+            var names=new[]{"Banyan-overview","Banyan-branches","Palm-line"};
+            for(int i=0;i<poses.Length;i++)
+            {camera.transform.position=poses[i];camera.transform.LookAt(targets[i]);yield return Capture("Vegetation-"+names[i]);}
+            Root.style.display=display;session.ui.HideModal();camera.transform.SetPositionAndRotation(position,rotation);session.player.enabled=true;
+            yield return FrontageChecks();
+            Check(EnvironmentPhysicsDigest()==report.environmentPhysicsSha256,"static environment collision bounds remain stable during routes");
         }
         IEnumerator FrontageChecks()
         {

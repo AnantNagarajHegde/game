@@ -116,6 +116,11 @@ Slider { margin-top: 12px; margin-bottom: 12px; }
 .conversation .dialogue-footer { flex-wrap: wrap; justify-content: flex-start; }
 .dialogue-footer > * { margin-right: 12px; }
 
+/* Shared focus and controller guidance for every modal. */
+.quiet-button:focus { background-color: rgb(67,80,53); color: rgb(241,226,190); }
+Toggle:focus, Slider:focus, DropdownField:focus, TextField:focus { border-width: 1px; border-color: rgb(196,164,104); }
+.controller-help { position: absolute; bottom: 2px; left: 8px; right: 8px; padding: 3px 8px; font-size: 12px; color: rgb(241,226,190); background-color: rgba(16,28,24,.97); white-space: normal; -unity-text-align: middle-center; }
+
 /* Title presentation: readable hierarchy over the live village backdrop. */
 .title-card { width: 720px; border-top-width: 3px; }
 .title-card .brand { font-size: 26px; margin-top: 5px; margin-bottom: 14px; }

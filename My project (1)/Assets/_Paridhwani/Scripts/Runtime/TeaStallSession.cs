@@ -138,7 +138,8 @@ namespace Paridhwani
             UpdateReturnJourney();
             UpdateFarmArrival();
             FindInteraction();
-            HandleKeyboard();
+            UpdateInputDevice();
+            if(!HandleController()) HandleKeyboard();
             ui.RefreshHUD();
             if(Time.unscaledTime>nextSave && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) { Save(); nextSave=Time.unscaledTime+15; }
         }

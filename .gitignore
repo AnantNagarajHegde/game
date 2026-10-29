@@ -8,10 +8,18 @@
 [Uu]serSettings/
 [Mm]emoryCaptures/
 [Rr]ecordings/
+[Cc]rash[Rr]eports/
+
+# Unity tooling caches and generated asset backups
+.utmp/
+.consulo/
+[Aa]ssets/AssetStoreTools*/
+[Aa]ssets/[Pp]lugins/Editor/JetBrains*/
 
 # Unity-generated IDE files
 .vs/
 .idea/
+.vscode/
 *.csproj
 *.sln
 *.slnx
@@ -21,10 +29,38 @@
 *.svd
 *.pdb
 *.mdb
+*.suo
+*.userprefs
+*.unityproj
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Player crash/debug output (do not ignore DLLs or model .obj source assets)
+sysinfo.txt
+*.dmp
+*_BackUpThisFolder_ButDontShipItWithYourGame/
+*_BurstDebugInformation_DoNotShip/
+
+# Python helper caches and local virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local service configuration; keep distributable examples
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
 
 # Operating system files
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Local verification diagnostics
 *.log

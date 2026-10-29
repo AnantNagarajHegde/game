@@ -34,6 +34,7 @@ Material:
     - _Roughness: 0.96
     - _TextureScale: 0.5
     - _TextureStrength: 0.75
+    - _VertexSurface: 0
     - _Wet: 0.45
     - _WindStrength: 0
     m_Colors:

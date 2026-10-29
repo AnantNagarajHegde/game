@@ -1,0 +1,14 @@
+{
+  "contract_version": 1,
+  "request_file": "request.json",
+  "cases": [
+    {"response_file": "accepted-minimal.json", "expected": "accepted"},
+    {"response_file": "accepted-unicode-literal.json", "expected": "accepted"},
+    {"response_file": "rejected-nested-command.json", "expected": "InvalidContract"},
+    {"response_file": "rejected-duplicate-text.json", "expected": "InvalidContract"},
+    {"response_file": "rejected-unpaired-surrogate.json", "expected": "InvalidContract"},
+    {"response_file": "rejected-trailing-json.json", "expected": "InvalidContract"},
+    {"response_file": "rejected-wrong-correlation.json", "expected": "InvalidContract"},
+    {"response_file": "rejected-numeric-text.json", "expected": "InvalidContract"}
+  ]
+}

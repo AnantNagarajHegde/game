@@ -1,0 +1,28 @@
+CONTROLLER_SUPPORT_VERIFICATION_OK
+Date: 28 October 2026
+Unity: 6000.6.7f1
+
+Source: Verify-Sources.ps1 passed runtime, editor and Player-branch compilation.
+Standalone logic: 387 assertions passed.
+Fresh Windows development build: Succeeded.
+Native standalone player: full story smoke passed; 17,195 advancing frames; exit code 0.
+Final native log: no runtime exceptions.
+
+Virtual gamepad checks passed:
+- Analogue movement and camera look.
+- Pause blocks world movement and camera input.
+- UI submit/cancel do not act on two screens in one frame.
+- Sliders, dropdown dismissal, chapter selection and launcher-focus return.
+- Right stick scrolls menus without changing selection.
+- World interaction, dialogue selection, notebook suspension and return.
+- Active-controller removal pauses exploration.
+- Repeated trunk-digit submission preserves the same focused digit.
+- D-pad navigation and incorrect-answer retry in deed evidence.
+
+Native report: Temp/StandalonePlaytests/run-20261028-085549450-d3bbacff/report.json
+Native log: Temp/StandalonePlaytests/run-20261028-085549450-d3bbacff/player.log
+Source log: latest-controller-source-check.log
+Reproduce: Paridhwani > Build and Run Standalone Playtest in desktop Unity.
+
+Hardware limit: validation uses a virtual Unity Gamepad; physical controller/driver compatibility was not tested.
+Optional free-text dialogue still requires keyboard input; authored story responses and trunk digits are controller-accessible.

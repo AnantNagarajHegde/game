@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paridhwani dialogue HTTP v1",
+  "oneOf": [{"$ref": "#/$defs/request"}, {"$ref": "#/$defs/response"}],
+  "description": "Use #/$defs/request for POST input and #/$defs/response for HTTP 200. Enforce a 65536 byte body cap and x-maxUtf16CodeUnits separately. Reject duplicate properties before schema validation.",
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "label": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S", "x-maxUtf16CodeUnits": 128},
+    "text": {"type": "string", "maxLength": 4096, "x-maxUtf16CodeUnits": 4096},
+    "line": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kn", "roman", "en"],
+      "properties": {"kn": {"$ref": "#/$defs/text"}, "roman": {"$ref": "#/$defs/text"}, "en": {"$ref": "#/$defs/text"}}
+    },
+    "request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "request_id", "turn_id", "speaker", "learner_text", "authored_line", "available_replies"],
+      "properties": {
+        "version": {"type": "integer", "const": 1},
+        "request_id": {"$ref": "#/$defs/id"}, "turn_id": {"$ref": "#/$defs/label"}, "speaker": {"$ref": "#/$defs/label"},
+        "learner_text": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S", "x-maxUtf16CodeUnits": 512},
+        "authored_line": {"$ref": "#/$defs/line"},
+        "available_replies": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/line"}}
+      }
+    },
+    "response": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "request_id", "turn_id", "line"],
+      "properties": {
+        "version": {"type": "integer", "const": 1}, "request_id": {"$ref": "#/$defs/id"}, "turn_id": {"$ref": "#/$defs/label"},
+        "line": {
+          "allOf": [{"$ref": "#/$defs/line"}],
+          "anyOf": [{"properties": {"kn": {"pattern": "\\S"}}}, {"properties": {"en": {"pattern": "\\S"}}}]
+        }
+      }
+    }
+  }
+}

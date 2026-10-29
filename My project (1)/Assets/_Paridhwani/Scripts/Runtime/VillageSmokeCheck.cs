@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 namespace Paridhwani
 {
     // Opt-in built-player verification. Uses a unique temporary save, never a player's visit.
-    public sealed class VillageSmokeCheck : MonoBehaviour
+    public sealed partial class VillageSmokeCheck : MonoBehaviour
     {
         sealed class FailingSaveCodec : ITeaProgressCodec {
             public string Encode(TeaProgress progress) => throw new IOException("Deliberate isolated quit-save regression");
@@ -104,6 +104,7 @@ namespace Paridhwani
             session.Close();Check(session.ui.Mode=="main-menu" && player.blocked && !session.Progress.arrivalAcknowledged,"Escape at welcome returns to title without entering the village");
             session.ContinueMainVisit();session.AcknowledgeArrival();
             Check(!session.ui.IsModal && !player.blocked && session.Progress.arrivalAcknowledged,"explicit welcome action enters and acknowledges the visit");
+            yield return ControllerChecks();
             player.blocked=true;
             player.Restore(new Vector3(0,.2f,-4.8f),-32);
             yield return new WaitForSecondsRealtime(.8f);
@@ -341,8 +342,9 @@ namespace Paridhwani
             Check(Physics.CheckCapsule(new Vector3(60.5f,.4f,5),new Vector3(60.5f,1.3f,5),.25f,~(1<<2)),"road closure stays solid after ridge permission");
             session.Save(); session.Load(); Check(player.transform.position.x>40 && session.Progress.trailPermission,"checkpost position and learned directions restore");
             player.Restore(new Vector3(56.5f,.15f,-5.5f),0); player.blocked=true; yield return new WaitForSecondsRealtime(.8f);
+            Check(session.Nearby=="Talk to Raghavendra","return driver focus; nearby="+session.Nearby+" mode="+session.ui.Mode+" position="+player.transform.position+" transitioning="+player.IsTransitioning);
             session.Interact(); yield return new WaitForSecondsRealtime(.9f); session.Choose(0); session.ConfirmTravel();
-            Check(player.transform.position.x<13 && session.Progress.checkpostVisited && session.Progress.trailPermission,"return trip preserves evidence");
+            Check(player.transform.position.x<13 && session.Progress.checkpostVisited && session.Progress.trailPermission,"return trip preserves evidence; position="+player.transform.position+" mode="+session.ui.Mode+" activity="+session.ActiveActivity+" visited="+session.Progress.checkpostVisited+" permission="+session.Progress.trailPermission);
             yield return Shot("34-village-return"); session.Close();
             var townDriver=Array.Find(session.villagers,n=>n.role==VillageNpcRole.AutoDriver);
             session.StartConversation(townDriver); session.Choose(0); session.ConfirmTravel(); session.Close();
@@ -377,9 +379,10 @@ namespace Paridhwani
             Check(session.Nearby=="Inspect the family trunk","physical trunk prompt reachable");session.Interact();yield return new WaitForSecondsRealtime(.9f);
             session.TrunkAttempt="1200";session.SubmitTrunkCode();Check(!session.Progress.trunkOpened,"wrong lock grants no deed");
             session.OpenNotebook();session.Close();Check(session.ActiveActivity==VillageActivity.TrunkLock && session.TrunkAttempt=="1200","notebook preserves lock attempt");
+            yield return ControllerTrunkChecks();
             session.TrunkAttempt="1207";session.SubmitTrunkCode();Check(session.Progress.trunkOpened && !session.Progress.deedRetrieved,"unlock distinct from collection");
             yield return Shot("40-trunk-open");session.OpenActivity(VillageActivity.DeedReview);
-            session.SubmitInvestigationAnswer(1);Check(!session.Progress.deedPurposeKnown,"wrong deed purpose rejected");
+            yield return ControllerEvidenceChecks();
             session.SubmitInvestigationAnswer(0);session.SubmitInvestigationAnswer(2);session.SubmitInvestigationAnswer(1);session.ProtectDeed();
             Check(session.Progress.deedRetrieved && !session.deedPaper.activeSelf,"reviewed original protected");yield return Shot("41-original-deed");session.Close();session.Close();
             player.Restore(new Vector3(46,.13f,38.7f),0);player.blocked=true;yield return new WaitForSecondsRealtime(.8f);session.Interact();yield return new WaitForSecondsRealtime(.9f);
@@ -530,8 +533,6 @@ namespace Paridhwani
             }
             session.Progress.brightness=previousBrightness;session.SettingsChanged();
             Debug.Log("VILLAGE_PRESENTATION_DEMO_CHECKED");
-
-
 
 
             Check(Time.frameCount>startFrame+50,"player actually advanced frames");

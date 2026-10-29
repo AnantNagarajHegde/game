@@ -78,8 +78,10 @@ namespace Paridhwani
             Vector2 input=canMove?VillageInputPolicy.WalkInput(move.ReadValue<Vector2>()):Vector2.zero;
             if(canMove && Time.unscaledTime>suppressLookUntil && Cursor.lockState==CursorLockMode.Locked)
             {
-                Vector2 delta=Vector2.ClampMagnitude(look.ReadValue<Vector2>(),200);
-                yaw+=delta.x*sensitivity; pitch=Mathf.Clamp(pitch-delta.y*sensitivity*(invertY?-1:1),-50,65);
+                Vector2 delta=look.activeControl?.device is Gamepad
+                    ? VillageInputPolicy.ControllerLookDelta(look.ReadValue<Vector2>(),Time.deltaTime,sensitivity)
+                    : Vector2.ClampMagnitude(look.ReadValue<Vector2>(),200)*sensitivity;
+                yaw+=delta.x; pitch=Mathf.Clamp(pitch-delta.y*(invertY?-1:1),-50,65);
             }
             Vector3 direction=Quaternion.Euler(0,yaw,0)*new Vector3(input.x,0,input.y);
             float speed=sprint.IsPressed()?3.6f:2.15f;

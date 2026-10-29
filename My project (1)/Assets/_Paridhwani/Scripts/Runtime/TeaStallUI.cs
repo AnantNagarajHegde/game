@@ -51,17 +51,20 @@ namespace Paridhwani
             routeHint=Add(task,"","small");
             saveStatus=Add(task,"","small");
             var controls=new VisualElement(); Class(controls,"controls"); root.Add(controls);
-            Add(controls,"WASD  Walk    Shift  Jog    Mouse  Look","small");
-            Add(controls,"E  Interact    Tab  Notebook    Esc  Pause","small");
+            controlsWalk=Add(controls,"","small");
+            controlsActions=Add(controls,"","small");
             prompt=new VisualElement(); Class(prompt,"prompt"); root.Add(prompt);
-            Add(prompt,"E","keycap"); promptText=Add(prompt,"","prompt-text");
+            promptKey=Add(prompt,"E","keycap"); promptText=Add(prompt,"","prompt-text");
             modal=new VisualElement(); Class(modal,"modal-layer"); root.Add(modal);
             modal.style.display=DisplayStyle.None;
+            controllerHelp=Add(root,"","controller-help");controllerHelp.pickingMode=PickingMode.Ignore;
+            BindControllerNavigation();
             RefreshHUD();
         }
         public void RefreshHUD()
         {
             if(session==null || root==null) return;
+            RefreshControllerHints();
             root.Q<VisualElement>(className:"task").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
             root.Q<VisualElement>(className:"controls").style.display=IsModal?DisplayStyle.None:DisplayStyle.Flex;
             string day=session.Progress.epilogueStarted?"SOME WEEKS LATER":session.Progress.fridayFinaleStarted?"FRIDAY / BEFORE 09:00":session.Progress.thursdayStarted?"THURSDAY":"WEDNESDAY";
@@ -87,9 +90,12 @@ namespace Paridhwani
         { var b=new Button(action){text=text}; Class(b,cls); parent.Add(b); return b; }
         VisualElement Card(string mode,string cls)
         {
+            var restoreFocus=PreserveModalFocus(mode);
             AcceptingEvidenceAnswers=false; SelectingBicycleParts=false;
             Mode=mode; modal.Clear(); modal.style.display=DisplayStyle.Flex;
             var card=new VisualElement(); Class(card,cls); modal.Add(card);
+            SuppressControllerSubmit();
+            card.schedule.Execute(()=> {if(modal.Contains(card)){restoreFocus?.Invoke();EnsureControllerFocus();}});
             ApplyCardScale(card,mode);RefreshHUD();return card;
         }
         void ApplyCardScale(VisualElement card,string mode)
@@ -304,7 +310,7 @@ namespace Paridhwani
             Add(card,"WEDNESDAY / YOUR FIRST MORNING","eyebrow");
             Add(card,"Welcome to Kalyanapura","title");
             Add(card,"You came to help archive the community library. Ananya was meant to meet you, but she is not at the bus stand. The tea-stall owner may know the way.","body");
-            Add(card,"Walk with WASD, look with the mouse, and press E when a nearby person or sign offers a prompt. Conversations take their time. Your notebook is always one Tab away.","body");
+            Add(card,"Walk with WASD or the left stick, and look with the mouse or right stick. Press E or A / Cross at a nearby person or sign. Use Tab in the village, or View / Share, for your notebook. Conversations take their time.","body");
             var enter=Button(card,"Step into the village  [Enter]",session.AcknowledgeArrival);enter.name="arrival-enter";FocusLater(enter);
             Button(card,"Back to title  [Esc]",session.OpenTitle,"quiet-button").name="arrival-title";
         }
@@ -333,7 +339,7 @@ namespace Paridhwani
             var sensitivity=new Slider("Look sensitivity",.05f,.3f){value=session.Progress.sensitivity};
             sensitivity.RegisterValueChangedCallback(e=>{session.Progress.sensitivity=e.newValue;session.SettingsChanged();}); card.Add(sensitivity);
             var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);
-            var invert=new Toggle("Invert vertical mouse look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
+            var invert=new Toggle("Invert vertical look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
             var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
             var environmentVolume=new Slider("Rain and river volume",0,1){value=session.Progress.ambienceVolume};environmentVolume.RegisterValueChangedCallback(e=>{session.Progress.ambienceVolume=e.newValue;session.SettingsChanged();});card.Add(environmentVolume);
             var stepsVolume=new Slider("Footstep volume",0,1){value=session.Progress.footstepVolume};stepsVolume.RegisterValueChangedCallback(e=>{session.Progress.footstepVolume=e.newValue;session.SettingsChanged();});card.Add(stepsVolume);
@@ -343,6 +349,6 @@ namespace Paridhwani
             Add(card,"F5  Save visit    F9  Restore visit","small");
         }
         public void HideModal() { Mode=""; modal.Clear(); modal.style.display=DisplayStyle.None; }
-        void OnDestroy() { if(latinAsset) Destroy(latinAsset); if(kannadaAsset) Destroy(kannadaAsset); }
+        void OnDestroy() { ReleaseControllerNavigation();if(latinAsset) Destroy(latinAsset); if(kannadaAsset) Destroy(kannadaAsset); }
     }
 }
