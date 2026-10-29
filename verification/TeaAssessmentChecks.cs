@@ -17,6 +17,11 @@ class TeaAssessmentChecks {
  protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token){Request=await request.Content.ReadAsStringAsync();return new HttpResponseMessage(Bad?HttpStatusCode.ServiceUnavailable:HttpStatusCode.OK){Content=new ByteArrayContent(Body){Headers={ContentType=new System.Net.Http.Headers.MediaTypeHeaderValue("application/json")}}};}
  }
  static async Task Run(string root){
+ string recipeDir=Path.Combine(Path.GetTempPath(),"paridhwani-tea-recipe-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(recipeDir);
+ File.WriteAllText(Path.Combine(recipeDir,"SceneBuilder.cs"),"geometry-v1");string recipe=WorldRecipeSignature.Compute(recipeDir);
+ File.WriteAllText(Path.Combine(recipeDir,"TeaAssessmentMenu.cs"),"attachment-only");Check(WorldRecipeSignature.Compute(recipeDir)==recipe,"assessment attachment menu does not invalidate geometry");
+ File.WriteAllText(Path.Combine(recipeDir,"TeaAssessmentMenu.cs"),"attachment-change");Check(WorldRecipeSignature.Compute(recipeDir)==recipe,"menu updates preserve geometry stamp");
+ File.WriteAllText(Path.Combine(recipeDir,"SceneBuilder.cs"),"geometry-v2");Check(WorldRecipeSignature.Compute(recipeDir)!=recipe,"actual geometry recipe changes still invalidate stamp");
  var provider=new LocalTeaConversation();var progress=new TeaProgress();var hello=provider.Start(progress);var order=provider.Reply(hello,0,progress);
  foreach(string name in new[]{"tea","water","correction","coffee","milk","chapati","rejected","english-mix"}){
  var request=JsonDocument.Parse(File.ReadAllBytes(Path.Combine(root,name+"-request.json")));var r=request.RootElement;string id=r.GetProperty("request_id").GetString(),input=r.GetProperty("learner_text").GetString();var bytes=File.ReadAllBytes(Path.Combine(root,name+"-response.json"));

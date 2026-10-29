@@ -1,0 +1,48 @@
+TEA ASSESSMENT RETRY - 29 October 2026
+Starting game commit: 06defef. Initial game working tree clean.
+
+ACCESS SUCCEEDED
+- Supported desktop inventory and Unity accessibility now respond.
+- Unity Raise action restored a correct foreground screenshot.
+- Existing safe Play Isolated Test Visit menu inspected before invocation.
+
+INITIAL NATIVE FAILURE AND RELATED FIX
+- Isolated launch threw: Regenerate the tea-stall benchmark before starting the
+  isolated test visit. It did not enter Play mode on that attempt.
+- Read-only hash comparison proved the scene matches the editor recipe exactly
+  when ONLY TeaAssessmentMenu.cs is omitted. That attachment menu does not create
+  geometry/bindings; WorldRecipeSignature already excludes standalone test tooling.
+- Serialized signature: DczudBq8BkD5N5GMQ9w9XiWcs0yB/NbaI6DiLepUq+4=
+- Initial full signature: ZJZPtJ2bbXktaK5zv3dQnCa2PWFBM8nZ59gsXWmwtmQ=
+- Added that single non-world menu to the explicit exclusion list. No scene,
+  generated asset, recipe builder, player save, security or network setting changed.
+- Three new regressions prove adding/updating this menu leaves the geometry stamp
+  unchanged, while a real builder source change still changes it.
+
+CHECKS SUCCEEDED AFTER FIX
+- Runtime, Editor and Player-source compilation.
+- 405 chapter assertions, 108 existing dialogue HTTP assertions, 8 portable cases.
+- 50 production assessment assertions (previous 47 plus 3 recipe regressions).
+- All transport checks use in-memory handlers, not real sockets.
+
+NATIVE EVIDENCE AFTER NORMAL ASSETS REFRESH
+- Play Isolated Test Visit entered actual Unity Play mode.
+- Begin your visit opened the Welcome to Kalyanapura screen.
+- Step into the village opened the world with TEST VISIT / WEDNESDAY displayed.
+- Notebook Tab shortcut was attempted twice but no notebook was visibly rendered;
+  this is an unsuccessful/unverified help check, not proof of a product root cause.
+- Escape released the captured game cursor; Stop returned to non-Play Editor mode.
+- Real visit untouched: the inspected isolated launch sets the existing SessionState
+  test flag, whose session path uses temporaryCachePath/GUID saves. No normal visit
+  was continued or loaded and no scene regeneration was performed.
+
+SOCKET / ASSESSMENT ACCEPTANCE NOT RUN
+- Network restrictions are unchanged; no materially new evidence of permitted
+  loopback client access. The generic retry is not authorization to bypass the
+  previous AccessDenied. No denied socket/Git operation was retried.
+- Prepared Python host was never started, so no host shutdown was needed.
+- No live request/response, tea/water assessment progression, correction display,
+  rejection/fallback, cancellation or stale-response native acceptance claimed.
+- No security prompt, firewall, credentials, permissions or alternate route touched.
+- Language-engine metadata restrictions and uncommitted evaluator/host work remain
+  unchanged. No push or submodule-pointer update.

@@ -68,7 +68,7 @@ deployment, and cancellation does not promise server-side inference interruption
 
 `verification/Verify-TeaAssessment.ps1` generates real Python assessment fixtures,
 compiles current runtime/Editor/Player-source branches, reruns the existing 405
-chapter and 108 dialogue assertions, and executes 47 production assessment
+chapter and 108 dialogue assertions, and executes 50 production assessment
 codec/consumer/mapping/transport/coordinator assertions. Passing transport tests
 use an injected in-memory HTTP handler and open **no sockets**. Raw fixture inputs
 are synthetic learner examples, not private user data.
@@ -84,3 +84,12 @@ focus/layout of the new controls, a fresh standalone Player build and fluent Kan
 review. The prior loopback AccessDenied was not retried or bypassed. Source and
 in-memory success do not constitute a fully playable verified milestone. Use an
 isolated test visit before native acceptance to preserve the user's actual save.
+
+The retry recovered supported Unity access and exposed a recipe bookkeeping bug:
+the attachment-only assessment menu invalidated the generated geometry signature.
+It is now excluded alongside standalone test tooling; regressions still require
+real builder edits to invalidate that signature. Without regenerating the scene,
+the isolated native visit now reaches title, welcome and the TEST VISIT village and
+returns to Editor mode. The notebook shortcut did not visibly open during the
+automated check. Actual assessment/native networking remains unaccepted because
+loopback restrictions are unchanged. See `verification/tea-assessment-retry.txt`.
