@@ -1,0 +1,12 @@
+Recorded audio source checkpoint
+33 shipped clips: SHA-256 verified, valid unique GUIDs, finite decoded samples, no sample clipping.
+Shipping OGG bytes: 3637155
+Unity import log references: 33 of 33 current clips.
+Missing import log entries: []
+Runtime/Editor/Player-source-branch compilation PASSED.
+448 assertions PASSED, including recorded footstep choice coverage and constant-gain overlapping loop seams.
+No runtime AudioClip.Create / SetData noise synthesis remains in the village audio scripts.
+Unity window is blocked by the pre-existing external scene modification reload dialog. No Reload/Ignore action was taken; no scene changes made by this audio pass.
+Native listening, hardware output, live scheduled playback and standalone-build audio acceptance remain pending.
+Measurements are decoded asset sample peaks/RMS, not LUFS or reconstructed true peaks.
+Public HQ MP3 sources remain lossy; no lossless-source claim. Regional wildlife and voice/music review remain outstanding.

@@ -1,0 +1,24 @@
+CONTROLLER_HAPTICS_VERIFICATION_OK
+Date: 29 October 2026
+Unity: 6000.6.7f1
+
+Source compilation: runtime, Editor and Player branches passed Verify-Sources.ps1.
+Standalone assertions: 438 passed, including 33 haptic/persistence checks.
+Editor native playtest: passed, 7,454 frames.
+Fresh Windows build: Succeeded.
+Standalone native story playtest: passed, 18,801 frames, exit code 0.
+
+Recording virtual-gamepad checks:
+- Actual walking steps produce short motor pulses, including with footstep audio at zero.
+- Menu opening and interactions produce feedback.
+- Intensity changes preview on the active controller; zero stops immediately and suppresses further pulses.
+- Preference survives native JSON serialization; standalone fixtures cover old-save defaults, saved zero and invalid-value normalization.
+- Focus loss, application pause, component disable and controller removal stop motor output.
+- The full story, trunk/evidence focus, notebook return and settings checks complete successfully.
+
+Test input isolation applies only to opt-in smoke visits; normal game input is unchanged.
+Native report: Temp/StandalonePlaytests/run-20261029-071304174-82c0f554/report.json
+Native log: Temp/StandalonePlaytests/run-20261029-071304174-82c0f554/player.log
+Reproduce: Paridhwani > Build and Run Standalone Playtest in desktop Unity.
+
+Physical controller compatibility and tactile strength were not verified; test devices record motor commands rather than vibrating hardware.

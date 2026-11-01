@@ -26,11 +26,22 @@ namespace Paridhwani
                     if(move.bindings[i].path.Contains("rightStick")) move.ApplyBindingOverride(i,"");
             }
             root.RegisterCallback<NavigationSubmitEvent>(e=> {
+                if(KeyboardOpen){e.StopImmediatePropagation();return;}
                 if(IsModal && Gamepad.current?.buttonSouth.wasPressedThisFrame==true) controllerSubmitFrame=Time.frameCount;
                 if(!IsModal || Time.frameCount==suppressSubmitFrame) e.StopImmediatePropagation();
+                else session.PlayControllerFeedback(ControllerFeedback.Confirm);
+            },TrickleDown.TrickleDown);
+            root.RegisterCallback<NavigationMoveEvent>(e=> {
+                if(KeyboardOpen){e.StopImmediatePropagation();return;}
+                if(IsModal)session.PlayControllerFeedback(ControllerFeedback.Navigation);
+            },TrickleDown.TrickleDown);
+            root.RegisterCallback<NavigationCancelEvent>(e=> {
+                if(KeyboardOpen){e.StopImmediatePropagation();return;}
+                if(IsModal)session.PlayControllerFeedback(ControllerFeedback.Navigation);
             },TrickleDown.TrickleDown);
             // Let fields/dropdown popups handle Cancel first; unhandled B returns one screen.
             root.RegisterCallback<NavigationCancelEvent>(e=> {
+                if(KeyboardOpen){e.StopImmediatePropagation();return;}
                 if(!IsModal || Gamepad.current?.buttonEast.wasPressedThisFrame!=true) return;
                 e.StopPropagation();
                 if(Time.frameCount!=suppressSubmitFrame) session.Close();
@@ -64,16 +75,23 @@ namespace Paridhwani
         {
             var focused=root.focusController?.focusedElement as VisualElement;
             if(Mode!=nextMode || focused==null || !modal.Contains(focused)) return null;
-            int index=modal.Query<VisualElement>().ToList().IndexOf(focused);
+            // ScrollView creates/removes internal controls during layout. Count only the
+            // authored fields, and prefer a stable name when a control provides one.
+            while(focused!=null && focused!=modal && !AuthoredControl(focused))focused=focused.parent;
+            if(focused==null || focused==modal)return null;
+            int index=modal.Query<VisualElement>().ToList().FindAll(AuthoredControl).IndexOf(focused);
             if(index<0)return null;
             var type=focused.GetType();string name=focused.name;
             string text=focused is Button button?button.text:null;
             var oldScroll=focused.GetFirstAncestorOfType<ScrollView>();
             Vector2 offset=oldScroll?.scrollOffset??Vector2.zero;
             return ()=> {
-                var elements=modal.Query<VisualElement>().ToList();
-                if(index>=elements.Count)return;
-                var target=elements[index];
+                VisualElement target=string.IsNullOrEmpty(name)?null:modal.Q(name);
+                if(target==null) {
+                    var elements=modal.Query<VisualElement>().ToList().FindAll(AuthoredControl);
+                    if(index>=elements.Count)return;
+                    target=elements[index];
+                }
                 if(target.GetType()!=type || target.name!=name ||
                     (target is Button candidate && candidate.text!=text) || !CanFocus(target)) return;
                 var scroll=target.GetFirstAncestorOfType<ScrollView>();
@@ -81,13 +99,16 @@ namespace Paridhwani
                 target.Focus();
             };
         }
+        static bool AuthoredControl(VisualElement element) =>
+            (element is Button || element is Toggle || element is Slider || element is DropdownField || element is TextField) &&
+            element.GetFirstAncestorOfType<Scroller>()==null;
         public void ScrollController(float vertical)
         {
             if(!IsModal || Mathf.Abs(vertical)<.15f) return;
             var focused=root.focusController?.focusedElement as VisualElement;
-            ScrollView target=null;
+            ScrollView target=Mode=="conversation"?root.Q<ScrollView>("dialogue-scroll"):null;
             for(var element=focused;element!=null;element=element.parent)
-                if(element is ScrollView scroll) {target=scroll;break;}
+                if(target==null && element is ScrollView scroll) {target=scroll;break;}
             if(target==null) target=modal.Q<ScrollView>();
             if(target!=null) target.scrollOffset+=Vector2.down*(vertical*480*Time.unscaledDeltaTime);
         }
@@ -102,7 +123,7 @@ namespace Paridhwani
             controlsActions.text=pad?ControllerConfirm+"  Interact    View / Share  Notebook    Menu / Options  Pause":"E  Interact    Tab  Notebook    Esc  Pause";
             promptKey.text=pad?ControllerConfirm:"E";
             controllerHelp.text="D-pad / LS: select   "+ControllerConfirm+": confirm   "+ControllerBack+": back   RS: scroll   View / Share: notes";
-            controllerHelp.style.display=pad && IsModal?DisplayStyle.Flex:DisplayStyle.None;
+            controllerHelp.style.display=pad && IsModal && !KeyboardOpen && Mode!="conversation"?DisplayStyle.Flex:DisplayStyle.None;
         }
         Label controlsWalk,controlsActions,promptKey,controllerHelp;
         void ReleaseControllerNavigation()

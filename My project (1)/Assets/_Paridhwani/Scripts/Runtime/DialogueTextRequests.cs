@@ -89,7 +89,7 @@ namespace Paridhwani {
  public string OptionalDialogueInput {get;set;}="";
  public string OptionalDialogueStatus {get;private set;}="";
  public bool OptionalDialogueBusy => textRequests.Busy;
- public TeaLine VisibleConversationLine => optionalLine??Turn?.Line;
+ public TeaLine VisibleConversationLine => teaTopicLine??optionalLine??Turn?.Line;
  public bool HasOptionalDialogueLine => optionalLine!=null;
  public void UseAuthoredDialogue() {
  if(ui.Mode!="conversation" || Turn==null)return;
@@ -97,10 +97,11 @@ namespace Paridhwani {
  textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="Original conversation line. Your supported replies are unchanged.";ui.ShowConversation();
  }
  void NewDialogueTurn(){ResetTeaAssessment();textRequests.Cancel();optionalLine=null;OptionalDialogueStatus="";OptionalDialogueInput="";}
- void SuspendDialogueText(){teaAssessmentRequests.Cancel();bool waiting=textRequests.Busy;textRequests.Cancel();if(waiting)OptionalDialogueStatus="Reply cancelled. Your conversation is still here.";}
+ void SuspendDialogueText(){bool assessmentWaiting=teaAssessmentRequests.Busy;teaAssessmentRequests.Cancel();if(assessmentWaiting)TeaAssessmentFeedback="Reply cancelled. You can ask again.";bool waiting=textRequests.Busy;textRequests.Cancel();if(waiting)OptionalDialogueStatus="Reply cancelled. Your conversation is still here.";}
  public void CancelOptionalDialogue(){textRequests.Cancel();OptionalDialogueStatus="You can continue with the supported replies.";if(ui.Mode=="conversation")ui.ShowConversation();}
  public async void AskOptionalDialogue() {
  if(OptionalDialogueText==null || ui.Mode!="conversation" || Turn==null || string.IsNullOrWhiteSpace(OptionalDialogueInput))return;
+ ui.RecordChatMessage(OptionalDialogueInput);
  teaAssessmentRequests.Cancel();
  optionalLine=null;var turn=Turn;var npc=ActiveNpc;var prompt=new DialoguePrompt(npc?npc.displayName:"",turn,OptionalDialogueInput);
  OptionalDialogueInput=prompt.LearnerText;var handler=OptionalDialogueText;
@@ -113,6 +114,6 @@ namespace Paridhwani {
  else OptionalDialogueStatus=reply.Status==DialogueTextStatus.TimedOut?"That reply took too long. Try again or use a supported reply.":"A reply is unavailable. Try again or use a supported reply.";
  ui.ShowConversation();
  }
- void OnDestroy(){teaAssessmentRequests.Dispose();textRequests.Dispose();}
+ void OnDestroy(){teaAssessmentRequests.Dispose();DisposeOwnedTeaAssessment();textRequests.Dispose();}
  }
 }

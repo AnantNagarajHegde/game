@@ -1,13 +1,19 @@
 using UnityEngine;
 namespace Paridhwani {
+ [DefaultExecutionOrder(100)]
  public sealed class VillageCharacter : MonoBehaviour {
  public Transform leftArm,rightArm,leftLeg,rightLeg,head;
  public VillageWalker walker;public Transform lookTarget;
  public bool talking,working,presentationPaused;
  public VendorWorkRoutine workRoutine {get;set;}
  float phase,animationTime;Vector3 previousPosition,restPosition;bool restCaptured;
+ VillageCharacterGait gait;
+ public VillageCharacterGait Gait=>gait;
+ void Start() {if(walker && leftLeg && rightLeg && leftArm && rightArm)gait=new VillageCharacterGait(this);}
+ void OnDestroy() {gait?.Dispose();}
  void OnEnable() {previousPosition=transform.position;if(!restCaptured){restPosition=transform.localPosition;restCaptured=true;}phase=Mathf.Repeat(transform.position.x*1.3f+transform.position.z*.7f,6.28f);}
  void Update() {
+ if(gait!=null) {gait.Update(Time.deltaTime);return;}
  if(presentationPaused) {previousPosition=transform.position;return;}
  animationTime+=Time.deltaTime;
  var delta=transform.position-previousPosition;previousPosition=transform.position;delta.y=0;

@@ -11,9 +11,9 @@ namespace Paridhwani {
  if(!session.Progress.trunkOpened) {
  var dials=new VisualElement();Class(dials,"row");scroll.Add(dials);
  for(int i=0;i<4;i++) {int digit=i;var column=new VisualElement();column.style.flexGrow=1;dials.Add(column);
- Button(column,"+",()=>{session.TrunkAttempt=DeedInvestigation.AdjustCode(session.TrunkAttempt,digit,1);ShowDeedActivity(a);});
+ Button(column,"+",()=>{session.TrunkAttempt=DeedInvestigation.AdjustCode(session.TrunkAttempt,digit,1);ShowDeedActivity(a);}).name="trunk-increase-"+digit;
  string display=session.TrunkAttempt!=null && session.TrunkAttempt.Length==4?session.TrunkAttempt.Substring(digit,1):"0";Add(column,display,"title");
- Button(column,"-",()=>{session.TrunkAttempt=DeedInvestigation.AdjustCode(session.TrunkAttempt,digit,-1);ShowDeedActivity(a);});}
+ Button(column,"-",()=>{session.TrunkAttempt=DeedInvestigation.AdjustCode(session.TrunkAttempt,digit,-1);ShowDeedActivity(a);}).name="trunk-decrease-"+digit;}
  var field=new TextField("Four-digit lock"){value=session.TrunkAttempt,maxLength=4}; field.RegisterValueChangedCallback(e=>session.TrunkAttempt=e.newValue); scroll.Add(field);
  Add(scroll,"Two digits for months, then two for days. No attempt limit.","body"); Button(scroll,"Try the lock",session.SubmitTrunkCode);
  Button(scroll,"Use the reminder: 12 / 07",()=>{session.TrunkAttempt="1207";ShowDeedActivity(a,"12 followed by 07 gives 1207. Try the lock when ready.");},"quiet-button");

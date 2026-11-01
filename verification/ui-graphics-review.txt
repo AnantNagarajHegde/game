@@ -1,0 +1,41 @@
+Paridhwani UI and graphics review candidate - 1 November 2026
+
+Status: implemented for user review. The user requested the reusable template and
+AGENTS.md reference only after approving the visual direction; neither is finalized.
+
+Changed presentation:
+- Consolidated TeaStall.uss into shared charcoal / ivory / brass tokens.
+- Left-column title over a dedicated live village composition; persistent footer actions.
+- Compact exploration objective card, readable typography, consistent notebook/evidence surfaces.
+- Grouped pause actions and settings sections; explicit focus/disabled states and thin scrollers.
+- Solid black right-side chat with white NPC and blue player bubbles, speaker header,
+  responsive framing, no empty translation rows, and readable input/aid controls.
+- QWERTY keyboard compresses only chat. Character stays visible beside chat.
+- Runtime 1280x720 reference panel; authored panel asset is cloned and restored.
+- Cool sky fill, warm bounce, restrained ACES colour grade and vignette. Story weather retained.
+- Balanced/High use 4x MSAA; Low keeps its reduced rendering settings.
+
+Verification:
+- Verify-Sources.ps1 passed Runtime, Editor and Player-branch compilation plus 448 assertions.
+- Native Unity 6000.6.7f1 Review UI and graphics:
+  verification/Temp/UIReview/20261101-152253: 80 checks, 960x540, text 1.0/1.3, passed.
+  verification/Temp/UIReview/20261101-152353: 80 checks, 1920x1080, text 1.0/1.3, passed.
+  Includes onscreen actions, checkbox sizes, keyboard/chat bounds and unchanged camera.
+- Native presentation rehearsal passed tea, river, deed and council routes, wrong-answer
+  handling, guide/menu navigation, sign/cast checks and main-save restoration:
+  verification/Temp/PresentationPlaytests/run-20261101-152052836-4e86cf98/report.json
+  100888 assertions (includes per-mesh checks), 51 captures, 960x540, text 1.3.
+  This rehearsal preceded the final checkbox minimum-width and title button-spacing tweak;
+  both final UI-review runs above include those changes.
+- git diff --check passed for the edited tracked presentation files.
+
+Scope of acceptance:
+- Native Editor checks and source compilation; no new standalone build or performance sign-off.
+- Preview chat contains a locally inserted sample player bubble, no backend request.
+- Existing low-poly meshes and textures remain; this is interface, lighting and framing polish.
+- Existing uncommitted conversation, audio, world and backend work was preserved.
+- Screenshots in docs/visual-review are native 1920x1080 captures of the final candidate.
+
+To preview manually: Paridhwani > Play Isolated Test Visit.
+To repeat the visual checks: Paridhwani > Review UI and graphics.
+

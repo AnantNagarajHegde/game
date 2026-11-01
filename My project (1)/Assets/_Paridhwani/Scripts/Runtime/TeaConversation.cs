@@ -50,6 +50,7 @@ namespace Paridhwani
             }
             return c.Next == "close" ? null : Node(c.Next,p);
         }
+        public static TeaLine AuthoredLine(string id,TeaProgress p) { var line=Node(id,p).Line; return new TeaLine(line.Kannada,line.Roman,line.English); }
         static TeaChoice C(string kn,string ro,string en,string next,string effect="") =>
             new TeaChoice(kn,ro,en,next,effect);
         static TeaTurn Node(string id, TeaProgress p)

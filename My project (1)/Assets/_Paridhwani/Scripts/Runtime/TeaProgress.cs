@@ -26,6 +26,7 @@ namespace Paridhwani
         public bool english = true, roman = true, muted;
         public bool reducedMotion,invertY;
         public float masterVolume=1,ambienceVolume=1,footstepVolume=1;
+        public float controllerVibration=ControllerHapticPolicy.DefaultIntensity;
         public VillageQuality quality;
         public float brightness=PresentationPolicy.DefaultBrightness;
         public float textScale = 1f, sensitivity = 0.12f;
@@ -132,6 +133,7 @@ namespace Paridhwani
                 p.masterVolume=json.Contains("\"masterVolume\"")?PresentationPolicy.Volume(p.masterVolume):1;
                 p.ambienceVolume=json.Contains("\"ambienceVolume\"")?PresentationPolicy.Volume(p.ambienceVolume):1;
                 p.footstepVolume=json.Contains("\"footstepVolume\"")?PresentationPolicy.Volume(p.footstepVolume):1;
+                p.controllerVibration=json.Contains("\"controllerVibration\"")?ControllerHapticPolicy.Intensity(p.controllerVibration):ControllerHapticPolicy.DefaultIntensity;
                 p.quality=PresentationPolicy.ValidQuality(p.quality);
                 p.brightness=json.Contains("\"brightness\"")?PresentationPolicy.Brightness(p.brightness):PresentationPolicy.DefaultBrightness;
                 if(!float.IsFinite(p.heading)) p.heading=-18;

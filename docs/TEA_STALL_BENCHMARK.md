@@ -12,12 +12,19 @@ A Windows development player is generated at My project (1)/Builds/TeaStall/Pari
 
 ## Controls
 
+### Display and developer options
+
+Open **Settings** from the title screen or press **Escape** in the village and scroll to **Developer options / display**. Enable **Override render resolution** and select 100%, 125%, 150%, or 200% to control the internal 3D render scale. The override is stored on the device, independently of story saves, and can be turned off to restore the chosen quality preset. Supersampling improves edge detail but costs GPU performance; try 125% first. Balanced and High normally render at 100%, while Low renders at 70%.
+
+In a newly built standalone player, select a window resolution and choose **Apply window resolution**, or select **Native display / borderless**. The output and estimated 3D render dimensions are shown below the controls. The default new-player window is 1920 x 1080 and can be resized. In the Unity Editor, use the Game view's resolution and Scale controls for the output size; the in-game window controls apply only in a standalone build. Existing builds must be rebuilt to include these changes.
+
 | Input | Action |
 |---|---|
 | WASD / Shift | Walk / jog |
 | Mouse | Orbit the third-person camera, including looking up |
 | E | Interact with a nearby, visible NPC or sign |
-| 1–3 / pointer | Choose a conversation response, evidence answer, or bicycle part |
+| Type / Enter | Send a message during a villager conversation; the local model bridge must be running |
+| 1-3 / pointer | Choose an evidence answer or bicycle part |
 | Tab | Open/close notebook; return to the same conversation if opened during dialogue |
 | Escape | Leave conversation, close notebook, or pause |
 | F5 / F9 | Save / restore this visit |
@@ -30,18 +37,22 @@ Connect a controller recognized by Unity's Input System as a Gamepad before or d
 |---|---|
 | Left stick | Walk with analogue speed |
 | Hold right trigger (RT / R2) | Jog |
-| Right stick | Orbit camera in exploration; scroll documents and menus while a panel is open |
-| A / Cross | Interact in the world; activate the focused menu control or reply |
+| Right stick | Orbit camera in exploration; scroll chat, documents and menus while a panel is open |
+| A / Cross | Interact in the world; activate the focused control or type the selected keyboard key |
 | B / Circle | Back / close the current panel; dismiss a dropdown before leaving settings |
-| D-pad / left stick | Navigate replies, evidence answers, notebook actions, settings and chapter lists |
+| D-pad / left stick | Navigate evidence answers, notebook actions, settings and chapter lists; the left stick navigates the on-screen keyboard |
 | D-pad left / right | Adjust a focused slider |
 | A / Cross, then D-pad up / down | Open a dropdown and select an option; A / Cross confirms |
 | View / Share | Open or close field notes, including during dialogue and evidence tasks |
 | Menu / Options | Pause in exploration; return through the current panel's normal close path |
 
-Save and restore are available through Pause. The trunk's plus/minus buttons allow all four digits to be set without typing; focus stays on the digit after each adjustment. Optional free-text dialogue still uses keyboard entry; every authored story response is available by controller.
+Save and restore are available through Pause. The trunk's plus/minus buttons allow all four digits to be set without typing; focus stays on the digit after each adjustment. Villager dialogue uses the on-screen QWERTY keyboard automatically on controller. RB/R1 adds a space, LB/L1 deletes, and X/Square sends. See [typed conversation controls](TEA_TYPED_CONVERSATION.md).
 
 Controller camera sensitivity and vertical inversion use the existing Look sensitivity and Invert vertical look settings. Stick look uses a time-based angular rate, while mouse look uses mouse displacement. Sticks retain the Input System's deadzone processing. Modal panels block world movement and look. Removing the active controller pauses exploration; reconnecting and pressing a control resumes controller navigation through Pause.
+
+**Controller vibration:** Settings and Pause include a Controller vibration intensity slider. It starts at 50%; set it to 0 to switch haptics off. Short, fading pulses accompany actual walking/jogging footsteps, opening and closing panels, menu navigation, confirming replies/evidence answers, and talking to villagers. Adjusting the slider with the controller previews the selected strength. The setting is saved and retained in new stories, practice and presentation visits; older saves receive the subtle default. Footstep haptics work independently of audio volume. Feedback goes to the controller currently in use and stops on focus loss, application pause, session disable, disconnect, keyboard/mouse takeover or setting intensity to zero. Hardware/driver rumble support and the physical feel still need checking with a real controller.
+
+Haptics verification, 29 October 2026: runtime/editor/Player-branch source compilation and 438 standalone assertions passed. The Editor story playtest passed, followed by a fresh Windows build and complete standalone story playtest over 18,801 frames (exit 0). A recording virtual gamepad verified motor output for actual footsteps with audio muted, menu and action feedback, intensity previews, zero/off, save serialization and focus/pause/disable/disconnect shutdown. Automated smoke visits disable only their Unity session's existing live input devices while test gamepads run, restore the original devices on teardown, and wait briefly for foreground focus when input checks need it. Normal visits are unaffected. Trunk controls now restore focus using stable names. See `verification/haptics-check.txt` and `verification/Temp/StandalonePlaytests/run-20261029-071304174-82c0f554/report.json`.
 
 The development smoke playtest injects a temporary virtual gamepad through InputSystem and checks the actual runtime movement, camera, UI submit/cancel, settings, scrolling, notebook return and disconnect paths. It uses the smoke run's isolated save. Physical controller/driver compatibility still requires testing on the target hardware.
 

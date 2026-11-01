@@ -3,6 +3,55 @@ using Paridhwani;
 public static class ChapterChecks {
  static int checks;
  static void Check(bool ok,string why) { if(!ok) throw new Exception(why); checks++; }
+ sealed class HapticSaveCodec : ITeaProgressCodec {
+ public float decoded;
+ public string Encode(TeaProgress p) => "{\"version\":1,\"controllerVibration\":"+p.controllerVibration.ToString(System.Globalization.CultureInfo.InvariantCulture)+"}";
+ public TeaProgress Decode(string json) => new TeaProgress {controllerVibration=decoded};
+ }
+ static void HapticChecks() {
+ Check(new TeaProgress().controllerVibration==.5f,"new visits start with subtle vibration");
+ Check(ControllerHapticPolicy.Intensity(float.NaN)==.5f && ControllerHapticPolicy.Intensity(float.PositiveInfinity)==.5f,"invalid vibration settings recover a safe default");
+ Check(ControllerHapticPolicy.Intensity(-1)==0 && ControllerHapticPolicy.Intensity(2)==1,"vibration intensity stays within the slider range");
+ float low=0,high=0;int commands=0;
+ var pulse=new ControllerHapticPulse((l,h)=>{low=l;high=h;commands++;});
+ pulse.Play(ControllerFeedback.Step,1,.5f);float step=low;
+ Check(pulse.Active && low>0 && high>0 && low<.15f && high<.15f,"default footsteps produce a subtle pulse");
+ pulse.Tick(1.02,true);Check(low>0 && low<step,"footstep feedback fades rather than remaining at full strength");
+ pulse.Tick(1.1,true);Check(!pulse.Active && low==0 && high==0,"pulse deadline explicitly stops both motors");
+ int stoppedCommands=commands;pulse.Stop();Check(commands==stoppedCommands,"stopping an idle controller does not keep sending commands");
+ pulse.Play(ControllerFeedback.Interaction,2,1);float peak=high;
+ pulse.Play(ControllerFeedback.Navigation,2,1);Check(high==peak && high<=.3f,"overlapping UI and gameplay actions cannot add into a strong vibration");
+ pulse.Tick(2.01,false);Check(!pulse.Active && low==0 && high==0,"loss of eligibility immediately stops a live pulse");
+ stoppedCommands=commands;pulse.Play(ControllerFeedback.Menu,3,0);Check(!pulse.Active && commands==stoppedCommands,"zero intensity never starts a motor");
+ pulse.Play(ControllerFeedback.Confirm,4,1);pulse.Play(ControllerFeedback.Menu,4,0);
+ Check(!pulse.Active && low==0 && high==0,"turning vibration off cancels an existing pulse immediately");
+ pulse.Play(ControllerFeedback.Menu,5,.5f);pulse.Tick(double.NaN,true);
+ Check(!pulse.Active && low==0 && high==0,"invalid clock samples cannot leave the motors running");
+ pulse.Play(ControllerFeedback.Menu,6,.5f);pulse.Tick(5,true);
+ Check(!pulse.Active && low==0 && high==0,"clock rollback safely stops vibration");
+ foreach(ControllerFeedback cue in Enum.GetValues(typeof(ControllerFeedback))) {
+ pulse.Play(cue,10,1);Check(pulse.Active && low<=.3f && high<=.3f,"every feedback cue has a restrained maximum: "+cue);
+ pulse.Tick(10.2,true);Check(!pulse.Active && low==0 && high==0,"every feedback cue finishes promptly: "+cue);
+ }
+ var unsupported=new ControllerHapticPulse((l,h)=>throw new NotSupportedException("No rumble device"));
+ unsupported.Play(ControllerFeedback.Menu,1,1);unsupported.Stop();
+ Check(!unsupported.Active,"unsupported rumble cannot interrupt the game");
+ var copied=new TeaProgress();PresentationPolicy.Copy(new TeaProgress{controllerVibration=0},copied);
+ Check(copied.controllerVibration==0,"vibration off survives preference copies for new stories and practice");
+ copied=ChapterReplay.Seed(ReplayChapter.Deed,new TeaProgress{controllerVibration=.27f});
+ Check(copied.controllerVibration==.27f,"practice visits keep the selected vibration intensity");
+ string folder=System.IO.Path.Combine(Environment.CurrentDirectory,"Temp","IterationVerification","ParidhwaniHapticChecks-"+Guid.NewGuid().ToString("N"));
+ System.IO.Directory.CreateDirectory(folder);string path=System.IO.Path.Combine(folder,"visit.json");
+ try {
+ var codec=new HapticSaveCodec{decoded=0};var store=new TeaSaveStore(path,codec);
+ System.IO.File.WriteAllText(path,"{\"version\":1}");
+ Check(store.Read(out _).controllerVibration==.5f,"older saves missing vibration receive the default even when a decoder returns zero");
+ Check(store.Write(new TeaProgress{controllerVibration=0},out _),"vibration preference can be saved: "+store.LastFailureDetail);
+ Check(store.Read(out _).controllerVibration==0,"explicit saved zero remains disabled after restoring");
+ codec.decoded=.27f;Check(store.Read(out _).controllerVibration==.27f,"saved nonzero vibration intensity restores");
+ codec.decoded=float.NaN;Check(store.Read(out _).controllerVibration==.5f,"saved invalid vibration intensity is normalized");
+ } finally {System.IO.Directory.Delete(folder,true);}
+ }
  static void Witnesses(bool reverse) {
  var p=new TeaProgress(); var g=new TempleConversation(false); var r=new TempleConversation(true);
  Check(g.Start(p).Id=="early" && r.Start(p).Id=="early","early visitor gets no testimony");
@@ -104,15 +153,20 @@ public static class ChapterChecks {
  Check(!stride.Travel(50,true,false) && !stride.Travel(.5,true,false),"teleports do not cause a footstep burst");
  stride.Travel(double.NaN,true,false);Check(!stride.Travel(.5,true,false),"invalid distance resets cadence");
  var copied=new TeaProgress();PresentationPolicy.Copy(new TeaProgress {ambienceVolume=.3f,footstepVolume=0},copied);Check(copied.ambienceVolume==.3f && copied.footstepVolume==0,"audio mix survives practice/new-story preference copy");
- for(int surface=0;surface<3;surface++) {
- var samples=FootstepPolicy.Samples((FootstepSurface)surface,0);var repeat=FootstepPolicy.Samples((FootstepSurface)surface,0);var alternate=FootstepPolicy.Samples((FootstepSurface)surface,1);
- bool finite=true,deterministic=true,different=false;double energy=0;float peak=0;
- for(int i=0;i<samples.Length;i++) {finite&=float.IsFinite(samples[i]);deterministic&=samples[i]==repeat[i];different|=samples[i]!=alternate[i];energy+=samples[i]*samples[i];peak=Math.Max(peak,Math.Abs(samples[i]));}
- Check(finite && peak<1 && energy>0,"surface audio is finite, audible and bounded");
- Check(deterministic && different,"surface variants repeat deterministically without identical footsteps");
- Check(samples[0]==0 && samples[samples.Length-1]==0,"surface transient fades without hard endpoint clicks");
+ for(int previous=0;previous<FootstepPolicy.Variants;previous++) {
+ var available=new System.Collections.Generic.HashSet<int>();
+ for(int draw=0;draw<40;draw++)available.Add(FootstepPolicy.SelectVariant(previous,draw));
+ bool valid=true;foreach(int value in available)valid&=value>=0 && value<FootstepPolicy.Variants;
+ Check(valid && available.Count==FootstepPolicy.Variants-1 && !available.Contains(previous),"footstep shuffle reaches every alternative without an immediate repeat");
  }
+ foreach(double length in new[]{4.4,10,48,50,60}) {
+ double fade=Math.Min(1.5,length*.15);bool continuous=true;
+ for(int frame=0;frame<=300;frame++){double age=fade*frame/300;double gain=RecordedLoopPolicy.Envelope(length-fade+age,length,fade)+RecordedLoopPolicy.Envelope(age,length,fade);continuous&=Math.Abs(gain-1)<.00001;}
+ Check(continuous,"overlapping recorded ambience retains constant gain at its seam");
  }
+ Check(RecordedLoopPolicy.Envelope(-1,50,1.5)==0 && RecordedLoopPolicy.Envelope(50,50,1.5)==0 && RecordedLoopPolicy.Envelope(double.NaN,50,1.5)==0,"scheduled or completed loops remain silent outside their active time");
+ }
+
  static void CompanionChecks() {
  var trail=new CompanionTrail();trail.Reset(new UnityEngine.Vector3(48,0,30));
  trail.Sample(new UnityEngine.Vector3(48.2f,0,30));Check(trail.Count==0,"stationary companion sampling does not grow path");
@@ -255,7 +309,16 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { DemoPresentationChecks.Run(Check); ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ public static int Main() { HapticChecks(); DemoPresentationChecks.Run(Check); ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ Check(VillageWeatherPolicy.Raining(null) && VillageWeatherPolicy.Raining(new TeaProgress()),"new visits begin in rain");
+ var weather=new TeaProgress{ananyaFound=true};Check(VillageWeatherPolicy.Raining(weather),"rain stays through Ananya's greeting");
+ weather.disappearanceExplained=true;Check(!VillageWeatherPolicy.Raining(weather),"rain clears after the explanation");
+ Check(VillageWeatherPolicy.Raining(ChapterReplay.Seed(ReplayChapter.Farm,new TeaProgress())),"farm replay preserves the rainy reunion");
+ Check(!VillageWeatherPolicy.Raining(ChapterReplay.Seed(ReplayChapter.Deed,new TeaProgress())),"later replay restores clear weather");
+ float rainfall=1;for(int i=0;i<180;i++)rainfall=VillageWeatherPolicy.Advance(rainfall,false,.1f);
+ Check(rainfall<.001f,"storm gradually clears");
+ rainfall=VillageWeatherPolicy.Advance(rainfall,true,.1f);Check(rainfall>0 && rainfall<.01f,"rain can gradually return");
+ Check(VillageWeatherPolicy.Advance(.5f,false,float.NaN)==.5f,"invalid weather delta cannot corrupt state");
  Check(PresentationPolicy.Volume(float.NaN)==1 && PresentationPolicy.Volume(-1)==0 && PresentationPolicy.Volume(4)==1,"audio preference limits");
  Check(PresentationPolicy.ValidQuality((VillageQuality)99)==VillageQuality.Balanced,"invalid quality defaults safely");
  var prefs=new TeaProgress {reducedMotion=true,invertY=true,masterVolume=.4f,quality=VillageQuality.Low};var copied=new TeaProgress();PresentationPolicy.Copy(prefs,copied);Check(copied.reducedMotion && copied.invertY && copied.masterVolume==.4f && copied.quality==VillageQuality.Low,"practice keeps accessibility preferences");

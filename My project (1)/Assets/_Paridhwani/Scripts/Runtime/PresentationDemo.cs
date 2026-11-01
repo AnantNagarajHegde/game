@@ -44,7 +44,7 @@ namespace Paridhwani {
  }
  presentationDemo=true;PresentationChapter=chapter;
  Progress=PresentationDemo.Seed(chapter,Progress);PracticeChapterName="Presentation demo / "+ChapterReplay.Name(chapter);
- saves=new TeaSaveStore(Path.Combine(Application.temporaryCachePath,"paridhwani-demo-"+Guid.NewGuid().ToString("N")+".json"));
+            saves=new TeaSaveStore(Path.Combine(VillageTestStorage.Cache,"paridhwani-demo-"+Guid.NewGuid().ToString("N")+".json"));
  EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
  }
  }
@@ -87,7 +87,7 @@ namespace Paridhwani {
  void AddDisplaySettings(VisualElement card) {
  var exposure=new Slider("Display brightness",-.5f,1.5f){name="settings-brightness",value=PresentationPolicy.Brightness(session.Progress.brightness)};
  exposure.RegisterValueChangedCallback(e=>{session.Progress.brightness=e.newValue;session.SettingsChanged();});card.Add(exposure);
- Add(card,"Adjust for your screen. The overcast weather and world colours are preserved.","small");
+ Add(card,"Adjust for your screen. Weather changes with the story.","small");
  }
  }
 }

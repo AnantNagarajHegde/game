@@ -1,48 +1,49 @@
 using UnityEngine;
 namespace Paridhwani
 {
+    public static class VillageWeatherPolicy
+    {
+        // Ananya's first greeting explicitly refers to rain. It can clear after
+        // the player has heard her explanation, with the road still damaged.
+        public static bool Raining(TeaProgress progress) => progress == null || !progress.disappearanceExplained;
+        public static float Advance(float current, bool raining, float deltaTime)
+        {
+            float dt = float.IsFinite(deltaTime) ? Mathf.Clamp(deltaTime, 0, .1f) : 0;
+            return Mathf.MoveTowards(Mathf.Clamp01(current), raining ? 1 : 0, dt / 18f);
+        }
+    }
+
     public sealed class TeaAmbience : MonoBehaviour
     {
         public Transform listener;
         public ParticleSystem rain;
         public bool muted;
-        AudioSource rainSource, shelterSource;
+        VillageRecordedLoop rainSource, shelterSource;
         VillageFootsteps footsteps;
         public float volume=1,footstepVolume=1;
-        AudioClip noiseClip, dripClip;
         readonly RainShelterMix mix=new RainShelterMix();
+        TeaStallSession session;
+        TeaProgress weatherProgress;
+        VillageLighting lighting;
+        float rainAmount=1, initialEmission;
+        bool weatherInitialized;
+        void Awake() { Shader.SetGlobalFloat("_VillageRainAmount",1); }
         void Start()
         {
-            rainSource=gameObject.AddComponent<AudioSource>();
-            shelterSource=gameObject.AddComponent<AudioSource>();
-            noiseClip=Noise("Monsoon rainfall",6,173,.95f);
-            dripClip=Noise("Eaves and roof",8,94,.97f);
-            rainSource.clip=noiseClip; shelterSource.clip=dripClip;
+            session=GetComponent<TeaStallSession>();
+            lighting=Object.FindAnyObjectByType<VillageLighting>();
+            if(rain) initialEmission=rain.emission.rateOverTime.constantMax;
+            var outdoor=new GameObject("Recorded outdoor rain");outdoor.transform.SetParent(transform,false);
+            var roof=new GameObject("Recorded roof runoff");roof.transform.SetParent(transform,false);
+            rainSource=outdoor.AddComponent<VillageRecordedLoop>();rainSource.Configure("Rain");
+            shelterSource=roof.AddComponent<VillageRecordedLoop>();shelterSource.Configure("RoofRunoff");
             footsteps=listener.gameObject.AddComponent<VillageFootsteps>();
-            rainSource.playOnAwake=shelterSource.playOnAwake=false;
-            rainSource.volume=shelterSource.volume=0;
-            rainSource.loop=shelterSource.loop=true;
-            rainSource.Play(); shelterSource.Play();
-        }
-        static AudioClip Noise(string name,int seconds,int seed,float filter)
-        {
-            const int rate=22050;
-            float[] data=new float[rate*seconds];
-            var random=new System.Random(seed); float low=0;
-            for(int i=0;i<data.Length;i++)
-            {
-                float white=(float)(random.NextDouble()*2-1);
-                low=filter*low+(1-filter)*white;
-                float pulse=.7f+.3f*Mathf.Sin(i*.0009f);
-                data[i]=(white*.10f+low*.8f)*pulse;
-            }
-            // Fade through the loop seam to avoid a click.
-            for(int i=0;i<512;i++) { float t=i/512f; data[i]*=t; data[data.Length-1-i]*=t; }
-            AudioClip clip=AudioClip.Create(name,data.Length,1,rate,false); clip.SetData(data,0); return clip;
+            gameObject.AddComponent<VillageEnvironmentalAudio>().Bind(this,session);
         }
         void Update()
         {
             if(!rainSource || !shelterSource) return;
+            UpdateWeather();
             if(!listener) {SilenceSources();return;}
             if(rain) {
                 var target=listener.position+Vector3.up*7;
@@ -52,11 +53,37 @@ namespace Paridhwani
             if(footsteps) footsteps.volume=footstepVolume;
             bool sheltered=Physics.Raycast(listener.position+Vector3.up*1.5f,Vector3.up,4,~(1<<2),QueryTriggerInteraction.Ignore);
             mix.Step(sheltered,!muted && Application.isFocused,PresentationPolicy.Volume(volume),Time.unscaledDeltaTime);
-            rainSource.volume=mix.RainGain;shelterSource.volume=mix.EaveGain;
+            float duck=session && session.ui && session.ui.Mode=="conversation"?.65f:1;
+            rainSource.Gain=mix.RainGain*rainAmount*duck;
+            shelterSource.Gain=mix.EaveGain*rainAmount*duck;
+            rainSource.Cutoff=Mathf.Lerp(rainSource.Cutoff,mix.Sheltered?2800:18000,Time.unscaledDeltaTime*3);
+        }
+        void UpdateWeather()
+        {
+            var progress=session?session.Progress:null;
+            if(progress==null)return;
+            bool raining=VillageWeatherPolicy.Raining(progress);
+            // New/loaded/practice visits start at their own story weather. Only
+            // changes within the current visit animate as the storm passes.
+            if(!weatherInitialized || !ReferenceEquals(progress,weatherProgress))
+            {
+                weatherInitialized=true; weatherProgress=progress; rainAmount=raining?1:0;
+                if(rain && rainAmount==0)rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+            else rainAmount=VillageWeatherPolicy.Advance(rainAmount,raining,Time.unscaledDeltaTime);
+            Shader.SetGlobalFloat("_VillageRainAmount",rainAmount);
+            if(!lighting)lighting=Object.FindAnyObjectByType<VillageLighting>();
+            if(lighting)lighting.SetClearWeather(1-rainAmount);
+            if(rain)
+            {
+                var emission=rain.emission; emission.rateOverTime=initialEmission*rainAmount;
+                if(rainAmount>0 && !rain.isEmitting)rain.Play();
+                else if(rainAmount<=0 && rain.isEmitting)rain.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+            }
         }
         void SilenceSources()
-        {mix.Silence();if(rainSource)rainSource.volume=0;if(shelterSource)shelterSource.volume=0;}
-        void OnDisable() {SilenceSources();}
-        void OnDestroy() { if(noiseClip) Destroy(noiseClip); if(dripClip) Destroy(dripClip); if(footsteps) Destroy(footsteps); }
+        {mix.Silence();if(rainSource)rainSource.Gain=0;if(shelterSource)shelterSource.Gain=0;}
+        void OnDisable() {SilenceSources();Shader.SetGlobalFloat("_VillageRainAmount",1);}
+        void OnDestroy() { if(footsteps) Destroy(footsteps); }
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 
 namespace Paridhwani
 {
@@ -19,15 +20,25 @@ namespace Paridhwani
         string output;
         int startFrame;
         bool originalBackground;
+        readonly List<InputDevice> isolatedInputDevices=new List<InputDevice>();
         public void Begin(TeaStallSession value)
         {
             if(!Debug.isDebugBuild) {enabled=false;return;}
             originalBackground=Application.runInBackground;Application.runInBackground=true;
-            session=value; output=Path.Combine(Path.GetTempPath(),"ParidhwaniSmoke","run-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"));
+            // Disable only this Unity session's live input devices. The desktop remains usable;
+            // regression gamepads are added later and continue through the normal input path.
+            foreach(var device in InputSystem.devices)
+                if(device.enabled && (device is Keyboard || device is Mouse || device is Gamepad))isolatedInputDevices.Add(device);
+            foreach(var device in isolatedInputDevices)InputSystem.DisableDevice(device);
+            session=value; output=Path.Combine(VillageTestStorage.Cache,"ParidhwaniSmoke","run-"+DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"));
             Directory.CreateDirectory(output); startFrame=Time.frameCount;
             StartCoroutine(Guarded());
         }
-        void OnDestroy() {Application.runInBackground=originalBackground;}
+        void OnDestroy() {
+            Application.runInBackground=originalBackground;
+            foreach(var device in isolatedInputDevices)if(device.added && !device.enabled)InputSystem.EnableDevice(device);
+            isolatedInputDevices.Clear();
+        }
         static void Finish(int code)
         {
 #if UNITY_EDITOR
@@ -104,6 +115,8 @@ namespace Paridhwani
             session.Close();Check(session.ui.Mode=="main-menu" && player.blocked && !session.Progress.arrivalAcknowledged,"Escape at welcome returns to title without entering the village");
             session.ContinueMainVisit();session.AcknowledgeArrival();
             Check(!session.ui.IsModal && !player.blocked && session.Progress.arrivalAcknowledged,"explicit welcome action enters and acknowledges the visit");
+            var store=(TeaSaveStore)typeof(TeaStallSession).GetField("saves",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(session);
+            Check(session.LastSaveSucceeded && session.HasSavedVisit,"isolated arrival save failed: "+store.LastFailureDetail);
             yield return ControllerChecks();
             player.blocked=true;
             player.Restore(new Vector3(0,.2f,-4.8f),-32);
@@ -124,8 +137,8 @@ namespace Paridhwani
             yield return new WaitForSecondsRealtime(.8f);
             Check(Vector3.Distance(player.view.transform.position,player.EyePosition)<.08f,"first person uses player eyes");
             Check(player.ConversationBlend>.99f,"camera reaches first person");
-            Check(Quaternion.Angle(player.view.transform.rotation,
-                Quaternion.LookRotation(tea.eyes.position-Vector3.up*.55f-player.EyePosition))<2,"camera frames NPC");
+            var speaker=player.view.WorldToViewportPoint(tea.eyes.position-Vector3.up*.55f);
+            Check(speaker.z>0 && speaker.x>.08f && speaker.x<1-player.conversationPanelFraction-.04f,"camera frames NPC beside the chat panel");
             foreach(var r in player.visual.GetComponentsInChildren<Renderer>())
                 Check(r.shadowCastingMode==ShadowCastingMode.ShadowsOnly,"own head/body hidden in first person");
             Check(player.view.WorldToViewportPoint(tea.eyes.position).y>.62f,"NPC face stays above dialogue panel");

@@ -93,7 +93,7 @@ namespace Paridhwani
 #if UNITY_EDITOR
             IsIsolatedTestVisit|=UnityEditor.SessionState.GetBool(IsolatedTestKey,false);
 #endif
-            string path=IsIsolatedTestVisit?Path.Combine(Application.temporaryCachePath,"village-playtest-"+Guid.NewGuid().ToString("N")+".json"):
+            string path=IsIsolatedTestVisit?Path.Combine(VillageTestStorage.Cache,"village-playtest-"+Guid.NewGuid().ToString("N")+".json"):
                 Path.Combine(Application.persistentDataPath,"paridhwani-tea-v1.json");
             saves=new TeaSaveStore(path);
             if(!IsIsolatedTestVisit && !saves.HasAnySaveFiles)
@@ -139,12 +139,14 @@ namespace Paridhwani
             UpdateFarmArrival();
             FindInteraction();
             UpdateInputDevice();
+            UpdateControllerHaptics();
             if(!HandleController()) HandleKeyboard();
             ui.RefreshHUD();
             if(Time.unscaledTime>nextSave && ui.Mode!="main-menu" && ui.Mode!="new-visit-confirm" && !TitleSettings) { Save(); nextSave=Time.unscaledTime+15; }
         }
         void HandleKeyboard()
         {
+            if(ui.KeyboardOpen)return;
             var keys=Keyboard.current;
             if(keys==null || !Application.isFocused) return;
             // One command per frame: a close/restore must not also answer a newly shown turn.
@@ -167,8 +169,7 @@ namespace Paridhwani
             if(!VillageInputPolicy.ChoiceShortcut(ui.Mode,editing)) return;
             int choice=keys.digit1Key.wasPressedThisFrame?0:keys.digit2Key.wasPressedThisFrame?1:keys.digit3Key.wasPressedThisFrame?2:-1;
             if(choice<0) return;
-            if(ui.Mode=="conversation" && Turn!=null) Choose(choice);
-            else if(ui.AcceptingEvidenceAnswers) SubmitInvestigationAnswer(choice);
+            if(ui.AcceptingEvidenceAnswers) SubmitInvestigationAnswer(choice);
             else if(ui.SelectingBicycleParts) SelectBicyclePart(choice==0?BicyclePart.Frame:choice==1?BicyclePart.Stand:BicyclePart.CarrierPocket);
         }
         void FindInteraction()
@@ -229,13 +230,16 @@ namespace Paridhwani
         public void StartConversation(VillageNpc npc)
         {
             if(!npc || !npc.eyes) return;
+            PlayControllerFeedback(ControllerFeedback.Interaction);
             activityHistory.Clear(); notebookActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false;
-            NewDialogueTurn(); ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
+            ui.BeginChat();NewDialogueTurn(); ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
             player.BeginConversation(npc.eyes); ui.ShowConversation(); SetCursor(true);
         }
-        public void Choose(int index)
+        public void Choose(int index) {Choose(index,true);}
+        void Choose(int index,bool recordChat)
         {
             if(Turn==null || index<0 || index>=Turn.Choices.Count) return;
+            if(recordChat)ui.RecordChatChoice(Turn.Choices[index].Line);
             if(Turn.Choices[index].Activity!=VillageActivity.None) { OpenActivity(Turn.Choices[index].Activity); return; }
             NewDialogueTurn(); bool wasThursday=Progress.thursdayStarted;
             Turn=Provider.Reply(Turn,index,Progress); ApplyState(); Save();
@@ -374,11 +378,12 @@ namespace Paridhwani
         }
         void OnApplicationFocus(bool focused)
         {
+            if(!focused)StopControllerHaptics();
             if(focused || !ready) return;
             Save();
             if(!ui.IsModal && !IsAutomatedTest) { ui.ShowPause(); SetCursor(true); }
         }
-        void OnApplicationPause(bool paused) { if(paused) Save(); }
-        void OnApplicationQuit() { Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }
+        void OnApplicationPause(bool paused) {controllerHapticsPaused=paused;if(paused){StopControllerHaptics();Save();}}
+        void OnApplicationQuit() {StopControllerHaptics();Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }
     }
 }

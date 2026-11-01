@@ -11,11 +11,15 @@ namespace Paridhwani
         public Transform visual;
         public Camera view;
         public bool blocked,reducedMotion,invertY;
+        [HideInInspector] public float conversationPanelFraction=.4f;
         float TransitionDuration => reducedMotion?.15f:Mathf.Max(.15f,conversationTransition);
         public float sensitivity=.12f;
         [Range(.15f,1.5f)] public float conversationTransition=.65f;
         public float Heading => yaw;
         public float Speed { get; private set; }
+        public Vector3 Velocity { get; private set; }
+        public float TravelDistance { get; private set; }
+        public bool Grounded => controller && controller.isGrounded;
         public float ConversationBlend { get; private set; }
         public bool IsTransitioning => elapsed<TransitionDuration;
         public bool IsInspecting => inspectionPose;
@@ -28,12 +32,12 @@ namespace Paridhwani
         ShadowCastingMode[] bodyShadows;
         float yaw=-18,pitch=17,gravity,suppressLookUntil,elapsed=10,transitionFov=53;
         bool hidden,returningFromInspection;
-        Vector3 transitionPosition,cameraVelocity;
+        Vector3 transitionPosition,cameraVelocity,movementVelocity;
         Quaternion transitionRotation;
         void CaptureTransition()
         {
             transitionPosition=view.transform.position; transitionRotation=view.transform.rotation; transitionFov=view.fieldOfView;
-            elapsed=0; cameraVelocity=Vector3.zero; SuppressLook();
+            elapsed=0; cameraVelocity=Vector3.zero; StopMovement(); SuppressLook();
         }
         public void BeginConversation(Transform eyeAnchor)
         {
@@ -59,21 +63,30 @@ namespace Paridhwani
             ownedActions=Instantiate(actions);
             move=ownedActions.FindAction("Player/Move",true); look=ownedActions.FindAction("Player/Look",true);
             sprint=ownedActions.FindAction("Player/Sprint",true); ownedActions.FindActionMap("Player").Enable();
+            RefreshBodyRenderers();
+        }
+        internal void RefreshBodyRenderers()
+        {
+            ShowBody(true);
             bodyRenderers=visual.GetComponentsInChildren<Renderer>(); bodyShadows=new ShadowCastingMode[bodyRenderers.Length];
             for(int i=0;i<bodyRenderers.Length;i++) bodyShadows[i]=bodyRenderers[i].shadowCastingMode;
         }
         void OnDestroy()
         { ShowBody(true); if(ownedActions) { ownedActions.Disable(); Destroy(ownedActions); } }
-        void OnApplicationFocus(bool focused) { SuppressLook(); }
+        void OnApplicationFocus(bool focused) { if(!focused)StopMovement(); SuppressLook(); }
+        void OnDisable() { StopMovement(); }
+        void StopMovement() { movementVelocity=Vector3.zero; Velocity=Vector3.zero; Speed=0; }
         public void Restore(Vector3 position,float heading)
         {
             controller.enabled=false; transform.position=position; controller.enabled=true;
-            yaw=Mathf.Repeat(heading+180,360)-180; gravity=0; Speed=0; cameraVelocity=Vector3.zero;
+            yaw=Mathf.Repeat(heading+180,360)-180; gravity=0; StopMovement(); TravelDistance=0; cameraVelocity=Vector3.zero;
+            if(visual)visual.rotation=Quaternion.Euler(0,yaw,0);
             focus=null; inspectionPose=null; inspectionTarget=null; elapsed=TransitionDuration;
             returningFromInspection=false; ConversationBlend=0; ShowBody(true); SuppressLook(); UpdateView(true);
         }
         void Update()
         {
+            if(!controller.enabled) { StopMovement(); return; }
             bool canMove=!blocked && !IsTransitioning && Application.isFocused;
             Vector2 input=canMove?VillageInputPolicy.WalkInput(move.ReadValue<Vector2>()):Vector2.zero;
             if(canMove && Time.unscaledTime>suppressLookUntil && Cursor.lockState==CursorLockMode.Locked)
@@ -85,14 +98,22 @@ namespace Paridhwani
             }
             Vector3 direction=Quaternion.Euler(0,yaw,0)*new Vector3(input.x,0,input.y);
             float speed=sprint.IsPressed()?3.6f:2.15f;
+            float dt=Mathf.Min(Time.deltaTime,.05f);
+            // Short, deliberate starts; stronger braking keeps doorways and prompts precise.
+            // Modal/focus transitions stop immediately, rather than letting inertia leak into UI.
+            if(!canMove) StopMovement();
+            else movementVelocity=VillageMotion.Step(movementVelocity,direction*speed,dt);
             if(controller.isGrounded && gravity<0) gravity=-2;
-            gravity=Mathf.Max(gravity+Physics.gravity.y*Time.deltaTime,-25);
+            gravity=Mathf.Max(gravity+Physics.gravity.y*dt,-25);
             Vector3 before=transform.position;
-            controller.Move((direction*speed+Vector3.up*gravity)*Time.deltaTime);
+            controller.Move((movementVelocity+Vector3.up*gravity)*dt);
             Vector3 travelled=transform.position-before; travelled.y=0;
-            Speed=Time.deltaTime>0 ? Mathf.Min(travelled.magnitude/Time.deltaTime,direction.magnitude*speed) : 0;
-            if(direction.sqrMagnitude>.001f)
-                visual.rotation=Quaternion.Slerp(visual.rotation,Quaternion.LookRotation(direction),12*Time.deltaTime);
+            Velocity=dt>0?Vector3.ClampMagnitude(travelled/dt,movementVelocity.magnitude):Vector3.zero;
+            Speed=Velocity.magnitude; TravelDistance+=travelled.magnitude;
+            // Feed collision response back to the motor: no stored push against walls.
+            movementVelocity=Velocity;
+            if(Speed>.06f && visual)
+                visual.rotation=Quaternion.RotateTowards(visual.rotation,Quaternion.LookRotation(Velocity),540*dt);
         }
         void LateUpdate() { UpdateView(false); }
         void UpdateView(bool snap)
@@ -110,7 +131,16 @@ namespace Paridhwani
             if(inspectionPose && inspectionTarget)
             { desired=inspectionPose.position; rotation=Quaternion.LookRotation(inspectionTarget.position-desired); }
             else if(focus)
-            { desired=EyePosition; rotation=Quaternion.LookRotation(focus.position-Vector3.up*.55f-desired); }
+            {
+                desired=EyePosition;
+                rotation=Quaternion.LookRotation(focus.position-Vector3.up*.55f-desired);
+                // Keep the speaker in the centre of the uncovered world beside chat.
+                // The keyboard compresses UI only; it never changes this composition.
+                float chatWidth=Mathf.Clamp(conversationPanelFraction,0,.7f);
+                float horizontalHalfFov=Mathf.Tan(55*Mathf.Deg2Rad*.5f)*view.aspect;
+                float framingYaw=Mathf.Atan(chatWidth*horizontalHalfFov)*Mathf.Rad2Deg;
+                rotation=Quaternion.AngleAxis(framingYaw,Vector3.up)*rotation;
+            }
             elapsed=Mathf.Min(TransitionDuration,elapsed+Time.unscaledDeltaTime);
             float t=Mathf.SmoothStep(0,1,elapsed/TransitionDuration);
             ConversationBlend=active?t:1-t;
@@ -120,7 +150,15 @@ namespace Paridhwani
             if(sweep.magnitude>.2f && Physics.SphereCast(pivot,.12f,sweep.normalized,out hit,sweep.magnitude,~(1<<2),QueryTriggerInteraction.Ignore))
                 desired=pivot+sweep.normalized*Mathf.Max(.1f,hit.distance-.05f);
             if(snap || active || IsTransitioning || reducedMotion) view.transform.position=desired;
-            else view.transform.position=Vector3.SmoothDamp(view.transform.position,desired,ref cameraVelocity,.06f);
+            else
+            {
+                var settled=Vector3.SmoothDamp(view.transform.position,desired,ref cameraVelocity,.075f);
+                // Sweep the damped result too: smoothing must never delay a collision pull-in.
+                var arm=settled-pivot;
+                if(arm.magnitude>.2f && Physics.SphereCast(pivot,.14f,arm.normalized,out hit,arm.magnitude,~(1<<2),QueryTriggerInteraction.Ignore))
+                { settled=pivot+arm.normalized*Mathf.Max(.1f,hit.distance-.06f); cameraVelocity=Vector3.zero; }
+                view.transform.position=settled;
+            }
             view.transform.rotation=rotation;
             float targetFov=reducedMotion?53:inspectionPose?48:focus?55:53;
             view.fieldOfView=IsTransitioning?Mathf.Lerp(transitionFov,targetFov,t):targetFov;

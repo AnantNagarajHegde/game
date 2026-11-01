@@ -10,9 +10,11 @@ namespace Paridhwani
         bool controllerLost;
 
         void OnEnable() { InputSystem.onDeviceChange+=ControllerChanged; }
-        void OnDisable() { InputSystem.onDeviceChange-=ControllerChanged; }
+        void OnDisable() { ReleaseControllerHaptics();InputSystem.onDeviceChange-=ControllerChanged; }
         void ControllerChanged(InputDevice device,InputDeviceChange change)
         {
+            if(device==rumbleController && (change==InputDeviceChange.Disconnected ||
+                change==InputDeviceChange.Removed || change==InputDeviceChange.Disabled))StopControllerHaptics();
             if(device!=activeController || (change!=InputDeviceChange.Disconnected &&
                 change!=InputDeviceChange.Removed && change!=InputDeviceChange.Disabled)) return;
             activeController=null; controllerLost=UsingController; UsingController=false;
@@ -33,8 +35,11 @@ namespace Paridhwani
             bool mouseUsed=mouse!=null && (mouse.delta.ReadValue().sqrMagnitude>1 ||
                 mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame ||
                 mouse.scroll.ReadValue().sqrMagnitude>0);
+            bool wasUsingController=UsingController;
             if(padUsed) {UsingController=true;activeController=pad;}
             else if(keyboardUsed || mouseUsed) UsingController=false;
+            if(UsingController && !wasUsingController && ui.Mode=="conversation" && ShowTeaAssessment && !TeaAssessmentBusy)ui.OpenTeaKeyboard();
+            else if(!UsingController && wasUsingController && ui.KeyboardOpen)ui.CloseTeaKeyboard(true);
             if(ui.IsModal) Cursor.visible=!UsingController;
         }
         bool HandleController()
@@ -46,8 +51,10 @@ namespace Paridhwani
                 if(!ui.IsModal) {ui.ShowPause();SetCursor(true);}
                 return true;
             }
-            var pad=Gamepad.current;
+            var pad=activeController!=null && activeController.added?activeController:Gamepad.current;
+            if(ui.KeyboardOpen)return ui.HandleTeaKeyboard(pad);
             if(pad==null || !UsingController) return false;
+            if(ui.Mode=="conversation" && ShowTeaAssessment && !TeaAssessmentBusy && pad.buttonWest.wasPressedThisFrame){ui.OpenTeaKeyboard();return true;}
             if(ui.ControllerSubmitConsumed) return true;
             // UI Submit/Cancel/Move are dispatched once by InputSystemUIInputModule.
             // Only world interaction and global shortcuts belong to this polling path.

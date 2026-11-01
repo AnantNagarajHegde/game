@@ -17,20 +17,26 @@ namespace Paridhwani {
  bool saved=session.HasSavedVisit;
  var shell=Card("main-menu","paper");shell.name="title-card";Class(shell,"title-card");shell.style.height=Length.Percent(85);
  var card=MenuScroll(shell,"title-scroll");
- Add(card,"KARNATAKA / THE MONSOON SEASON","eyebrow");Add(card,"P A R I D H W A N I","brand");
- Add(card,"A language. A place. A way to belong.","title");
- Add(card,"Ananya was meant to meet you at the village library. Follow her trail through Kalyanapura, learn Kannada through everyday exchanges, and uncover the records that matter to its people.","body");
+ Add(card,"A KANNADA STORY ADVENTURE","eyebrow");
+ Add(card,"PARIDHWANI","brand");
+ var rule=new VisualElement();Class(rule,"title-rule");card.Add(rule);
+ Add(card,"Every conversation\nbrings you closer.","title");
+ Add(card,"Follow a missing archivist's trail through Kalyanapura, one Kannada conversation at a time.","body");
  if(feedback!="")Add(card,feedback,"feedback");
  var resume=Button(card,session.IsPresentationDemo?"Continue presentation demo":session.IsPracticeVisit?"Continue practice":"Continue visit",session.ContinueMainVisit);resume.name="title-continue";resume.SetEnabled(saved);
+ if(!saved)resume.style.display=DisplayStyle.None;
  Button start=null;
  if(session.IsPracticeVisit)Button(card,"Return to the main visit",session.ReturnToCompletedStory);
  else {
  start=Button(card,saved?"Begin a new story":"Begin your visit",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});start.name="title-start";
  Button(card,"Presentation demo / choose a scene",ShowPresentationDemo).name="title-demo";
- Button(card,"Practise a reached chapter",ShowChapterReplay,"quiet-button").name="title-practice";
  }
- Button(card,"Settings",session.OpenTitleSettings,"quiet-button");Button(card,"Save and return to desktop",session.RequestQuit,"quiet-button");
- Add(card,"Take your time. Reading and conversations have no countdown.","small");
+ Class(saved?resume:start??resume,"primary-button");
+ var footer=new VisualElement();Class(footer,"title-actions");shell.Add(footer);
+ Button(footer,"Settings",session.OpenTitleSettings,"quiet-button").name="title-settings";
+ if(!session.IsPracticeVisit)Button(footer,"Chapter practice",ShowChapterReplay,"quiet-button").name="title-practice";
+ Button(footer,"Save & exit",session.RequestQuit,"quiet-button").name="title-exit";
+ Add(shell,"KALYANAPURA  /  KARNATAKA","title-location");
  FocusLater(saved?resume:start);
  }
  public void ShowNewVisitConfirmation() {

@@ -75,10 +75,21 @@ namespace Paridhwani
         void Answers(VisualElement parent,TeaLine[] lines)
         {
             AcceptingEvidenceAnswers=true;
+            var choices=new Button[lines.Length];
             for(int i=0;i<lines.Length;i++)
             {
                 int index=i;
-                var button=new Button(()=>session.SubmitInvestigationAnswer(index)); Class(button,"evidence-answer"); parent.Add(button);
+                var button=new Button(()=>session.SubmitInvestigationAnswer(index)){name="evidence-answer-"+i};choices[i]=button;Class(button,"evidence-answer");parent.Add(button);
+                // Document answers form an ordered list. Spatial focus navigation
+                // cannot reliably reach the next row while it is clipped by scrolling.
+                button.RegisterCallback<NavigationMoveEvent>(e=>{
+                    int step=e.direction==NavigationMoveEvent.Direction.Down?1:e.direction==NavigationMoveEvent.Direction.Up?-1:0;
+                    int next=index+step;
+                    if(step==0 || next<0 || next>=choices.Length || !choices[next].enabledInHierarchy)return;
+                    e.StopImmediatePropagation();choices[next].Focus();
+                    var scroll=parent as ScrollView ?? parent.GetFirstAncestorOfType<ScrollView>();
+                    scroll?.ScrollTo(choices[next]);
+                });
                 var number=Add(button,(i+1).ToString("00"),"choice-number");
                 var content=new VisualElement(); Class(content,"choice-lines"); button.Add(content);
                 Line(content,lines[i],true);

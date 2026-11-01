@@ -1,0 +1,55 @@
+PARIDHWANI - MOVEMENT AND ARCHITECTURE POLISH
+2026-11-01 | Unity 6000.6.7f1 | Windows / URP
+
+Implemented
+- Acceleration, short braking, bounded turning and collision feedback in the player motor.
+- Distance-driven gait with weighted knees, articulated ankles/elbows, coordinated arm swing,
+  support-leg pelvis motion, modest terrain adaptation and synchronized footsteps/haptics.
+- Immediate movement reset on modal transitions, focus loss and restore; collision sweep of
+  the camera's final damped position. No artificial camera head bob or sprint FOV effect.
+- Light-reactive plaster, timber, stone and clay relief; restrained rain staining.
+- Timber fascia/rafters, overlapping ridge caps, bonded stone courses, framed doors/windows
+  and dressed sills. 12 roofs, 19 walls, 8 doors/windows; 93,712 added vertices.
+  Detail is batched per facade/roof, uses shared materials, owns/cleans its runtime assets,
+  follows door visibility, and does not add collision or change the authored world recipe.
+- Explicit up/down navigation for scroll-clipped evidence answers, with stable focus names.
+- Reproducible development-player test storage via -village-test-directory; normal saves
+  keep their existing platform location. Updated smoke diagnostics and dialogue framing check.
+- Extended docs/UI_GRAPHICS_TEMPLATE.md and both repository AGENTS.md references.
+
+Verification
+1. verification/Verify-Sources.ps1: PASS. Runtime, Editor and non-Editor source branches
+   compile; 448 chapter/behavior assertions and seven texture-source checks pass.
+   Log: Temp/movement-architecture-sources.log
+2. Native movement/architecture review: PASS, 40,714 checks at 1920x1080.
+   These include per-triangle geometry validation, not 40,714 distinct gameplay scenarios.
+   Actual CharacterController and InputSystem gamepad events cover starts, target walking/
+   jogging speeds, braking, reversal, modal blocking, wall contact, skinning and footsteps.
+   Motor response checked over equal elapsed time at 20, 30, 60 and 120 Hz.
+   Walking brake distance: 0.124 m including one queued input frame.
+   Evidence-list controller navigation also passes.
+   Run: Temp/PolishReview/20261101-165017
+3. Native UI review: PASS, 80 checks at each resolution, with text scales 1.0 and 1.3.
+   1920x1080: Temp/UIReview/20261101-162302
+   960x540:   Temp/UIReview/20261101-162425
+   Includes title, exploration, notebook, settings, chat and keyboard/camera invariance.
+4. Presentation demo regression: PASS, 100,888 checks and 51 captures at 960x540.
+   Run: Temp/PresentationPlaytests/run-20261101-162555981-4995b8f2
+5. Fresh Windows64 development build: PASS.
+   My project (1)/Builds/TeaAssessment-20261101-165137/Paridhwani.exe
+   Final standalone smoke result: PASS (VILLAGE_SMOKE_OK), exit code 0, 17,862 frames.
+   Completed 2026-11-01T16:54:33Z; includes the full story through the ending,
+   controller evidence, saved progress, failed-save/exit handling and isolated demos/practice.
+   Run artifacts: Temp/PolishStandalone-20261101-165137
+
+Reference captures
+docs/polish-review/{movement,tea-stall,library,house}.png
+The movement image uses a side QA camera; normal play keeps the third-person camera.
+
+Scope and limits
+All review runs use isolated visits. Existing authored meshes, scenes and real saved visits
+are preserved. This is a functional/rendering verification record, not a minimum-hardware
+or commercial release certification. The restricted standalone runner logs Windows
+ClipCursor permission failures, so mouse confinement cannot be certified by that run;
+native gamepad movement/camera and UI navigation are exercised. Optional stripped URP
+effects and unavailable Unity telemetry hosts also produce environment warnings.

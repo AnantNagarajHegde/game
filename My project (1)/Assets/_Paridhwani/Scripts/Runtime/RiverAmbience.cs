@@ -4,22 +4,17 @@ namespace Paridhwani
     public sealed class RiverAmbience : MonoBehaviour
     {
         public TeaAmbience preferences;
-        AudioSource source; AudioClip clip;
+        VillageRecordedLoop source;
         void Start()
         {
-            const int rate=22050; var samples=new float[rate*5]; var rng=new System.Random(53); float low=0;
-            for(int i=0;i<samples.Length;i++)
-            {
-                float white=(float)(rng.NextDouble()*2-1); low=low*.92f+white*.08f;
-                samples[i]=(low*.8f+white*.06f)*(.8f+.2f*Mathf.Sin(i*.00024f));
-            }
-            for(int i=0;i<600;i++) { float f=i/600f; samples[i]*=f; samples[samples.Length-1-i]*=f; }
-            clip=AudioClip.Create("River weir current",samples.Length,1,rate,false); clip.SetData(samples,0);
-            source=gameObject.AddComponent<AudioSource>(); source.playOnAwake=false; source.volume=0; source.clip=clip; source.loop=true;
-            source.spatialBlend=1; source.minDistance=5; source.maxDistance=34; source.rolloffMode=AudioRolloffMode.Linear;
-            source.Play();
+            source=gameObject.AddComponent<VillageRecordedLoop>();source.Configure("River",true,34);
         }
-        void Update() { if(source) source.volume=!preferences || preferences.muted || !Application.isFocused?0:.45f*PresentationPolicy.Volume(preferences.volume); }
-        void OnDestroy() { if(clip) Destroy(clip); }
+        void Update() {
+            if(!source)return;
+            var session=preferences?preferences.GetComponent<TeaStallSession>():null;
+            float duck=session && session.ui && session.ui.Mode=="conversation"?.65f:1;
+            source.Gain=!preferences || !preferences.isActiveAndEnabled || preferences.muted || !Application.isFocused?0:.32f*duck*PresentationPolicy.Volume(preferences.volume);
+        }
+        void OnDisable(){if(source)source.Gain=0;}
     }
 }
