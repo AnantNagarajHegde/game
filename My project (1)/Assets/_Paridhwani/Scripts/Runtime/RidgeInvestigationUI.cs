@@ -20,8 +20,8 @@ namespace Paridhwani
             } else Add(scroll,"Direction recorded. Close this page and follow the fenced path through the shelter bend to the farmhouse veranda. You can walk back along the same route.","success");
             Add(scroll,"No jumping, stamina test or reading countdown. Tab opens your field notes and returns here.","small");
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
-            var english=new Toggle("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowRidgeActivity();}); aids.Add(english);
-            var roman=new Toggle("Roman letters"){value=session.Progress.roman}; roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowRidgeActivity();}); aids.Add(roman);
+            var english=new VillageSwitch("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowRidgeActivity();}); aids.Add(english);
+            var roman=new VillageSwitch("Roman letters"){value=session.Progress.roman}; roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowRidgeActivity();}); aids.Add(roman);
         }
     }
 }

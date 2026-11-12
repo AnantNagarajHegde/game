@@ -41,8 +41,8 @@ namespace Paridhwani
                 Add(scroll,"Ridge trailhead: continue to the stone marker, recall the left turn, then follow the fenced bends to Gudda Mane. You can return along the same trail and travel back with Raghavendra.","small");
             }
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
-            var english=new Toggle("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowCheckpostActivity(activity);}); aids.Add(english);
-            var roman=new Toggle("Roman letters"){value=session.Progress.roman}; roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowCheckpostActivity(activity);}); aids.Add(roman);
+            var english=new VillageSwitch("English meaning"){value=session.Progress.english}; english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowCheckpostActivity(activity);}); aids.Add(english);
+            var roman=new VillageSwitch("Roman letters"){value=session.Progress.roman}; roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowCheckpostActivity(activity);}); aids.Add(roman);
         }
     }
 }

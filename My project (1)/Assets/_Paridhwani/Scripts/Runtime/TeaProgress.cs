@@ -10,6 +10,7 @@ namespace Paridhwani
         public int version = 1;
         public bool greeted, drinkOrdered, directionsKnown, signRead, ananyaRoutineKnown;
         public bool arrivalAcknowledged,metSomanna,messLeadKnown,mealOrdered,servingComplete,shoppingNoteCollected,marketLeadKnown;
+        public bool arrivalIntroSeen;
         public bool marketReceiptCollected,purchaseTimeKnown,marketAccountKnown,busDepartureKnown,riverReportKnown;
         public bool giriAccountKnown,bicycleFrameObserved,bicycleStandObserved,bookingSlipFound,bookingSlipRead,riverDeductionKnown,templeLeadKnown;
         public bool gurumurthyAccountKnown,rathnammaAccountKnown,witnessAccountsCompared,guddaFamilyLeadKnown;
@@ -32,22 +33,7 @@ namespace Paridhwani
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
-        public string Objective => storyCompleted ? "Story complete - revisit the village or practise again" : epilogueStarted ? "Meet Somanna or Ananya and choose what comes next" : workSuspended ? "Works suspended - await the council review outcome" : fridayFinaleStarted ? "Present the protected original at the library court" : returnedWithAnanya ? "Confirm Friday morning preparations with Ananya" : returnJourneyStarted ? "Return with Ananya via the checkpost and auto" : deedRetrieved ? "Prepare the return journey with Ananya" : deedConceptsReviewed ? "Protect the original deed in its folder" : trunkOpened ? "Read and review the three deed clauses" : trunkLocationKnown ? "Open the family trunk in the farm archive" : disappearanceExplained ? "Ask Kamalamma about the original deed" : ananyaFound ? "Hear why Ananya could not return" : guddaManeReached ? "Meet Ananya on the farmhouse veranda" : ridgeWayfindingKnown ? "Follow the fenced path to Gudda Mane" : trailPermission ? "Checked ridge approach available - review the trailhead" : trailInstructionsUnderstood ? "Wait for Kencha to confirm the ridge is checked" : checkpostAccountKnown ? "Review Kencha\u0027s safe ridge directions" : checkpostVisited ? "Ask Kencha about Ananya and the road closure" : checkpostDestinationKnown ? "Ask Raghavendra for a ride to the forest checkpost" : deadlineKnown ? "Compare the archive reference with the notice checklist" : noticeIdentified ? "Read the clearance day and time" : thursdayStarted ? "Read the public panchayat notice" : deedReferenceFound ? "Return to Somanna when ready to rest" : libraryAccessGranted ? "Read the catalogue inside the library" : guddaFamilyLeadKnown ? "Bring the Gudda Mane family name to Somanna" : witnessAccountsCompared ? "Ask Rathnamma about the Gudda Mane family" : gurumurthyAccountKnown && rathnammaAccountKnown ? "Compare the two witness accounts" : templeLeadKnown ? "Speak to Gurumurthy and Rathnamma at the northern stop" :
-            riverDeductionKnown ? "Ask Giri about witnesses near the northern stop" :
-            RiverInvestigation.CanDeduce(this) ? "Compare the bicycle and booking evidence with Giri" :
-            bookingSlipFound && !bookingSlipRead ? "Read the advance booking slip" :
-            giriAccountKnown ? "Inspect the bicycle’s frame, stand and carrier pocket" :
-            riverReportKnown ? "Follow the river path and speak to Giri" :
-            busDepartureKnown ? "Read Giri’s notice beside the timetable" :
-            marketAccountKnown ? "Check Route 14 at the bus-stand timetable" :
-            purchaseTimeKnown ? "Ask Basavaraju about Ananya’s journey" :
-            marketReceiptCollected ? "Read the purchase day and time on the ledger" :
-            marketLeadKnown ? "Show Ananya’s shopping note to Basavaraju" :
-            shoppingNoteCollected ? "Ask Shanthakka about the shopping note" :
-            messLeadKnown ? "Visit Shanthakka at the mess across the lane" :
-            metSomanna ? "Ask Somanna about Ananya" :
-            directionsKnown ? "Follow the lane towards the library" :
-            drinkOrdered ? "Ask Manjunatha where the library is" : "Introduce yourself at the tea stall";
+        public string Objective => VillageStory.CurrentObjective(this);
     }
 
     public interface ITeaProgressCodec

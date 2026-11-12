@@ -1,8 +1,8 @@
 # Paridhwani
 
-Paridhwani is a story-led Kannada-learning adventure built in Unity. The prototype follows an archive worker investigating Ananya's disappearance and helping protect the village library. Players explore the village, speak with its residents, collect evidence, and practise Kannada through authored dialogue and activities.
+Paridhwani is a story-led Kannada-learning adventure built in Unity. The prototype follows an archive worker investigating Ananya's disappearance and helping protect the village library. Players explore the village, speak with its residents, collect evidence, and practise Kannada through model-generated conversations and authored activities.
 
-The main story is authored from arrival through the council review and epilogue, with a separate practice visit that preserves the completed story save. The game is still a procedural prototype, not a release-ready product; final art, fluent language review, a connected NLP service, and broader player acceptance testing remain outstanding.
+The main story is authored from arrival through the council review and epilogue, with a separate practice visit that preserves the completed story save. The game is still a procedural prototype, not a release-ready product; model quality, fluent language review, live integration and broader player acceptance testing remain outstanding.
 
 ## Open and play
 
@@ -11,6 +11,10 @@ The main story is authored from arrival through the council review and epilogue,
 3. Press **Play**.
 
 If generated assets are missing, use **Paridhwani > Create Tea Stall Benchmark** in the Editor. For controls, story walkthrough, and save details, see [play and build instructions](docs/TEA_STALL_BENCHMARK.md).
+
+New main visits open with a rendered 3D arrival movie, with Kannada narration and scalable English subtitles. It supports pause, replay and skip, then leads to the welcome instructions. [Watch the movie and read its playback details](docs/ARRIVAL_MOVIE.md).
+
+The village now includes 18 residential homes in six reusable styles, 12 ambient residents, connected neighbourhood lanes and 76 scenic houses beyond its fenced playable area. The river has continuous banks, flowing ripples, rain rings and weir foam. Use **Paridhwani > Update residential village and river** to update an existing benchmark; **Review expanded village and graphics** runs the isolated layout, movement and visual checks. See the [village verification record](verification/village-expansion-review.txt) and [street capture](docs/village-review/residential-street.png).
 
 ## Verification
 
@@ -36,9 +40,9 @@ See [current production status](docs/PRODUCTION_STATUS.md) for verified results 
 
 ## NLP integration
 
-Dialogue currently uses local authored content. The project includes an optional cancellable text-service adapter, but no real NLP endpoint, authentication, or transport is configured. See the [proposed service contract](docs/NLP_SERVICE_CONTRACT_PROPOSAL.md).
+NPC conversations start immediately with authored dialogue. **Phrases**, beside Send, lets players practise an available Kannada reply and continue without a service. Typed messages use the configured conversation bridge with a Groq, OpenRouter or Ollama model; Unity validates and applies eligible story transitions. The game checks its configured bridge before sending and reports specific connection/provider failures. Its 60-second deadline includes the backend's 45-second model-turn budget. Failed deliveries preserve the draft and reuse their bubble on retry. Readable replies can be displayed without an English translation; invalid action metadata cannot advance the story. Optional Azure Speech reads NPC replies aloud. See [conversations and phrase help](docs/LOCAL_MODEL_CONVERSATION.md) for setup and diagnostics, and the [failure register](docs/FAILURE_POINTS.md) for fixes and outstanding issues. Earlier NLP contract documents describe retired integrations.
 
-Service attachment/detachment uses SetOptionalDialogueService on the Unity thread. Switching providers invalidates old replies; cancellation and shutdown contain transport callback failures while preserving the authored conversation.
+Chapter entries, practice preparation and objectives now share `VillageStory`; serialized save fields remain compatible. Conversation lifecycle and transport have separate owners outside the Unity session class. Source and behavior checks pass; the new phrase, focus and keyboard layout/input checks are for the user's later Unity review.
 
 Chapter practice returns to its title, Pause or credits origin. Settings and chapter lists keep Back visible while scrolling, and live text scaling updates panel width and height. These changes have source coverage; their new native focus/layout assertions remain pending.
 

@@ -15,6 +15,14 @@ namespace Paridhwani
         }
         readonly VillageCharacter character;
         readonly VillageWalker walker;
+        readonly VillageAmbientResident resident;
+        float Speed => walker ? walker.Speed : resident.Speed;
+        float Distance => walker ? walker.TravelDistance : resident.TravelDistance;
+        Vector3 Velocity => walker ? walker.Velocity : resident.Velocity;
+        bool Grounded => walker ? walker.Grounded : resident.Grounded;
+        bool Blocked => walker ? walker.blocked : resident.Stopped;
+        bool ReducedMotion => walker ? walker.reducedMotion : resident.ReducedMotion;
+        Transform Root => walker ? walker.transform : resident.transform;
         readonly Limb left,right;
         readonly List<Mesh> meshes=new List<Mesh>();
         readonly Vector3 rest;
@@ -24,11 +32,11 @@ namespace Paridhwani
         public float Blend=>blend;
         public bool Footfall {get;private set;}
 
-        public VillageCharacterGait(VillageCharacter value)
+        public VillageCharacterGait(VillageCharacter value,VillageAmbientResident ambient=null)
         {
-            character=value;walker=value.walker;rest=value.transform.localPosition;
+            character=value;walker=value.walker;resident=ambient;rest=value.transform.localPosition;
             left=Rig(value.leftLeg,value.leftArm);right=Rig(value.rightLeg,value.rightArm);
-            walker.RefreshBodyRenderers();lastDistance=walker.TravelDistance;
+            if(walker)walker.RefreshBodyRenderers();lastDistance=Distance;
         }
         Limb Rig(Transform hip,Transform arm)
         {
@@ -78,21 +86,21 @@ namespace Paridhwani
         {
             Footfall=false;
             float dt=Mathf.Min(seconds,.05f);if(dt<=0)return;
-            float travel=walker.TravelDistance-lastDistance;lastDistance=walker.TravelDistance;
+            float travel=Distance-lastDistance;lastDistance=Distance;
             float previousCycle=cycle;
             bool teleported=travel<0 || travel>.5f;
-            bool moving=!walker.blocked && walker.Grounded && walker.Speed>.04f;
+            bool moving=!Blocked && Grounded && Speed>.04f;
             if(teleported){cycle=0;blend=0;pelvis=lean=bank=0;previousVelocity=Vector3.zero;}
-            else if(moving)cycle=Mathf.Repeat(cycle+travel/(VillageMotion.StepLength(walker.Speed)*2),1);
+            else if(moving)cycle=Mathf.Repeat(cycle+travel/(VillageMotion.StepLength(Speed)*2),1);
             if(moving && !teleported)Footfall=(previousCycle<.5f && cycle>=.5f) || cycle<previousCycle;
-            blend=Mathf.MoveTowards(blend,moving?Mathf.Clamp01(walker.Speed/.65f):0,dt*7);
-            float jog=Mathf.InverseLerp(2.15f,3.6f,walker.Speed);
-            var localVelocity=character.transform.InverseTransformDirection(walker.Velocity);
-            var acceleration=character.transform.InverseTransformDirection((walker.Velocity-previousVelocity)/dt);
-            previousVelocity=walker.Velocity;
+            blend=Mathf.MoveTowards(blend,moving?Mathf.Clamp01(Speed/.65f):0,dt*7);
+            float jog=Mathf.InverseLerp(2.15f,3.6f,Speed);
+            var localVelocity=character.transform.InverseTransformDirection(Velocity);
+            var acceleration=character.transform.InverseTransformDirection((Velocity-previousVelocity)/dt);
+            previousVelocity=Velocity;
             lean=Mathf.Lerp(lean,Mathf.Clamp(localVelocity.z*1.2f+acceleration.z*.16f,-3,7)*blend,1-Mathf.Exp(-9*dt));
             bank=Mathf.Lerp(bank,Mathf.Clamp(-acceleration.x*.45f,-5,5)*blend,1-Mathf.Exp(-8*dt));
-            float breath=walker.reducedMotion?0:Mathf.Sin(Time.time*1.7f)*.002f*(1-blend);
+            float breath=ReducedMotion?0:Mathf.Sin(Time.time*1.7f)*.002f*(1-blend);
             FootPath(cycle,jog,out float leftZ,out _,out bool leftStance);
             FootPath(Mathf.Repeat(cycle+.5f,1),jog,out float rightZ,out _,out bool rightStance);
             float support=Mathf.Max(leftStance?Mathf.Abs(leftZ):0,rightStance?Mathf.Abs(rightZ):0);
@@ -117,7 +125,7 @@ namespace Paridhwani
             if(!limb.hip || !limb.knee)return;
             FootPath(phase,jog,out float z,out float lift,out _);
             var desired=character.transform.TransformPoint(new Vector3(limb.hip.localPosition.x,.115f+lift,z));
-            desired.y=walker.transform.position.y+rest.y+.115f+lift;
+            desired.y=Root.position.y+rest.y+.115f+lift;
             // Modest terrain adaptation: don't reach through steps or pull a leg into a wall.
             if(Physics.Raycast(desired+Vector3.up*.4f,Vector3.down,out var hit,.8f,~(1<<2),QueryTriggerInteraction.Ignore) && hit.normal.y>.65f)
                 desired.y=Mathf.Max(desired.y,Mathf.Min(desired.y+.12f,hit.point.y+.115f+lift));
@@ -136,7 +144,7 @@ namespace Paridhwani
         void FootPath(float phase,float jog,out float z,out float lift,out bool stance)
         {
             float contact=Mathf.Lerp(.5f,.36f,jog),swingT=Mathf.Clamp01((phase-contact)/(1-contact));
-            float reach=VillageMotion.StepLength(walker.Speed)*contact*blend;
+            float reach=VillageMotion.StepLength(Speed)*contact*blend;
             stance=phase<contact;
             z=stance?Mathf.Lerp(reach,-reach,phase/contact):Mathf.Lerp(-reach,reach,Mathf.SmoothStep(0,1,swingT));
             lift=Mathf.Sin(swingT*Mathf.PI)*(.10f+jog*.055f)*blend;

@@ -1,92 +1,143 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Paridhwani {
+ // Azure returns 16-bit mono PCM WAV. Decode only that bounded format; never
+ // write generated speech to disk or relax Unity's global HTTP policy.
+ public static class VillageSpeechPcm {
+  static bool Tag(byte[] b,int p,string tag) => p>=0 && p+4<=b.Length && b[p]==tag[0] && b[p+1]==tag[1] && b[p+2]==tag[2] && b[p+3]==tag[3];
+  static uint U32(byte[] b,int p) => (uint)(b[p] | b[p+1]<<8 | b[p+2]<<16 | b[p+3]<<24);
+  static int U16(byte[] b,int p) => b[p] | b[p+1]<<8;
+  public static bool TryDecode(byte[] b,out float[] samples,out int frequency) {
+   samples=null;frequency=0;
+   if(b==null || b.Length<44 || b.Length>4*1024*1024 || !Tag(b,0,"RIFF") || !Tag(b,8,"WAVE"))return false;
+   long end=8L+U32(b,4);if(end>b.Length || end<44)return false;
+   int dataStart=-1,dataSize=0;bool format=false;
+   for(long p=12;p+8<=end;) {
+    int at=(int)p;long size=U32(b,at+4),start=p+8,next=start+size+(size&1);
+    if(start+size>end || next>end)return false;
+    if(Tag(b,at,"fmt ")) {
+     if(size<16 || U16(b,at+8)!=1 || U16(b,at+10)!=1 || U16(b,at+20)!=2 || U16(b,at+22)!=16)return false;
+     uint rate=U32(b,at+12);if(rate<8000 || rate>48000)return false;
+     frequency=(int)rate;format=true;
+    } else if(Tag(b,at,"data")) {dataStart=(int)start;dataSize=(int)size;}
+    p=next;
+   }
+   if(!format || dataStart<0 || dataSize<=0 || (dataSize&1)!=0)return false;
+   samples=new float[dataSize/2];
+   for(int i=0;i<samples.Length;i++)samples[i]=unchecked((short)U16(b,dataStart+i*2))/32768f;
+   return true;
+  }
+ }
 #if UNITY_EDITOR || UNITY_ENABLE_CHECKS
- // Opt-in in-process response for isolated Editor/development smoke tests.
  internal sealed class VillageModelTestReply {public TeaLine Line;public int Choice;public string Feedback;}
 #endif
  public sealed partial class TeaStallSession {
 #if UNITY_EDITOR || UNITY_ENABLE_CHECKS
   internal Func<TeaTurn,string,CancellationToken,Task<VillageModelTestReply>> VillageModelTestTransport;
 #endif
-  static readonly HttpClient villageModelClient = new HttpClient(new HttpClientHandler {
-   AllowAutoRedirect=false, UseProxy=false, UseCookies=false, UseDefaultCredentials=false,
-   AutomaticDecompression=DecompressionMethods.None
-  }) { Timeout=Timeout.InfiniteTimeSpan };
-  static readonly Uri villageModelEndpoint=new Uri("http://127.0.0.1:8767/v1/village/turn");
-  readonly Dictionary<string,List<string[]>> villageModelHistory=new Dictionary<string,List<string[]>>();
-  public string VillageModelObjective=>Provider is LocalTeaConversation && Turn?.Id=="hello" ? "Greet Manjunatha and introduce yourself by name." : Progress?.Objective??"Talk to the villager.";
+  CancellationTokenSource villageSpeechCancel;
+  int villageSpeechGeneration;
+  AudioSource villageSpeechSource;
+  AudioClip villageSpeechClip;
+  TeaLine villageLastSpokenLine;
+  string villageLastSpokenSpeaker;
+  public string VillageModelObjective=>Provider is LocalTeaConversation && (Turn?.Id=="hello"||Turn?.Id=="help") ? "Greet Manjunatha and introduce yourself by name." : Progress?.Objective??"Talk to the villager.";
+
+  VillageConversationAction[] SnapshotVillageActions(TeaTurn turn,ITeaConversationProvider provider) {
+   var result=new List<VillageConversationAction>();
+   for(int i=0;i<turn.Choices.Count;i++) {
+    var current=turn.Choices[i];string nextFact="";
+    if(current.Activity==VillageActivity.None) {
+     try {
+      var copy=JsonUtility.FromJson<TeaProgress>(JsonUtility.ToJson(Progress));
+      var next=provider.Reply(turn,i,copy);nextFact=next?.Line?.English??"";
+     } catch(Exception error) when(error is ArgumentException || error is InvalidOperationException) {continue;}
+    }
+    string description=current.Line.English??"";
+    if(provider is LocalTeaConversation && (turn.Id=="hello" || turn.Id=="help")) {
+     if(current.Effect=="greet")description="Greet Manjunatha and introduce yourself by providing your name.";
+     else if(turn.Id=="hello" && i==1)description="Explicitly ask Manjunatha to speak slowly or say you know only a little Kannada.";
+    }
+    result.Add(new VillageConversationAction("a"+i,description,nextFact,i));
+   }
+   return result.ToArray();
+  }
   async void AskVillageModel() {
    if(Turn==null || !ui || ui.Mode!="conversation" || TeaAssessmentBusy || string.IsNullOrWhiteSpace(TeaAssessmentInput))return;
-   teaAssessmentRequests.Cancel();textRequests.Cancel();teaTopicLine=null;
+   ui.CloseTeaKeyboard();StopVillageSpeech();
    var turn=Turn;var provider=Provider;var npc=ActiveNpc;
-   string input=TeaAssessmentInput.Trim();
-   if(input.Length>512){TeaAssessmentFeedback="Please keep your message under 512 characters.";ui.ShowConversation();return;}
-   ui.RecordChatMessage(input);
-   string id=Guid.NewGuid().ToString("N"),objective=VillageModelObjective,speaker=npc?npc.displayName:turn.Speaker,role=npc?npc.roleLabel:"Villager";int choice=-1;string feedback="";
-   var history=villageModelHistory.TryGetValue(speaker,out var previous)?previous.ToArray():Array.Empty<string[]>();
-   var pending=teaAssessmentRequests.Send(async token=>{
-#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
-    if(VillageModelTestTransport!=null){
-     var testReply=await VillageModelTestTransport(turn,input,token);
-     if(testReply?.Line==null || testReply.Choice < -1 || testReply.Choice>=turn.Choices.Count || string.IsNullOrWhiteSpace(testReply.Line.English) || testReply.Line.English.Length>1000 || (testReply.Line.Roman?.Length??0)>1000 || (testReply.Feedback?.Length??0)>1000)throw new InvalidDataException("Invalid test reply");
-     choice=testReply.Choice;feedback=testReply.Feedback;return testReply.Line;
-    }
-#endif
-    using(var stream=new MemoryStream()) {
-     using(var json=new Utf8JsonWriter(stream)) {
-      json.WriteStartObject();json.WriteNumber("version",1);json.WriteString("request_id",id);
-      json.WriteString("turn_id",turn.Id);json.WriteString("speaker",speaker);json.WriteString("role",role);
-      json.WriteString("learner_text",input);json.WriteString("objective",objective);json.WriteString("npc_roman",turn.Line.Roman??"");json.WriteString("npc_english",turn.Line.English??"");
-      json.WriteStartArray("history");foreach(var exchange in history){json.WriteStartObject();json.WriteString("player",exchange[0]);json.WriteString("npc",exchange[1]);json.WriteEndObject();}json.WriteEndArray();
-      json.WriteStartArray("choices");
-      foreach(var c in turn.Choices){json.WriteStartObject();json.WriteString("roman",c.Line.Roman??"");json.WriteString("english",c.Line.English??"");json.WriteEndObject();}
-      json.WriteEndArray();json.WriteEndObject();
-     }
-     using(var message=new HttpRequestMessage(HttpMethod.Post,villageModelEndpoint)) {
-      message.Content=new ByteArrayContent(stream.ToArray());message.Content.Headers.ContentType=new MediaTypeHeaderValue("application/json"){CharSet="utf-8"};
-      using(var response=await villageModelClient.SendAsync(message,HttpCompletionOption.ResponseHeadersRead,token).ConfigureAwait(false)) {
-       if(response.StatusCode!=HttpStatusCode.OK || response.Content.Headers.ContentLength>65536)throw new InvalidDataException("Model unavailable");
-       using(var body=await response.Content.ReadAsStreamAsync().ConfigureAwait(false))using(var output=new MemoryStream()) {
-        var buffer=new byte[4096];int count;while((count=await body.ReadAsync(buffer,0,buffer.Length,token).ConfigureAwait(false))>0){if(output.Length+count>65536)throw new InvalidDataException("Reply too large");output.Write(buffer,0,count);}
-        using(var doc=JsonDocument.Parse(output.ToArray(),new JsonDocumentOptions{MaxDepth=8})) {
-         var root=doc.RootElement;
-         if(root.GetProperty("version").GetInt32()!=1 || root.GetProperty("request_id").GetString()!=id || root.GetProperty("turn_id").GetString()!=turn.Id)throw new InvalidDataException("Uncorrelated reply");
-         choice=root.GetProperty("choice").GetInt32();if(choice < -1 || choice>=turn.Choices.Count)throw new InvalidDataException("Invalid choice");
-         string roman=root.GetProperty("roman").GetString(),english=root.GetProperty("english").GetString();feedback=root.GetProperty("feedback").GetString();
-         if(string.IsNullOrWhiteSpace(english)||english.Length>1000||(roman?.Length??0)>1000||(feedback?.Length??0)>1000)throw new InvalidDataException("Invalid model text");
-         return new TeaLine("",roman??"",english);
-        }
-       }
-      }
-     }
-    }
-   },90000);
-   TeaAssessmentFeedback="Thinking...";ui.ShowConversation();var result=await pending;
-   if(!this || Turn!=turn || ActiveNpc!=npc || !ReferenceEquals(provider,Provider) || ui.Mode!="conversation" || !teaAssessmentRequests.IsCurrent(result))return;
-   if(result.Status!=DialogueTextStatus.Ready){TeaAssessmentFeedback="The conversation service is unavailable. Start the local service and try sending your message again.";ui.ShowConversation();return;}
-   teaTopicLine=result.Line;TeaAssessmentFeedback=feedback??"";
-   if(!villageModelHistory.TryGetValue(speaker,out var exchanges)){exchanges=new List<string[]>();villageModelHistory[speaker]=exchanges;}
-   exchanges.Add(new[]{input,result.Line.English});if(exchanges.Count>6)exchanges.RemoveAt(0);
-   if(TeaAssessmentInput.Trim()==input)TeaAssessmentInput="";
-   if(choice>=0){
-    // Preserve the generated reply before the authored transition clears the turn.
-    // The request correlation/current-turn checks above prevent stale or invalid actions.
-    ui.RecordCurrentChatReply(result.Line);
-    Choose(choice,false);
-    // An unavailable activity can leave the same conversation open.
-    if(ui.Mode=="conversation" && Turn==turn)ui.ShowConversation();
-    return;
+   string input=TeaAssessmentInput.Trim(),speaker=npc?npc.displayName:turn.Speaker;
+   if(input.Length>512)return;
+   VillageConversationAction[] actions;VillageConversationRequest request;
+   try {
+    actions=SnapshotVillageActions(turn,provider);
+    request=new VillageConversationRequest(turn.Id,speaker,npc?npc.roleLabel??"Villager":"Villager",input,
+     VillageModelObjective,turn.Line.English??"",actions,conversation.History(speaker));
+   } catch(Exception) {
+    conversation.PreparationFailed();ui.ShowConversation();
+    Debug.LogWarning("PARIDHWANI_CHAT_FAILURE kind=InvalidRequest stage=prepare");return;
    }
-   ui.ShowConversation();
+   Func<VillageConversationRequest,CancellationToken,Task<VillageConversationReply>> transport=null;
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
+   var testTransport=VillageModelTestTransport;
+   if(testTransport!=null)transport=async (message,token)=> {
+    var reply=await testTransport(turn,input,token);
+    if(reply==null || reply.Choice < -1 || reply.Choice>=turn.Choices.Count)throw new InvalidDataException("Invalid test reply");
+    return new VillageConversationReply(reply.Choice<0?"none":"a"+reply.Choice,reply.Line);
+   };
+#endif
+   var pending=conversation.Send(request,transport);
+   string deliveryId=conversation.DisplayMessageId;
+   ui.RecordChatMessage(input,deliveryId);
+   if(!pending.IsCompleted)ui.ShowConversation();
+   var result=await pending;
+   if(this && ui)ui.CompleteChatMessage(deliveryId,result.Status==DialogueTextStatus.Ready && conversation.IsCurrent(result));
+   if(!this || Turn!=turn || ActiveNpc!=npc || !ReferenceEquals(provider,Provider) || ui.Mode!="conversation" || !conversation.IsCurrent(result))return;
+   if(result.Status!=DialogueTextStatus.Ready){
+    Debug.LogWarning("PARIDHWANI_CHAT_FAILURE request="+request.Id+" kind="+result.Failure+" http="+result.HttpStatus+" type="+result.DiagnosticType);
+    ui.ShowConversation();return;
+   }
+   if(result.ActionRejected)Debug.LogWarning("PARIDHWANI_CHAT_ACTION_IGNORED request="+request.Id+"; readable reply retained without story progress.");
+   int choice=Array.FindIndex(actions,a=>a.Id==result.ActionId);
+   if(choice>=0)Choose(actions[choice].Choice,false,true,result.Line);
+   else ui.ShowConversation();
+   if(ui.Mode=="conversation")PlayVillageSpeech(result.Line,speaker);
+  }
+
+  public void SpeakConversationLine(TeaLine line) {
+   PlayVillageSpeech(line,ActiveNpc?ActiveNpc.displayName:Turn?.Speaker??"Villager");
+  }
+  async void PlayVillageSpeech(TeaLine line,string speaker) {
+   if(line==null || IsAutomatedTest || !Application.isFocused || (Progress!=null && Progress.masterVolume<=0) ||
+      (ReferenceEquals(line,villageLastSpokenLine) && speaker==villageLastSpokenSpeaker))return;
+   string speech=string.IsNullOrWhiteSpace(line.Kannada)?line.English:line.Kannada;
+   string language=string.IsNullOrWhiteSpace(line.Kannada)?"en-IN":"kn-IN";
+   if(string.IsNullOrWhiteSpace(speech))return;
+   StopVillageSpeech();villageLastSpokenLine=line;villageLastSpokenSpeaker=speaker;
+   int generation=++villageSpeechGeneration;
+   var cancel=new CancellationTokenSource();cancel.CancelAfter(35000);villageSpeechCancel=cancel;
+   try {
+    var data=await VillageConversationClient.Speech(speaker,language,speech,cancel.Token);
+    if(!VillageSpeechPcm.TryDecode(data,out var samples,out int rate))throw new InvalidDataException("Invalid speech audio");
+    if(!this || generation!=villageSpeechGeneration || cancel.IsCancellationRequested || !Application.isFocused)return;
+    villageSpeechClip=AudioClip.Create("Villager speech",samples.Length,1,rate,false);
+    if(!villageSpeechClip || !villageSpeechClip.SetData(samples,0))throw new InvalidDataException("Could not load speech audio");
+    if(!villageSpeechSource){villageSpeechSource=gameObject.AddComponent<AudioSource>();villageSpeechSource.playOnAwake=false;villageSpeechSource.spatialBlend=0;}
+    villageSpeechSource.clip=villageSpeechClip;villageSpeechSource.volume=1;villageSpeechSource.Play();
+   } catch(Exception) {
+    // Speech is optional. Its failure must not overwrite conversation guidance.
+   } finally {if(villageSpeechCancel==cancel)villageSpeechCancel=null;cancel.Dispose();}
+  }
+  void StopVillageSpeech() {
+   villageSpeechGeneration++;var cancel=villageSpeechCancel;villageSpeechCancel=null;
+   if(cancel!=null)try{cancel.Cancel();}catch(ObjectDisposedException){}
+   if(villageSpeechSource){villageSpeechSource.Stop();villageSpeechSource.clip=null;}
+   if(villageSpeechClip){Destroy(villageSpeechClip);villageSpeechClip=null;}
   }
  }
 }

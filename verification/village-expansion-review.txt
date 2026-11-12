@@ -1,0 +1,70 @@
+PARIDHWANI - RESIDENTIAL VILLAGE AND RIVER
+2026-11-05 | Unity 6000.6.7f1 | Windows / URP
+
+Implemented
+- 18 new non-story homes in six reusable prefab styles, with shared detailed and distant meshes.
+- Regular residential lots, tiled roofs, attached ridge caps, verandas, shutters, sills,
+  laterite foundations, benches, pots and laundry. Nearby palms occupy garden verges.
+- Eastern avenue plus southern, western and northern neighbourhood lanes; connections
+  preserve story entrances. Friday's works vehicle still closes the market shortcut;
+  the southern and panchayat connections remain available.
+- 12 ambient residents with distinct clothing, walking/pause routes, player yielding,
+  physical collision, articulated gait and modal/focus stops. The 14 story NPC bindings
+  and their existing progression remain separate. Culling captures the articulated rigs
+  after their original unanimated leg renderers have been disabled.
+- 76 scenic houses beyond a physically sealed perimeter, continuing roads and layered
+  vegetation. Background LOD is reapplied on load; scenery has no gameplay colliders.
+  Playable village bounds: x -20..31, z -25..40, plus the protected river terrace.
+  Existing story travel to the forest/farm remains available.
+- Continuous river geometry and sloped banks beyond camera range, animated multiscale
+  ripples, soft sky reflection, shallow-bank colour, shoreline foam, weir cascade and
+  rain rings. Weather and reduced-motion preferences drive the shader.
+- Repeatable upgrade command preserves story geometry, bindings and existing materials.
+  Native mesh setters update loaded GPU buffers as well as saved mesh assets.
+  Scene backups are written under verification/Temp/VillageExpansion before upgrades.
+
+Verification
+- Verify-Sources.ps1: runtime, Editor and Player-source branches compile; 739 existing
+  behavior assertions and seven texture-source checks pass.
+- Native layout/physics/asset validation: 1,953 assertions, including lot spacing,
+  resident routes, public approaches, shared prefab/LOD budgets, upward riverbank faces,
+  shader support and the retained story bindings.
+- Native residential review: 77 assertions; all 12 residents walk, retain articulated
+  skinning and stop in modal UI. Actual CharacterController movement is blocked by all
+  16 perimeter segments. 1920x1080 captures inspected and visual defects corrected.
+- Required movement/architecture review: PASS, 40,714 assertions (many are per-triangle
+  geometry checks). Walking brake distance 0.124 m; original architecture remains
+  12 roofs, 19 walls, 8 joinery groups and 93,712 runtime detail vertices.
+  Native run: Temp/PolishReview/20261105-060804.
+- Required UI/graphics review: PASS, 111 assertions at each viewport, text scale 1.0/1.3,
+  including title, exploration, notebook, settings, conversation, phrases and keyboard.
+  Native runs: Temp/UIReview/20261105-060813 and 20261105-060819.
+- Current logs: Temp/VillageExpansion/source-final.log, unity-acceptance.log,
+  unity-build-accepted.log. The source check was repeated on the final sources.
+- Fresh Windows Development build: PASS (VILLAGE_EXPANSION_BUILD_OK), including the
+  runtime distant-house LOD restoration. BuildPlayer refreshes the saved scene first.
+  Build: My project (1)/Builds/VillageExpansion/Paridhwani.exe.
+  Assembly-CSharp.dll SHA-256:
+  8932E3EB14AF314DBC4C752814D9E5EB211D31BE63C5959F7227AA7DB06D3A7D
+- Standalone smoke: PASS (VILLAGE_SMOKE_OK), 17,733 frames through the existing
+  controller/haptics, village, river, forest, farm, ending and large-text flows.
+  Isolated visit, synthetic input and injected conversation replies; no player save used.
+  Run: Temp/VillageExpansion/StandaloneVisible/ParidhwaniSmoke/run-20261105-062117.
+  Early hidden-window launches failed the input check; opening the actual game window
+  passed without changing gameplay focus policy or weakening the test.
+- Standalone frame sample: 600 frames after 120 warm-up frames, 1280x720 Balanced,
+  RTX 4050 Laptop GPU. Mean 7.06 ms, 95th percentile 7.15 ms, maximum 46.65 ms.
+  This samples the smoke visit and UI transitions, not a residential stress benchmark.
+  Report: Temp/VillageExpansion/StandaloneVisible/frame-profile.json.
+
+Selected unedited native captures
+- docs/village-review/residential-street.png
+- docs/village-review/village-overview.png
+- docs/village-review/village-boundary.png
+- docs/village-review/river-weir.png
+
+Repeat the checks with Paridhwani > Review expanded village and graphics.
+Existing materials, scene edits and conversation work were retained; no commits were made.
+Native automated checks do not establish physical-controller, fluent-Kannada acceptance
+or minimum-hardware performance. The new homes are exterior scenery and the added
+residents provide ambient village life, separate from story conversations.

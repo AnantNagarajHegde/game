@@ -15,7 +15,7 @@ namespace Paridhwani {
  void AddDeveloperDisplaySettings(UnityEngine.UIElements.VisualElement parent) {
  var section=new UnityEngine.UIElements.Foldout {text="Developer options / display",name="developer-display"};parent.Add(section);
  Add(section,"Increase clarity for development and presentations. Supersampling increases GPU work; UI text stays at the window resolution.","small");
- var boost=new UnityEngine.UIElements.Toggle("Override render resolution"){name="developer-resolution-override",value=DeveloperDisplaySettings.Enabled};section.Add(boost);
+ var boost=new VillageSwitch("Override render resolution"){name="developer-resolution-override",value=DeveloperDisplaySettings.Enabled};section.Add(boost);
  var scales=new System.Collections.Generic.List<string>{"100% / Native","125% / Sharper","150% / Supersampled","200% / Maximum"};
  float[] values={1,1.25f,1.5f,2};int selected=0;
  for(int i=0;i<values.Length;i++)if(Mathf.Approximately(values[i],DeveloperDisplaySettings.Scale))selected=i;

@@ -56,7 +56,7 @@ try {
  if($LASTEXITCODE -ne 0) {throw 'Runtime source branches without Editor/diagnostic symbols failed compilation'}
  Write-Output 'PLAYER_SOURCE_BRANCHES_OK (cached Editor references; not a native Player build)'
  $argsText=Get-Content (Join-Path $outputRoot 'Runtime.rsp') | Where-Object { $_ -notmatch '^".*\.cs"$' -and $_ -notmatch '^-(out|refout|target):' -and $_ -notmatch '^/analyzer' }
- $argsText+=@('-target:exe','-out:"../verification/Temp/IterationVerification/ChapterChecks.dll"','-r:"../verification/Temp/IterationVerification/Assembly-CSharp.dll"','"../verification/ChapterChecks.cs"','"../verification/DemoPresentationChecks.cs"')
+ $argsText+=@('-target:exe','-out:"../verification/Temp/IterationVerification/ChapterChecks.dll"','-r:"../verification/Temp/IterationVerification/Assembly-CSharp.dll"','"../verification/ChapterChecks.cs"','"../verification/DemoPresentationChecks.cs"','"../verification/ConversationResilienceChecks.cs"')
  $responsePath=Join-Path $outputRoot 'Checks.rsp'; $argsText | Set-Content -Encoding utf8 -LiteralPath $responsePath
  & $dotnet $csc "@$responsePath"
  if($LASTEXITCODE -ne 0) { throw 'Chapter runner compilation failed' }

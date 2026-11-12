@@ -31,10 +31,12 @@ Material:
     m_Floats:
     - _Cull: 2
     - _Grain: 70
+    - _Relief: 0
     - _Roughness: 0.98
     - _TextureScale: 4
     - _TextureStrength: 0.75
     - _VertexSurface: 0
+    - _Weathering: 0
     - _Wet: 0
     - _WindStrength: 0
     m_Colors:

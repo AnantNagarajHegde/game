@@ -1,0 +1,28 @@
+Conversation resilience and progression consolidation — 4 November 2026
+
+Command: .\verification\Verify-TeaConversation.ps1 (from game)
+Result: PASS
+- Runtime and Editor sources compile using cached Unity references.
+- Runtime branches without Editor/diagnostic defines compile.
+- CHAPTER_CHECKS_OK: 739 assertions in the combined workspace.
+- Backend: 23 socket-free tests pass.
+- No provider requests, Unity playthrough or Player build in this verification.
+
+Behavior covered by the new checks:
+- Failure/timeout preserves the message and offers authored phrases.
+- Cancelled and late replies cannot supersede assisted progress.
+- Unmatched and invalid responses do not award a story action.
+- Draft changes, per-NPC history bounds and visit reset behavior.
+- Request snapshot isolation, Unicode and protocol correlation.
+- Authored introduction reaches the library without a model.
+- All 15 prepared chapters have consistent objectives and unlock prefixes.
+
+Pending native acceptance (user will perform later):
+- Paridhwani > Review UI and graphics at 960x540 and 1920x1080,
+  with text scale 1.0 and 1.3. Includes new phrase/offline regression cases.
+- Run Automated Editor Playtest, including new controller phrase navigation.
+- Run Presentation Demo Playtest; fresh standalone build and physical inputs.
+- Human/fluent Kannada acceptance and real-provider timing/quality.
+
+The UI follows docs/UI_GRAPHICS_TEMPLATE.md. No world regeneration is needed
+for these runtime/UI changes. Existing dirty world assets are preserved.

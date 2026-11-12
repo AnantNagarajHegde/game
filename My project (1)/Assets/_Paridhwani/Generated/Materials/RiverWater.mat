@@ -24,9 +24,15 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _FlowSpeed: 0.38
+    - _RippleStrength: 0.32
+    - _Smoothness: 0.83
+    - _Waterfall: 0
     m_Colors:
-    - _BaseColor: {r: 0.20784314, g: 0.30980393, b: 0.28235295, a: 1}
-    - _FoamColor: {r: 0.6039216, g: 0.6509804, b: 0.58431375, a: 1}
+    - _BaseColor: {r: 0.16078432, g: 0.29803923, b: 0.28235295, a: 1}
+    - _FoamColor: {r: 0.7529412, g: 0.80784315, b: 0.7411765, a: 1}
+    - _ReflectionColor: {r: 0.58431375, g: 0.70980394, b: 0.7019608, a: 1}
+    - _ShallowColor: {r: 0.34509805, g: 0.49019608, b: 0.44313726, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

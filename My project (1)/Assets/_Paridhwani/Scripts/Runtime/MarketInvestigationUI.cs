@@ -66,9 +66,9 @@ namespace Paridhwani
                 }
             }
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
-            var english=new Toggle("English meaning"){value=session.Progress.english};
+            var english=new VillageSwitch("English meaning"){value=session.Progress.english};
             english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowInvestigation(activity);}); aids.Add(english);
-            var roman=new Toggle("Roman letters"){value=session.Progress.roman};
+            var roman=new VillageSwitch("Roman letters"){value=session.Progress.roman};
             roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowInvestigation(activity);}); aids.Add(roman);
             Add(card,AcceptingEvidenceAnswers?"Use 1–3 or choose an answer. Hints do not cost progress.":"Your notebook keeps the evidence and its source.","small");
         }

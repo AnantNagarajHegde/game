@@ -7,6 +7,12 @@ namespace Paridhwani
     {
         public string Kannada, Roman, English;
         public TeaLine(string kn, string ro, string en) { Kannada=kn; Roman=ro; English=en; }
+        public string DisplayFallback(bool showRoman,bool showEnglish)
+        {
+            if(!string.IsNullOrWhiteSpace(Kannada) || (showRoman && !string.IsNullOrWhiteSpace(Roman)) ||
+                (showEnglish && !string.IsNullOrWhiteSpace(English)))return "";
+            return !string.IsNullOrWhiteSpace(English)?English:Roman??"";
+        }
     }
     public sealed class TeaChoice
     {
@@ -33,7 +39,7 @@ namespace Paridhwani
     // Authored fixture. No NLP, network access, or string-driven quest commands.
     public sealed class LocalTeaConversation : ITeaConversationProvider
     {
-        public TeaTurn Start(TeaProgress p) => Node(p.drinkOrdered ? "return" : "hello", p);
+        public TeaTurn Start(TeaProgress p) => Node(p.drinkOrdered ? "return" : p.greeted ? "order" : "hello", p);
         public TeaTurn Reply(TeaTurn turn, int choice, TeaProgress p)
         {
             if (choice < 0 || choice >= turn.Choices.Count) throw new ArgumentOutOfRangeException(nameof(choice));

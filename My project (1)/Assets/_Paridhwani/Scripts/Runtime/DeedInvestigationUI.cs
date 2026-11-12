@@ -32,8 +32,8 @@ namespace Paridhwani {
  Line(scroll,new TeaLine("ಸಮುದಾಯಕ್ಕಾಗಿ.","Samudaayakkaagi.","For the community.")); Add(scroll,"WHO BENEFITS?","section-title");
  Answers(scroll,new[]{new TeaLine("ವ್ಯಾಪಾರಿ","Vyaapaari","A private trader alone"),new TeaLine("ಸಮುದಾಯ","Samudaaya","The community"),new TeaLine("ಪ್ರಯಾಣಿಕ","Prayaanika","A bus passenger")});
  } else { Add(scroll,"Reviewed: education, restricted commercial use, community beneficiary. This is evidence for review, not an automatic protection decision.","success"); if(!session.Progress.deedRetrieved) Button(scroll,"Place the original in its protective folder",session.ProtectDeed); else Add(scroll,"Original safely carried. Ask Ananya about returning together.","success"); }
- var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids); var en=new Toggle("English meaning"){value=session.Progress.english}; en.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowDeedActivity(a);}); aids.Add(en);
- var ro=new Toggle("Roman letters"){value=session.Progress.roman}; ro.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowDeedActivity(a);}); aids.Add(ro);
+ var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids); var en=new VillageSwitch("English meaning"){value=session.Progress.english}; en.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowDeedActivity(a);}); aids.Add(en);
+ var ro=new VillageSwitch("Roman letters"){value=session.Progress.roman}; ro.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowDeedActivity(a);}); aids.Add(ro);
  }
  }
 }

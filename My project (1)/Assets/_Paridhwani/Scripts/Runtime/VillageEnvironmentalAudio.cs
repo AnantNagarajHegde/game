@@ -83,7 +83,7 @@ namespace Paridhwani
             if(!session || session.Progress==null || !preferences)return;
             var p=session.Progress;
             string currentMode=session.ui?session.ui.Mode:"";
-            float duck=currentMode=="conversation"?.45f:1;
+            float duck=currentMode=="conversation" || currentMode=="arrival-intro"?.45f:1;
             foreach(var e in emitters)
             {
                 bool audible=EnvironmentGain>0 && e.anchor && e.anchor.gameObject.activeInHierarchy;
@@ -94,7 +94,7 @@ namespace Paridhwani
                 {
                     e.next=Time.unscaledTime+Random.Range(e.min,e.max);
                     // No distant one-shots, overlapping samples, or random bells during dialogue.
-                    if(currentMode!="conversation" && preferences.listener &&
+                    if(currentMode!="conversation" && currentMode!="arrival-intro" && preferences.listener &&
                         Vector3.Distance(preferences.listener.position,e.anchor.position)<e.source.maxDistance && e.clip && !e.source.isPlaying)
                         e.source.PlayOneShot(e.clip);
                 }

@@ -18,12 +18,10 @@ namespace Paridhwani
             var module=EventSystem.current?.GetComponent<InputSystemUIInputModule>();
             if(module && module.actionsAsset)
             {
-                // Unity's default UI map also navigates with the right stick. Reserve it for reading.
+                // Keep pointer/text actions, but reserve menu movement for the controller.
                 controllerUIActions=Instantiate(module.actionsAsset);
                 module.actionsAsset=controllerUIActions;
-                var move=module.move?.action;
-                if(move!=null) for(int i=0;i<move.bindings.Count;i++)
-                    if(move.bindings[i].path.Contains("rightStick")) move.ApplyBindingOverride(i,"");
+                ConfigureControllerMenuNavigation(module.move?.action);
             }
             root.RegisterCallback<NavigationSubmitEvent>(e=> {
                 if(KeyboardOpen){e.StopImmediatePropagation();return;}
@@ -54,6 +52,21 @@ namespace Paridhwani
                             break;
                         }
             });
+        }
+        public static void ConfigureControllerMenuNavigation(InputAction move)
+        {
+            if(move==null)return;
+            for(int i=0;i<move.bindings.Count;i++)
+            {
+                var binding=move.bindings[i];
+                if(binding.isComposite)continue;
+                string path=binding.path??"";
+                bool controllerDirection=path.StartsWith("<Gamepad>/leftStick",System.StringComparison.Ordinal) ||
+                    path.StartsWith("<Gamepad>/dpad",System.StringComparison.Ordinal);
+                // An empty override disables this binding, including keyboard composite parts.
+                // Right stick stays available for scrolling instead of moving menu focus.
+                if(!controllerDirection)move.ApplyBindingOverride(i,"");
+            }
         }
         static bool CanFocus(VisualElement element) => element!=null && element.focusable &&
             element.enabledInHierarchy && element.resolvedStyle.display!=DisplayStyle.None &&
@@ -118,12 +131,13 @@ namespace Paridhwani
         {
             if(controlsWalk==null) return;
             bool pad=session.UsingController;
+            controlsWalk.style.display=DisplayStyle.None;
             string jog=Gamepad.current is UnityEngine.InputSystem.DualShock.DualShockGamepad?"R2":"RT";
             controlsWalk.text=pad?"Left stick  Walk    "+jog+"  Jog    Right stick  Look":"WASD  Walk    Shift  Jog    Mouse  Look";
             controlsActions.text=pad?ControllerConfirm+"  Interact    View / Share  Notebook    Menu / Options  Pause":"E  Interact    Tab  Notebook    Esc  Pause";
             promptKey.text=pad?ControllerConfirm:"E";
             controllerHelp.text="D-pad / LS: select   "+ControllerConfirm+": confirm   "+ControllerBack+": back   RS: scroll   View / Share: notes";
-            controllerHelp.style.display=pad && IsModal && !KeyboardOpen && Mode!="conversation"?DisplayStyle.Flex:DisplayStyle.None;
+            controllerHelp.style.display=pad && IsModal && !KeyboardOpen && Mode!="conversation" && Mode!="arrival-intro"?DisplayStyle.Flex:DisplayStyle.None;
         }
         Label controlsWalk,controlsActions,promptKey,controllerHelp;
         void ReleaseControllerNavigation()

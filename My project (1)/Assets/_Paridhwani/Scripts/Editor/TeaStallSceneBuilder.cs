@@ -147,6 +147,7 @@ namespace Paridhwani.Editor
             AddReturnChapter(session);
             AddFinaleChapter(session);
             AddEpilogueChapter(session);
+            AddResidentialVillage(session);
             ConfigureBenchmarkRendering();
             Lighting();
             foreach(var worldSign in UnityEngine.Object.FindObjectsByType<VillageSign>(FindObjectsInactive.Include))worldSign.theme=panel.themeStyleSheet;

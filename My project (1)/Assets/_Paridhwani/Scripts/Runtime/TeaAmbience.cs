@@ -53,7 +53,7 @@ namespace Paridhwani
             if(footsteps) footsteps.volume=footstepVolume;
             bool sheltered=Physics.Raycast(listener.position+Vector3.up*1.5f,Vector3.up,4,~(1<<2),QueryTriggerInteraction.Ignore);
             mix.Step(sheltered,!muted && Application.isFocused,PresentationPolicy.Volume(volume),Time.unscaledDeltaTime);
-            float duck=session && session.ui && session.ui.Mode=="conversation"?.65f:1;
+            float duck=session && session.ui && (session.ui.Mode=="conversation" || session.ui.Mode=="arrival-intro")?.65f:1;
             rainSource.Gain=mix.RainGain*rainAmount*duck;
             shelterSource.Gain=mix.EaveGain*rainAmount*duck;
             rainSource.Cutoff=Mathf.Lerp(rainSource.Cutoff,mix.Sheltered?2800:18000,Time.unscaledDeltaTime*3);

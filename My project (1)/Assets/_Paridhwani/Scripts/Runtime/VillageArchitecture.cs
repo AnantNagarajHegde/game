@@ -47,6 +47,7 @@ namespace Paridhwani
             Material wood=null,stone=null,clay=null;
             foreach(var r in renderers)
             {
+                if(r.GetComponentInParent<VillageResidence>())continue;
                 var m=r.sharedMaterial;if(!m || !m.shader || m.shader.name!="Paridhwani/Village Surface")continue;
                 string key=m.name;
                 if(key=="Wood")wood=m;if(key=="Stone")stone=m;if(key=="Clay")clay=m;
@@ -58,6 +59,7 @@ namespace Paridhwani
             var tile=Detail(clay,"Weathered ridge caps",new Color(.43f,.245f,.17f));
             foreach(var r in renderers)
             {
+                if(r.GetComponentInParent<VillageResidence>())continue;
                 if(!r.enabled || !r.sharedMaterial)continue;
                 var b=r.bounds;string key=r.sharedMaterial.name;
                 if(key.StartsWith("Clay |") && b.size.x>2 && b.size.z>2 && b.size.y<2.5f)

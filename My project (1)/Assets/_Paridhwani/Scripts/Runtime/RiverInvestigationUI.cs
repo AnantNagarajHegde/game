@@ -101,9 +101,9 @@ namespace Paridhwani
         void RiverAids(VisualElement card,VillageActivity activity)
         {
             var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids);
-            var english=new Toggle("English meaning"){value=session.Progress.english};
+            var english=new VillageSwitch("English meaning"){value=session.Progress.english};
             english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowRiverActivity(activity);}); aids.Add(english);
-            var roman=new Toggle("Roman letters"){value=session.Progress.roman};
+            var roman=new VillageSwitch("Roman letters"){value=session.Progress.roman};
             roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowRiverActivity(activity);}); aids.Add(roman);
             Add(aids,"1–3 choose a part or answer · Tab opens field notes","small");
         }

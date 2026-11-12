@@ -1,0 +1,49 @@
+Arrival movie verification — 2026-11-12
+
+Delivered
+- Actual rendered MP4: 71.291667 seconds, 1711 frames, 1920x1080, 24 fps.
+- Windows-compatible H.264 Constrained Baseline, YUV420 limited range, BT.709.
+- AAC stereo at 48 kHz; six approved Kannada passages synthesized with Microsoft's
+  kn-IN-GaganNeural voice. Script and per-passage audio hashes: docs/ARRIVAL_NARRATION.json.
+- English captions follow the native video decoder clock and the game's text scale.
+- Subtitled preview: docs/intro-movie/Paridhwani-introduction.mp4.
+- Runtime: My project (1)/Assets/StreamingAssets/ArrivalMovie/arrival.mp4.
+
+Validation
+- Verify-Sources.ps1: SOURCE_VERIFICATION_OK; runtime, Editor and Player branches
+  compiled; CHAPTER_CHECKS_OK, 776 assertions.
+- Verify-ArrivalMovie.ps1: ARRIVAL_MOVIE_VALIDATION_OK; 379 native checks in Unity
+  6000.6.7f1, Windows Media Foundation, D3D11, using an isolated copied project.
+- Actual file preparation, audio track, seek, pause, replay and natural completion.
+- Player mute; world audio muted during playback and restored after it.
+- Focus-loss pause; returning to title does not mark an unfinished movie complete;
+  Continue reopens an unfinished movie and bypasses one already completed.
+- Skip and natural completion lead to welcome; saved completion survives restore.
+- Normal player ground settling accounted for; no movie movement or quest rewards.
+- Welcome releases player control; existing visits and presentation demos bypass movie.
+- 28 native panel captures: six scenes plus welcome at 960x540 and 1920x1080,
+  each with text scale 1.0 and 1.3. Subtitle and action bounds checked; selected
+  actual captures and the encoded opening/tea scenes visually reviewed.
+- FFmpeg decoded all 1711 frames and the full audio track successfully.
+  Measured soundtrack mean -21.1 dBFS, peak -3.9 dBFS.
+- Final native run has no media timestamp or colour-space warnings. The isolated
+  Editor's unrelated SearchDatabase startup indexing exception remains in its log;
+  the playback suite completed and exited successfully after that exception.
+
+Final SHA-256
+Runtime: FFFD9D2D27B664085C4107ABFDCF4405767C7ADDAB3A07A7FC4E3341E379AC99
+Preview: 31F1101E9024765DC670AC0C2128EF452D9C58AB452D5ECF0BC9072B0A3B0060
+The isolated test's movie hash matches the runtime asset exactly.
+
+Scope
+No new standalone Player build, physical controller test or native-speaker audio
+review was performed. Editor checks do not establish those results. The movie
+plays offline; the speech service and authoring tools are not runtime dependencies.
+No desktop input, source scene regeneration or real saved-visit changes were used
+for rendering or final verification.
+
+Logs/captures (ignored working files)
+verification/Temp/ArrivalMovie/validation-editor.log
+verification/Temp/ArrivalMovie/verification/Temp/ArrivalIntro/640x480/
+The folder name is the batch Editor window size; capture dimensions are explicitly
+set to 960x540 and 1920x1080 through the UI panel render target.

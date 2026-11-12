@@ -23,7 +23,7 @@ namespace Paridhwani {
  Line(scroll,new TeaLine("ಸಮುದಾಯಕ್ಕಾಗಿ.","Samudaayakkaagi.","For the community."));
  Answers(scroll,new[]{new TeaLine("ವ್ಯಾಪಾರಿ","Vyaapaari","A private trader alone"),new TeaLine("ಪ್ರಯಾಣಿಕ","Prayaanika","A bus passenger"),new TeaLine("ಸಮುದಾಯ","Samudaaya","The community")});
  } else { Add(scroll,"Original, education purpose, commercial restriction and community beneficiary recorded. The council can now make its interim decision.","success"); Button(scroll,"Request the council's decision",session.RequestCouncilDecision); }
- var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids); var en=new Toggle("English meaning"){value=session.Progress.english}; en.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowCouncilActivity();}); aids.Add(en); var ro=new Toggle("Roman letters"){value=session.Progress.roman}; ro.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowCouncilActivity();}); aids.Add(ro);
+ var aids=new VisualElement(); Class(aids,"aids"); card.Add(aids); var en=new VillageSwitch("English meaning"){value=session.Progress.english}; en.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowCouncilActivity();}); aids.Add(en); var ro=new VillageSwitch("Roman letters"){value=session.Progress.roman}; ro.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowCouncilActivity();}); aids.Add(ro);
  }
  }
 }

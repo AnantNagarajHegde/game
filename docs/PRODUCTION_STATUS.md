@@ -2,6 +2,74 @@
 
 The main story is authored from arrival to epilogue. The revision-3 benchmark world has now been regenerated in Unity 6000.6.7f1, including all story locations. The game remains a procedural prototype and is not release-ready. Historical reports in TEA_STALL_BENCHMARK.md describe older revisions.
 
+## Conversation diagnosis and delivery fixes (5 November 2026)
+
+The game now checks its configured v2 bridge before a model turn, preserves safe
+HTTP/failure categories, and displays actionable errors while retaining the draft.
+The 60-second client deadline includes the backend's shared 45-second model budget
+and short connection check. Readable Kannada/Roman replies no longer depend on an
+English translation; display fallback also covers unavailable aid translations.
+Invalid action metadata is ignored without granting progress.
+Failed retries reuse their outgoing bubble. Vertical phrase buttons now measure
+their content instead of inheriting a horizontal row's zero flex basis.
+
+The Editor has **Check conversation connection** and **Test one conversation reply**
+under Paridhwani. The first checks configuration without inference; the second
+uses provider quota through the real game HTTP client and does not alter a visit.
+Only safe origins, request IDs, categories, exception type names and status numbers are logged. The
+launcher identifies an already-running incompatible/provider bridge rather than
+assuming that any occupied port is usable.
+
+Runtime, Editor and non-Editor branch source compilation pass. The latest source
+runner passes 764 assertions, including in-memory HTTP error propagation, health
+admission, response correlation, safe action suppression and retry identity.
+The backend passes 32 socket-free tests, including shared model deadlines and
+translation-absent replies. Launcher syntax is valid. The current generated scene
+matches its world recipes; the new diagnostic menu does not invalidate that hash.
+
+The user's Editor currently holds the project lock, desktop control is unavailable
+here, and this execution environment cannot connect to the user's localhost
+service. Native UI captures, the new native retry/text-containment assertions,
+demo/full-story playtests, a fresh Player build and live Groq/Kannada review are
+pending. These source results do not establish the cause or resolution of the
+user's particular live failure. The next acceptance step is running the two new
+diagnostic menus from that Editor, followed by a real conversation.
+
+The [failure register](FAILURE_POINTS.md) records the fixes, their validation scope,
+and the broader game issues deferred for a later pass. Older sections below retain
+their original historical deadlines, integrations and verification totals.
+
+## Conversation resilience and progression consolidation (4 November 2026)
+
+NPCs now start with an immediate authored line. The Phrases action offers eligible
+authored Kannada replies without a model dependency, retaining language aids and
+all evidence gates. Typed chat remains available; failures and a 15-second deadline
+preserve the draft and open phrases, while unmatched replies explain how to move
+forward. Choosing phrases cancels pending model work; cancelled or stale replies
+cannot apply another story action. Assisted phrases are practice, not proficiency
+assessment.
+
+`VillageConversationFlow` owns transient conversation state and request lifecycle;
+`VillageConversationClient` owns transport/protocol handling, including the shared
+workspace's configurable service connection. `VillageStory` consolidates chapter
+names, unlock predicates, practice preparation, spawns and ordered objectives.
+Serialized progress fields are retained for existing saves. The Unity session
+continues to own applying authored story effects and scene changes.
+
+The combined workspace passed runtime/editor and runtime-only branch compilation,
+739 standalone assertions and 23 socket-free backend tests through
+`verification/Verify-TeaConversation.ps1`. The new regression cases cover offline
+introduction, failures/timeouts, invalid/unmatched/late responses, draft/history
+isolation, protocol correlation and every chapter's objectives and unlocks.
+
+Native visual and controller checks have been extended and source-compiled, but
+were deliberately deferred to the user. No new Unity playthrough, captures,
+standalone Player build or real-model quality result is claimed. Review UI and
+graphics at both template viewports/text scales, run the demo/full-story native
+checks, and retain fluent Kannada and human usability review as acceptance work.
+Existing generated scene/material edits and unrelated hosting changes are
+preserved. The older records below retain their historical scopes.
+
 ## Verified implementation
 
 - Seven 512px surface PNGs import as Texture2D. The import blocker was caused by Cubemap texture shape as well as obsolete metadata; explicit Texture2D preprocessing and native-upgraded metadata preserve existing GUIDs. Generation checks every import before replacing a scene.

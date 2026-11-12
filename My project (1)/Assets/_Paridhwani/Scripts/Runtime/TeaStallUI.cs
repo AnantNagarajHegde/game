@@ -12,16 +12,29 @@ namespace Paridhwani
         TeaStallSession session;
         VisualElement root,modal,prompt;
         TeaTurn displayedTurn;
-        sealed class ChatMessage { public bool player; public TeaLine line; }
+        bool displayedPhrases;
+        sealed class ChatMessage { public bool player,pending,failed; public TeaLine line;public string deliveryId; }
         readonly System.Collections.Generic.List<ChatMessage> chatMessages=new System.Collections.Generic.List<ChatMessage>();
         TeaTurn chatTurn; TeaLine chatLine; bool chatAutoScroll; Vector2 chatScrollPosition;
         public void BeginChat() {chatMessages.Clear();chatTurn=null;chatLine=null;displayedTurn=null;chatAutoScroll=true;chatScrollPosition=Vector2.zero;}
-        public void RecordChatMessage(string message) {if(!string.IsNullOrWhiteSpace(message)){chatMessages.Add(new ChatMessage{player=true,line=new TeaLine("","",message.Trim())});chatAutoScroll=true;}}
+        internal int ChatMessageCount=>chatMessages.Count;
+        public void RecordChatMessage(string message,string deliveryId=null) {
+            if(string.IsNullOrWhiteSpace(message))return;
+            ChatMessage existing=string.IsNullOrEmpty(deliveryId)?null:chatMessages.Find(item=>item.deliveryId==deliveryId);
+            if(existing!=null){existing.pending=true;existing.failed=false;}
+            else chatMessages.Add(new ChatMessage{player=true,line=new TeaLine("","",message.Trim()),deliveryId=deliveryId,pending=!string.IsNullOrEmpty(deliveryId)});
+            chatAutoScroll=true;
+        }
+        public void CompleteChatMessage(string deliveryId,bool delivered) {
+            var message=chatMessages.Find(item=>item.deliveryId==deliveryId && !string.IsNullOrEmpty(deliveryId));
+            if(message!=null){message.pending=false;message.failed=!delivered;}
+        }
         public void RecordChatChoice(TeaLine line) {if(line!=null){chatMessages.Add(new ChatMessage{player=true,line=new TeaLine(line.Kannada,line.Roman,line.English)});chatAutoScroll=true;}}
         void RecordChatReply(TeaTurn turn,TeaLine line) {
             if(line==null)return;
             if(!object.ReferenceEquals(chatTurn,turn) || (!object.ReferenceEquals(line,turn.Line) && !object.ReferenceEquals(chatLine,line))) {
                 chatMessages.Add(new ChatMessage{line=new TeaLine(line.Kannada,line.Roman,line.English)});chatTurn=turn;chatLine=line;chatAutoScroll=true;
+                session.SpeakConversationLine(line);
             }
         }
         public void RecordCurrentChatReply(TeaLine line){RecordChatReply(session.Turn,line);}
@@ -64,7 +77,7 @@ namespace Paridhwani
             var top=new VisualElement(); Class(top,"top"); root.Add(top);
             var brand=new VisualElement(); top.Add(brand);
             Add(brand,"PARIDHWANI","brand");
-            Add(brand,"LEARN. PLAY. BELONG.","tagline");
+            // Keep the exploration brand quiet; the objective is the primary information.
             var place=new VisualElement(); Class(place,"place"); top.Add(place);
             Add(place,"KALYANAPURA","eyebrow");
             placeDay=Add(place,"Wednesday / Monsoon","small");
@@ -100,6 +113,7 @@ namespace Paridhwani
             storyDay.text=(session.IsPracticeVisit?"PRACTICE / ":session.IsIsolatedTestVisit?"TEST VISIT / ":"")+day;
             placeDay.text=VillageWeatherPolicy.Raining(session.Progress)?"MONSOON / RAIN":"AFTER THE RAIN";
             objective.text=session.Progress.Objective; saveStatus.text=session.SaveMessage;
+            saveStatus.style.display=session.LastSaveSucceeded?DisplayStyle.None:DisplayStyle.Flex;
             routeHint.text=session.NavigationHint;
             prompt.style.display=!IsModal && session.Nearby!=null ? DisplayStyle.Flex:DisplayStyle.None;
             string action=session.Nearby??"";
@@ -121,6 +135,7 @@ namespace Paridhwani
         { var b=new Button(action){text=text}; Class(b,cls); parent.Add(b); return b; }
         VisualElement Card(string mode,string cls)
         {
+            if(mode!="arrival-intro")session.CancelArrivalIntro();
             if(Mode=="conversation") {var oldChat=root.Q<ScrollView>("dialogue-scroll");if(oldChat!=null)chatScrollPosition=oldChat.scrollOffset;}
             if(Mode!=mode)session.PlayControllerFeedback(ControllerFeedback.Menu);
             CloseTeaKeyboard();
@@ -129,6 +144,7 @@ namespace Paridhwani
             Mode=mode; modal.Clear(); modal.style.display=DisplayStyle.Flex;
             modal.EnableInClassList("chat-modal",mode=="conversation");
             modal.EnableInClassList("title-modal",mode=="main-menu");
+            modal.EnableInClassList("intro-modal",mode=="arrival-intro");
             var card=new VisualElement(); Class(card,cls); modal.Add(card);
             SuppressControllerSubmit();
             card.schedule.Execute(()=> {if(modal.Contains(card)){restoreFocus?.Invoke();EnsureControllerFocus();}});
@@ -136,7 +152,7 @@ namespace Paridhwani
         }
         void ApplyCardScale(VisualElement card,string mode)
         {
-            if(mode=="conversation")return;
+            if(mode=="conversation" || mode=="arrival-intro")return;
             card.style.scale=new Scale(Vector3.one*session.Progress.textScale);
             card.style.maxWidth=Length.Percent((mode=="conversation"?94:92)/session.Progress.textScale);
             card.style.maxHeight=Length.Percent(85/session.Progress.textScale);
@@ -153,10 +169,11 @@ namespace Paridhwani
         }
         void Line(VisualElement parent,TeaLine line,bool choice=false)
         {
-            if(!string.IsNullOrEmpty(line.Kannada))Kannada(parent,line.Kannada,choice?"choice-kn":"kannada");
+            if(!string.IsNullOrWhiteSpace(line.Kannada))Kannada(parent,line.Kannada,choice?"choice-kn":"kannada");
             if(session.Progress.roman && !string.IsNullOrWhiteSpace(line.Roman)) Add(parent,line.Roman,choice?"choice-ro":"roman");
             if(session.Progress.english && !string.IsNullOrWhiteSpace(line.English)) Add(parent,line.English,choice?"choice-en":"meaning");
-            if(string.IsNullOrWhiteSpace(line.Kannada) && !session.Progress.english && (!session.Progress.roman || string.IsNullOrWhiteSpace(line.Roman))) Add(parent,!string.IsNullOrWhiteSpace(line.English)?line.English:line.Roman,choice?"choice-en":"meaning");
+            string fallback=line.DisplayFallback(session.Progress.roman,session.Progress.english);
+            if(!string.IsNullOrWhiteSpace(fallback))Add(parent,fallback,choice?"choice-en":"meaning");
         }
         void LayoutConversation(VisualElement card)
         {
@@ -172,14 +189,16 @@ namespace Paridhwani
         public void ShowConversation()
         {
             TeaTurn t=session.Turn; if(t==null) return;
+            RecordChatReply(t,session.ConversationLine);
             bool sameTurn=Mode=="conversation" && object.ReferenceEquals(displayedTurn,t);
+            bool focusPhrases=session.ConversationPhrasesVisible && (!sameTurn || !displayedPhrases);
+            displayedPhrases=session.ConversationPhrasesVisible;
             var previous=root.Q<ScrollView>("dialogue-scroll");
             Vector2 offset=previous!=null?previous.scrollOffset:chatScrollPosition;
             string focusKey="";
             if(sameTurn) for(var e=root.focusController?.focusedElement as VisualElement;e!=null;e=e.parent)
                 if(!string.IsNullOrEmpty(e.name) && e.name.StartsWith("dialogue-")) {focusKey=e.name;break;}
             displayedTurn=t;
-            RecordChatReply(t,session.VisibleConversationLine);
             var card=Card("conversation","conversation");card.name="dialogue-card";
             LayoutConversation(card);
             card.RegisterCallback<GeometryChangedEvent>(e=>{
@@ -192,53 +211,60 @@ namespace Paridhwani
             var identity=new VisualElement();Class(identity,"speaker-identity");header.Add(identity);
             Add(identity,speaker,"speaker-name");
             Add(identity,session.ActiveNpc?session.ActiveNpc.roleLabel:"CONVERSATION","eyebrow");
-            Button(header,"Close",session.Close,"quiet-button").name="dialogue-leave";
+            Button(header,"Notes",session.OpenNotebook,"quiet-button").name="dialogue-notebook";
+            Button(header,"Leave",session.Close,"quiet-button").name="dialogue-leave";
             var scroll=new ScrollView(ScrollViewMode.Vertical){name="dialogue-scroll"};Class(scroll,"dialogue-scroll");card.Add(scroll);
             scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;
             VisualElement latestMessage=null,latestNpcMessage=null;
             foreach(var message in chatMessages) {
                 var bubble=new VisualElement();Class(bubble,"chat-message");Class(bubble,message.player?"chat-player":"chat-npc");scroll.Add(bubble);
                 Add(bubble,message.player?"YOU":session.ConversationTitle,"chat-speaker");Line(bubble,message.line);
+                if(message.player && (message.pending || message.failed))
+                    Add(bubble,message.pending && session.TeaAssessmentBusy?"Sending...":"Not delivered · retry","chat-delivery");
                 latestMessage=bubble;
                 if(!message.player)latestNpcMessage=bubble;
             }
             if(latestNpcMessage!=null)latestNpcMessage.name="dialogue-speech";
             var composer=new VisualElement{name="dialogue-composer"};Class(composer,"dialogue-composer");
-            if(session.OptionalDialogueText!=null&&!session.ShowTeaAssessment) {
-                var input=new TextField("Ask in your own words"){name="dialogue-input",value=session.OptionalDialogueInput,maxLength=512};input.RegisterValueChangedCallback(e=>session.OptionalDialogueInput=e.newValue);composer.Add(input);
-                var ask=Button(composer,"Ask",session.AskOptionalDialogue,"quiet-button");ask.name="dialogue-ask";ask.SetEnabled(!session.OptionalDialogueBusy);
-                if(session.OptionalDialogueBusy)Button(scroll,"Cancel reply",session.CancelOptionalDialogue,"quiet-button").name="dialogue-cancel";
-                if(session.OptionalDialogueStatus.Length>0)Add(scroll,session.OptionalDialogueStatus,"small");
-            }
-
             if(session.ShowTeaAssessment) {
-                var assessmentInput=new TextField("Message"){name="dialogue-tea-input",value=session.TeaAssessmentInput,maxLength=512};
-                assessmentInput.tooltip="Type a message in Kannada or Roman letters. Press Enter to send.";
+                var inputRow=new VisualElement();Class(inputRow,"composer-input-row");composer.Add(inputRow);
+                var assessmentInput=new TextField("Your message"){name="dialogue-tea-input",value=session.TeaAssessmentInput,maxLength=512};
+                assessmentInput.tooltip="Type a message and press Enter to send.";
                 assessmentInput.style.unityTextGenerator=TextGeneratorType.Standard;
                 var textInput=assessmentInput.Q<VisualElement>(className:"unity-text-field__input");
                 if(textInput!=null){textInput.style.color=new Color(.95f,.97f,.95f);textInput.style.backgroundColor=new Color(.04f,.05f,.05f,.85f);}
                 assessmentInput.RegisterValueChangedCallback(e=>session.TeaAssessmentInput=e.newValue);
                 assessmentInput.RegisterCallback<KeyDownEvent>(e=>{if(e.keyCode==KeyCode.Return||e.keyCode==KeyCode.KeypadEnter){e.StopImmediatePropagation();if(!session.TeaAssessmentBusy)session.AskTeaConversation();}},TrickleDown.TrickleDown);
                 assessmentInput.SetEnabled(!session.TeaAssessmentBusy);
-                composer.Add(assessmentInput);
+                inputRow.Add(assessmentInput);
+                var send=Button(inputRow,"Send",session.AskTeaConversation);send.name="dialogue-send";Class(send,"send-button");send.SetEnabled(!session.TeaAssessmentBusy);
                 var actions=new VisualElement();Class(actions,"chat-actions");composer.Add(actions);
-                if(!session.UsingController)Button(actions,"Keyboard",OpenTeaKeyboard,"quiet-button").name="dialogue-tea-keyboard";
-                var send=Button(actions,"Send",session.AskTeaConversation);send.name="dialogue-send";Class(send,"send-button");send.SetEnabled(!session.TeaAssessmentBusy);
-                if(session.TeaAssessmentBusy)Button(scroll,"Cancel reply",session.CancelTeaAssessment,"quiet-button");
+                if(!session.UsingController && !session.TeaAssessmentBusy)Button(actions,"Keyboard",OpenTeaKeyboard,"quiet-button").name="dialogue-tea-keyboard";
+                if(t.Choices.Count>0)Button(actions,session.ConversationPhrasesVisible?"Hide phrases":"Phrases",session.ToggleConversationPhrases,"quiet-button").name="dialogue-phrases";
+                if(session.TeaAssessmentBusy)Button(actions,"Cancel",session.CancelTeaAssessment,"quiet-button").name="dialogue-cancel";
             }
             if(session.TeaAssessmentFeedback.Length>0)Add(scroll,session.TeaAssessmentFeedback,"small");
+            var phraseList=AddConversationPhrases(scroll,t);
             card.Add(composer);
             var aids=new VisualElement(); Class(aids,"aids");Class(aids,"dialogue-footer");card.Add(aids);
-            var english=new Toggle("English meaning"){name="dialogue-english",value=session.Progress.english};
+            var english=new VillageSwitch("English"){name="dialogue-english",value=session.Progress.english};
             english.RegisterValueChangedCallback(e=>{session.Progress.english=e.newValue;session.SettingsChanged();ShowConversation();});aids.Add(english);
-            var roman=new Toggle("Roman letters"){name="dialogue-roman",value=session.Progress.roman};
+            var roman=new VillageSwitch("Romanized"){name="dialogue-roman",value=session.Progress.roman};
             roman.RegisterValueChangedCallback(e=>{session.Progress.roman=e.newValue;session.SettingsChanged();ShowConversation();});aids.Add(roman);
-            Button(aids,"Field notebook",session.OpenNotebook,"quiet-button").name="dialogue-notebook";
-            if(session.HasOptionalDialogueLine)Button(aids,"Original line",session.UseAuthoredDialogue,"quiet-button").name="dialogue-original";
             card.schedule.Execute(()=> {
                 if(Mode!="conversation" || root.Q("dialogue-card")!=card) return;
-                if(chatAutoScroll){chatAutoScroll=false;scroll.schedule.Execute(()=>{if(latestMessage!=null && scroll.Contains(latestMessage))scroll.ScrollTo(latestMessage);});}
-                else scroll.scrollOffset=offset;
+                if(chatAutoScroll){chatAutoScroll=false;if(phraseList==null)scroll.schedule.Execute(()=>{if(latestMessage!=null && scroll.Contains(latestMessage))scroll.ScrollTo(latestMessage);});}
+                else if(phraseList==null)scroll.scrollOffset=offset;
+                if(phraseList!=null) {
+                    VisualElement target=focusPhrases || string.IsNullOrEmpty(focusKey)?null:card.Q(focusKey);
+                    if(target==null || !target.enabledInHierarchy)target=phraseList.Q<Button>();
+                    if(target!=null) {
+                        target.Focus();
+                        if(phraseList.Contains(target))scroll.schedule.Execute(()=>{if(scroll.Contains(target))scroll.ScrollTo(target);});
+                        else scroll.scrollOffset=offset;
+                    }
+                    return;
+                }
                 if(session.ShowTeaAssessment && session.UsingController && !session.TeaAssessmentBusy){OpenTeaKeyboard();return;}
                 VisualElement focus=string.IsNullOrEmpty(focusKey)?null:card.Q(focusKey);
                 // A response refresh must not pull focus away from the input or current aid.
@@ -257,12 +283,13 @@ namespace Paridhwani
         }
         public void ShowNotebook()
         {
-            var card=Card("notebook","notebook");
+            var card=Card("notebook","notebook");card.style.height=Length.Percent(85);
             var header=new VisualElement(); Class(header,"row"); card.Add(header);
-            Add(header,"FIELD NOTES  /  KALYANAPURA","eyebrow"); Button(header,session.NotebookBackLabel+"  [Tab]",session.Close,"quiet-button");
+            Add(header,"YOUR FIELD NOTEBOOK","eyebrow"); Button(header,session.NotebookBackLabel,session.Close,"quiet-button").name="notebook-back";
             Add(card,session.Progress.epilogueStarted?"The reopened library":session.Progress.fridayFinaleStarted?"Friday at the library court":session.Progress.thursdayStarted?"Thursday morning":"The first morning","title");
-            var scroll=new ScrollView(); Class(scroll,"notebook-scroll"); card.Add(scroll);
-            Add(scroll,"WORDS IN USE","section-title");
+            var nextStep=new VisualElement();Class(nextStep,"notebook-objective");card.Add(nextStep);
+            Add(nextStep,"NEXT STEP","eyebrow");Add(nextStep,session.Progress.Objective,"body");
+            var scroll=new ScrollView(ScrollViewMode.Vertical){name="notebook-story"}; Class(scroll,"notebook-scroll");scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;card.Add(scroll);
             if(session.Progress.greeted) Word(scroll,"ನಮಸ್ಕಾರ","Namaskara","Hello / a respectful greeting");
             if(session.Progress.greeted || session.Progress.drinkOrdered) { Word(scroll,"ಬೇಕು","Beku","Want / would like"); Word(scroll,"ಬೇಡ","Beda","Do not want / no, thank you"); }
             else Add(scroll,"Speak with Manjunatha to begin collecting useful phrases.","body");
@@ -367,8 +394,7 @@ namespace Paridhwani
             if(session.Progress.rathnammaAccountKnown) { Add(scroll,"RATHNAMMA / TUESDAY MORNING","section-title"); Add(scroll,"Reports seeing Ananya board Route 14. Did not see where she got off.","body"); Word(scroll,"ಬಸ್ಸು ಹತ್ತಿದಳು","Bassu hattidalu","She boarded the bus"); }
             if(session.Progress.witnessAccountsCompared) Add(scroll,"Witness comparison: boarding had an eyewitness account; those witnesses could not establish arrival or present safety.","body");
             if(session.Progress.guddaFamilyLeadKnown) Add(scroll,"Rathnamma: Ananya asked about Shankare Gowda's family at Gudda Mane. Check this name against Somanna's records next.","body");
-            Add(scroll,"NEXT STEP","section-title"); Add(scroll,session.Progress.Objective,"body");
-            Add(card,"A word encountered is a beginning. Use it again in a new place.","small");
+            OrganizeNotebook(card,scroll);
         }
         void Word(VisualElement parent,string kn,string ro,string en)
         {
@@ -378,56 +404,23 @@ namespace Paridhwani
         }
         public void ShowArrival()
         {
-            var card=Card("arrival","paper");
-            Add(card,"WEDNESDAY / YOUR FIRST MORNING","eyebrow");
+            var shell=Card("arrival","paper");shell.name="arrival-card";shell.style.height=Length.Percent(85);
+            Add(shell,"WEDNESDAY / YOUR FIRST MORNING","eyebrow").style.flexShrink=0;
+            var card=MenuScroll(shell,"arrival-scroll");
             Add(card,"Welcome to Kalyanapura","title");
             Add(card,"You came to help archive the community library. Ananya was meant to meet you, but she is not at the bus stand. The tea-stall owner may know the way.","body");
+            Add(card,"FIRST: greet Manjunatha at the tea stall, order tea or water, then ask for the library. English meanings, Roman lettering and Phrases can help you reply.","body");
             Add(card,"Walk with WASD or the left stick, and look with the mouse or right stick. Press E or A / Cross at a nearby person or sign. Use Tab in the village, or View / Share, for your notebook. Conversations take their time.","body");
-            var enter=Button(card,"Step into the village  [Enter]",session.AcknowledgeArrival);enter.name="arrival-enter";FocusLater(enter);
-            Button(card,"Back to title  [Esc]",session.OpenTitle,"quiet-button").name="arrival-title";
+            var enter=Button(shell,"Step into the village  [Enter]",session.AcknowledgeArrival);enter.name="arrival-enter";enter.style.flexShrink=0;FocusLater(enter);
+            var replay=Button(shell,"Replay introduction",session.PlayArrivalIntro,"quiet-button");replay.name="arrival-replay";replay.style.flexShrink=0;
+            var back=Button(shell,"Back to title  [Esc]",session.OpenTitle,"quiet-button");back.name="arrival-title";back.style.flexShrink=0;
         }
         public void ShowPause()
         {
-            var shell=Card("pause","paper");shell.name="pause-card";shell.style.height=Length.Percent(85);
-            Add(shell,session.TitleSettings?"SETTINGS / KALYANAPURA":"PAUSE  /  UNDER THE EAVES","eyebrow").style.flexShrink=0;
-            var back=Button(shell,session.TitleSettings?"Back to title":"Return to the village",session.Close);back.name="pause-back";back.style.flexShrink=0;FocusLater(back);
-            var card=MenuScroll(shell,"pause-scroll");Add(card,"A moment to yourself","title");
-            Add(card,"Take your time. Your reading and conversations have no countdown.","body");
-            if(!session.TitleSettings){
-            var actions=new VisualElement();Class(actions,"pause-actions");card.Add(actions);
-            AddPresentationActions(actions);
-            Button(actions,"Title menu",session.OpenTitle,"quiet-button");
-            Button(actions,"Save and return to desktop",session.RequestQuit,"quiet-button");
-            Button(actions,"Open field notebook",session.OpenNotebook);
-            if(session.IsPracticeVisit) Button(actions,"Return to the main visit",session.ReturnToCompletedStory);
-            else Button(actions,"Practise an earlier chapter",ShowChapterReplay).name="pause-practice";
-            if(session.Progress.storyCompleted) Button(actions,"Credits and phrase recap",ShowCredits);
-            Button(actions,"Save this visit",()=>{session.Save(); ShowPause();});
-            Button(actions,"Restore saved visit",session.Load);
-            }
-            Add(card,"COMFORT & INPUT","section-title");
-            var audio=new Toggle("Mute environment and interaction sounds"){value=session.Progress.muted};
-            audio.RegisterValueChangedCallback(e=>{session.Progress.muted=e.newValue;session.SettingsChanged();}); card.Add(audio);
-            var size=new Slider("Text size",.85f,1.3f){name="settings-text-size",value=session.Progress.textScale};
-            size.RegisterValueChangedCallback(e=>{session.Progress.textScale=e.newValue;ApplyCardScale(shell,"pause");session.SettingsChanged();}); card.Add(size);
-            var sensitivity=new Slider("Look sensitivity",.05f,.3f){value=session.Progress.sensitivity};
-            sensitivity.RegisterValueChangedCallback(e=>{session.Progress.sensitivity=e.newValue;session.SettingsChanged();}); card.Add(sensitivity);
-            var vibration=new Slider("Controller vibration",0,1){name="settings-controller-vibration",value=session.Progress.controllerVibration};
-            vibration.RegisterValueChangedCallback(e=>session.SetControllerVibration(e.newValue));card.Add(vibration);
-            Add(card,"Subtle feedback for footsteps, menus and actions. Set to 0 to turn vibration off.","small");
-            var motion=new Toggle("Reduced camera motion"){value=session.Progress.reducedMotion};motion.RegisterValueChangedCallback(e=>{session.Progress.reducedMotion=e.newValue;session.SettingsChanged();});card.Add(motion);
-            var invert=new Toggle("Invert vertical look"){value=session.Progress.invertY};invert.RegisterValueChangedCallback(e=>{session.Progress.invertY=e.newValue;session.SettingsChanged();});card.Add(invert);
-            Add(card,"SOUND","section-title");
-            var volume=new Slider("Master volume",0,1){value=session.Progress.masterVolume};volume.RegisterValueChangedCallback(e=>{session.Progress.masterVolume=e.newValue;session.SettingsChanged();});card.Add(volume);
-            var environmentVolume=new Slider("Rain and river volume",0,1){value=session.Progress.ambienceVolume};environmentVolume.RegisterValueChangedCallback(e=>{session.Progress.ambienceVolume=e.newValue;session.SettingsChanged();});card.Add(environmentVolume);
-            var stepsVolume=new Slider("Footstep volume",0,1){value=session.Progress.footstepVolume};stepsVolume.RegisterValueChangedCallback(e=>{session.Progress.footstepVolume=e.newValue;session.SettingsChanged();});card.Add(stepsVolume);
-            Add(card,"DISPLAY","section-title");AddDisplaySettings(card);
-            var quality=new DropdownField("Rendering quality",new System.Collections.Generic.List<string>{"Balanced","Low","High"},(int)PresentationPolicy.ValidQuality(session.Progress.quality));quality.RegisterValueChangedCallback(e=>{session.Progress.quality=(VillageQuality)quality.index;session.SettingsChanged();});card.Add(quality);
-            Add(card,"Balanced and High use full resolution. High adds finer shadows and more antialiasing; Low favours performance.","small");
-            AddDeveloperDisplaySettings(card);
-            Add(card,"F5  Save visit    F9  Restore visit","small");
+            if(Mode!="pause")pauseSection=session.TitleSettings?"display":"visit";
+            BuildPauseMenu();
         }
-        public void HideModal() {CloseTeaKeyboard();if(IsModal)session.PlayControllerFeedback(ControllerFeedback.Menu); Mode=""; modal.Clear(); modal.style.display=DisplayStyle.None; }
+        public void HideModal() {session.CancelArrivalIntro();CloseTeaKeyboard();if(IsModal)session.PlayControllerFeedback(ControllerFeedback.Menu); Mode=""; modal.Clear(); modal.style.display=DisplayStyle.None; }
         void OnDestroy() { CloseTeaKeyboard();ReleaseControllerNavigation();if(latinAsset) Destroy(latinAsset); if(kannadaAsset) Destroy(kannadaAsset);var document=GetComponent<UIDocument>();if(document && document.panelSettings==ownedPanel)document.panelSettings=originalPanel;if(ownedPanel)Destroy(ownedPanel); }
     }
 }

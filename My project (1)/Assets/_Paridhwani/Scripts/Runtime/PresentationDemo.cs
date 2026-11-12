@@ -43,7 +43,7 @@ namespace Paridhwani {
  completedStoryStore=saves;
  }
  presentationDemo=true;PresentationChapter=chapter;
- Progress=PresentationDemo.Seed(chapter,Progress);PracticeChapterName="Presentation demo / "+ChapterReplay.Name(chapter);
+ Progress=PresentationDemo.Seed(chapter,Progress);conversation.ResetVisit();PracticeChapterName="Presentation demo / "+ChapterReplay.Name(chapter);
             saves=new TeaSaveStore(Path.Combine(VillageTestStorage.Cache,"paridhwani-demo-"+Guid.NewGuid().ToString("N")+".json"));
  EndForJourney();ResetActorsToOrigins();player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();Save();ui.ShowPracticeArrival();SetCursor(true);
  }
@@ -85,7 +85,7 @@ namespace Paridhwani {
  Add(card,"Your main visit is preserved. Earlier clues were supplied for this scene. Pause lets you switch demo scenes, review these instructions, or return to the main visit.","small");
  }
  void AddDisplaySettings(VisualElement card) {
- var exposure=new Slider("Display brightness",-.5f,1.5f){name="settings-brightness",value=PresentationPolicy.Brightness(session.Progress.brightness)};
+ var exposure=new VillageSlider("Display brightness",-.5f,1.5f,"Darker","Brighter"){name="settings-brightness",value=PresentationPolicy.Brightness(session.Progress.brightness)};
  exposure.RegisterValueChangedCallback(e=>{session.Progress.brightness=e.newValue;session.SettingsChanged();});card.Add(exposure);
  Add(card,"Adjust for your screen. Weather changes with the story.","small");
  }

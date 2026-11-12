@@ -10,6 +10,8 @@ The two-character cartoon sample (`Scripts/Editor/CartoonCharacterSample.cs`, `A
 
 ## Recorded audio and foley
 
+The rendered arrival movie reuses the credited Rain, Bus and Boiler clips below. Its original Kannada narration script is synthesized with Microsoft's `kn-IN-GaganNeural` voice, with explicit user approval. Authoring uses [edge-tts](https://github.com/rany2/edge-tts) and FFmpeg; neither is bundled into the game. The narration provenance and source hashes are in `docs/ARRIVAL_NARRATION.json`.
+
 Assets under `My project (1)/Assets/_Paridhwani/Resources/VillageAudio` replace the old synthesized noise and footsteps. Source metadata, original/shipping SHA-256 hashes, processing and measured shipping-file levels are in `docs/AUDIO_ASSETS.json`.
 
 CC0 1.0 sources (https://creativecommons.org/publicdomain/zero/1.0/):

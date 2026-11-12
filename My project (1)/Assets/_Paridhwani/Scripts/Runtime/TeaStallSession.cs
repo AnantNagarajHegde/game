@@ -65,7 +65,7 @@ namespace Paridhwani
         bool returnToNotebook,activityChanged;
         public BicyclePart SelectedBicyclePart { get; private set; }=BicyclePart.None;
         public string EvidenceBackLabel => returnToNotebook?"Back to field notes":activityHistory.Count>0?(activityHistory.Peek()==VillageActivity.BicycleInspection?"Back to bicycle":"Back to previous evidence"):ResumeAvailable?"Back to conversation":"Return to village";
-        public string NotebookBackLabel => notebookActivity!=VillageActivity.None?"Back to evidence":ResumeAvailable?"Back to conversation":"Close";
+        public string NotebookBackLabel => notebookFromPause?"Back to pause":notebookActivity!=VillageActivity.None?"Back to evidence":ResumeAvailable?"Back to conversation":"Close";
         TeaSaveStore saves;
         VillageNpc nearbyNpc;
         int nearbyInspection;
@@ -149,6 +149,8 @@ namespace Paridhwani
             if(ui.KeyboardOpen)return;
             var keys=Keyboard.current;
             if(keys==null || !Application.isFocused) return;
+            if(ui.Mode=="arrival-intro" && keys.spaceKey.wasPressedThisFrame)
+            { ToggleArrivalIntroPause(); return; }
             // One command per frame: a close/restore must not also answer a newly shown turn.
             if(keys.escapeKey.wasPressedThisFrame)
             {
@@ -236,14 +238,19 @@ namespace Paridhwani
             player.BeginConversation(npc.eyes); ui.ShowConversation(); SetCursor(true);
         }
         public void Choose(int index) {Choose(index,true);}
-        void Choose(int index,bool recordChat)
+        void Choose(int index,bool recordChat,bool keepOpen=false,TeaLine reply=null)
         {
             if(Turn==null || index<0 || index>=Turn.Choices.Count) return;
             if(recordChat)ui.RecordChatChoice(Turn.Choices[index].Line);
-            if(Turn.Choices[index].Activity!=VillageActivity.None) { OpenActivity(Turn.Choices[index].Activity); return; }
+            if(Turn.Choices[index].Activity!=VillageActivity.None) {
+                if(reply!=null)ui.RecordCurrentChatReply(reply);
+                OpenActivity(Turn.Choices[index].Activity); return;
+            }
             NewDialogueTurn(); bool wasThursday=Progress.thursdayStarted;
             Turn=Provider.Reply(Turn,index,Progress); ApplyState(); Save();
             if(!wasThursday && Progress.thursdayStarted) { ui.ShowRestTransition(); return; }
+            if(Turn==null && keepOpen) Turn=new TeaTurn("conversation_end","",""," "){Speaker=ActiveNpc?ActiveNpc.displayName:"Villager"};
+            conversation.Line=reply;
             if(Turn==null) Close(); else ui.ShowConversation();
         }
         static bool RiverActivity(VillageActivity a) => a==VillageActivity.BicycleInspection || a==VillageActivity.BookingSlip || a==VillageActivity.RiverDeduction;
@@ -307,8 +314,10 @@ namespace Paridhwani
         }
         public void ReadRiverNotice()
         { if(!MarketInvestigation.ReadRiverNotice(Progress)) return; Save(); ui.ShowRiverNotice(); }
+        bool notebookFromPause;
         public void OpenNotebook()
         {
+            notebookFromPause=ui.Mode=="pause";
             SuspendDialogueText();
             notebookActivity=ui.Mode=="evidence"?ActiveActivity:VillageActivity.None;
             player.EndConversation(); ui.ShowNotebook(); SetCursor(true);
@@ -316,13 +325,16 @@ namespace Paridhwani
         public void Close()
         {
             if(ui.Mode=="presentation-demo"){ui.ClosePresentationDemo();return;}
-            if(ui.Mode=="arrival"){OpenTitle();return;}
+            if(ui.Mode=="arrival" || ui.Mode=="arrival-intro"){OpenTitle();return;}
             if(ui.Mode=="quit-save-error"){CancelQuit();return;}
             if(ui.Mode=="world-update-required")return;
             if(ui.Mode=="chapter-replay"){ui.CloseChapterReplay();return;}
             if(ui.Mode=="main-menu"){if(Progress.arrivalAcknowledged)ContinueMainVisit();return;}
             if(ui.Mode=="new-visit-confirm"){ui.ShowMainMenu();return;}
             if(ui.Mode=="pause" && TitleSettings){TitleSettings=false;ui.ShowMainMenu();return;}
+            if(ui.ClosePauseSection())return;
+            if(ui.Mode=="notebook" && notebookFromPause)
+            { notebookFromPause=false;ui.ShowPause();SetCursor(true);return; }
             if(ui.Mode=="notebook" && notebookActivity!=VillageActivity.None)
             { var previous=notebookActivity; notebookActivity=VillageActivity.None; OpenActivity(previous,false); return; }
             if(ui.Mode=="evidence" && returnToNotebook)
@@ -339,7 +351,7 @@ namespace Paridhwani
             ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation(); ui.HideModal(); SetCursor(false);
         }
         void ResetModalContext()
-        { NewDialogueTurn(); activityHistory.Clear(); notebookActivity=VillageActivity.None; ActiveActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false; }
+        { StopVillageSpeech(); NewDialogueTurn(); activityHistory.Clear(); notebookActivity=VillageActivity.None; ActiveActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false; }
         void SetCursor(bool free)
         {
             player.blocked=free; player.SuppressLook();
@@ -370,20 +382,21 @@ namespace Paridhwani
             saves=source;if(returningToMain) completedStoryStore=null;
             ResetModalContext(); Turn=null; ActiveNpc=null; player.EndConversation();ResetActorsToOrigins();
             Progress=restored;
+            conversation.ResetVisit();
             player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);ApplyState();
             SaveMessage=notice??"Saved visit restored";
             if(Progress.arrivalAcknowledged) {ui.HideModal();SetCursor(false);}
-            else {ui.ShowArrival();SetCursor(true);}
+            else ShowArrivalOrIntro();
             return true;
         }
         void OnApplicationFocus(bool focused)
         {
-            if(!focused)StopControllerHaptics();
+            if(!focused){StopControllerHaptics();StopVillageSpeech();}
             if(focused || !ready) return;
             Save();
             if(!ui.IsModal && !IsAutomatedTest) { ui.ShowPause(); SetCursor(true); }
         }
-        void OnApplicationPause(bool paused) {controllerHapticsPaused=paused;if(paused){StopControllerHaptics();Save();}}
+        void OnApplicationPause(bool paused) {controllerHapticsPaused=paused;if(paused){StopControllerHaptics();StopVillageSpeech();Save();}}
         void OnApplicationQuit() {StopControllerHaptics();Save(); Cursor.lockState=CursorLockMode.None; Cursor.visible=true; }
     }
 }

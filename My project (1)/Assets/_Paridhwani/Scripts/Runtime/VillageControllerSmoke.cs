@@ -71,6 +71,7 @@ namespace Paridhwani
                 motorStarts=pad.Starts;yield return ControllerPress(pad,GamepadButton.Start);
                 Check(session.ui.Mode=="pause" && player.blocked,"Start opens Pause and blocks movement");
                 Check(pad.Starts>motorStarts,"opening Pause produces controller feedback");
+                session.ui.ShowPauseSection("controls");yield return null;
                 var vibration=root.Q<Slider>("settings-controller-vibration");
                 Check(vibration!=null && vibration.lowValue==0 && vibration.highValue==1,"settings expose the full vibration intensity range");
                 session.PlayControllerFeedback(ControllerFeedback.Interaction);
@@ -102,11 +103,14 @@ namespace Paridhwani
                 yield return ControllerState(pad,new GamepadState());
                 var distance=player.transform.position-before;distance.y=0;
                 Check(distance.magnitude<.01f && Mathf.Abs(Mathf.DeltaAngle(yaw,player.Heading))<.01f,"modal navigation cannot walk or rotate the world");
+                session.ui.ShowPauseSection("accessibility");yield return null;
                 var size=root.Q<Slider>("settings-text-size");size.Focus();float oldSize=size.value;
                 yield return ControllerPress(pad,GamepadButton.DpadRight);
                 Check(size.value>oldSize,"controller adjusts a settings slider");
                 session.Progress.textScale=oldSize;session.SettingsChanged();
                 // Reserve right stick for document scrolling, without changing focus.
+                session.ui.ShowPauseSection("display");yield return null;
+                root.Q<Foldout>("developer-display").value=true;yield return null;
                 var focused=root.focusController.focusedElement;
                 var scroll=root.Q<ScrollView>("pause-scroll");float offset=scroll.scrollOffset.y;
                 yield return ControllerState(pad,new GamepadState{rightStick=Vector2.down},.3f);
@@ -116,6 +120,7 @@ namespace Paridhwani
                 yield return ControllerPress(pad,GamepadButton.South);
                 yield return ControllerPress(pad,GamepadButton.East);
                 Check(session.ui.Mode=="pause","B dismisses a settings dropdown before leaving Pause");
+                session.ui.ShowPauseSection("visit");yield return null;
                 root.Q<Button>("pause-practice").Focus();
                 yield return ControllerPress(pad,GamepadButton.South);
                 Check(session.ui.Mode=="chapter-replay","controller opens chapter practice from Pause");
@@ -128,6 +133,9 @@ namespace Paridhwani
                 yield return ControllerPress(pad,GamepadButton.Select);
                 Check(!session.ui.IsModal,"View closes notebook");
                 var tea=Array.Find(session.villagers,n=>n.role==VillageNpcRole.TeaVendor);
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
+                session.VillageModelTestTransport=(current,input,token)=>System.Threading.Tasks.Task.FromResult(new VillageModelTestReply{Line=new TeaLine("","Namaskara","Welcome."),Choice=-1,Feedback=""});
+#endif
                 player.Restore(new Vector3(-4.2f,.28f,-1.65f),0);
                 yield return new WaitForSecondsRealtime(.4f);
                 yield return ControllerPress(pad,GamepadButton.South);
@@ -191,6 +199,17 @@ namespace Paridhwani
                 Check(session.Progress.greeted && session.Turn!=null && session.Turn.Id=="order","a matched typed message advances the authored story automatically");
                 Check(root.Query<Label>().ToList().Exists(label=>label.text=="Welcome, Amogh."),"the generated NPC reply remains in chat after progression");
                 Check(root.Q<Button>("dialogue-choice-0")==null && root.Q<TextField>("dialogue-tea-input")!=null,"conversation uses the message field without story reply buttons");
+                yield return new WaitForSecondsRealtime(.2f);
+                if(session.ui.KeyboardOpen)yield return ControllerPress(pad,GamepadButton.East);
+                root.Q<Button>("dialogue-phrases").Focus();
+                yield return ControllerPress(pad,GamepadButton.South);
+                Check(session.ConversationPhrasesVisible && !session.ui.KeyboardOpen,"controller can choose phrases without reopening the keyboard");
+                Check((root.focusController.focusedElement as VisualElement)?.name=="dialogue-phrase-0","opening phrases focuses the first eligible phrase");
+                yield return ControllerPress(pad,GamepadButton.DpadDown);
+                Check((root.focusController.focusedElement as VisualElement)?.name=="dialogue-phrase-1","phrase navigation reaches the next ordered row");
+                yield return ControllerPress(pad,GamepadButton.South);
+                Check(session.Progress.drinkOrdered && session.Progress.drink=="water" && !session.Progress.directionsKnown,"controller phrase advances only the selected authored action");
+                session.Progress.drinkOrdered=false;session.Progress.drink="";
                 session.VillageModelTestTransport=null;
                 yield return new WaitForSecondsRealtime(.2f);
 #endif

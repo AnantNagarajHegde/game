@@ -38,7 +38,7 @@ namespace Paridhwani
             bool wasUsingController=UsingController;
             if(padUsed) {UsingController=true;activeController=pad;}
             else if(keyboardUsed || mouseUsed) UsingController=false;
-            if(UsingController && !wasUsingController && ui.Mode=="conversation" && ShowTeaAssessment && !TeaAssessmentBusy)ui.OpenTeaKeyboard();
+            if(UsingController && !wasUsingController && ui.Mode=="conversation" && ShowTeaAssessment && !TeaAssessmentBusy && !ConversationPhrasesVisible)ui.OpenTeaKeyboard();
             else if(!UsingController && wasUsingController && ui.KeyboardOpen)ui.CloseTeaKeyboard(true);
             if(ui.IsModal) Cursor.visible=!UsingController;
         }
@@ -60,6 +60,7 @@ namespace Paridhwani
             // Only world interaction and global shortcuts belong to this polling path.
             if(pad.startButton.wasPressedThisFrame)
             {
+                if(ui.Mode=="arrival-intro"){ToggleArrivalIntroPause();return true;}
                 if(ui.IsModal) Close(); else {ui.ShowPause();SetCursor(true);}
                 ui.SuppressControllerSubmit();return true;
             }

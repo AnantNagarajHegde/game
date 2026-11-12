@@ -29,12 +29,12 @@ namespace Paridhwani {
  if(session.IsPracticeVisit)Button(card,"Return to the main visit",session.ReturnToCompletedStory);
  else {
  start=Button(card,saved?"Begin a new story":"Begin your visit",()=>{if(session.HasSavedVisit)ShowNewVisitConfirmation();else session.BeginNewMainVisit();});start.name="title-start";
- Button(card,"Presentation demo / choose a scene",ShowPresentationDemo).name="title-demo";
  }
  Class(saved?resume:start??resume,"primary-button");
  var footer=new VisualElement();Class(footer,"title-actions");shell.Add(footer);
  Button(footer,"Settings",session.OpenTitleSettings,"quiet-button").name="title-settings";
  if(!session.IsPracticeVisit)Button(footer,"Chapter practice",ShowChapterReplay,"quiet-button").name="title-practice";
+ if(!session.IsPracticeVisit)Button(footer,"Scene demo",ShowPresentationDemo,"quiet-button").name="title-demo";
  Button(footer,"Save & exit",session.RequestQuit,"quiet-button").name="title-exit";
  Add(shell,"KALYANAPURA  /  KARNATAKA","title-location");
  FocusLater(saved?resume:start);

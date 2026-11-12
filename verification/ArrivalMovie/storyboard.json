@@ -1,0 +1,15 @@
+{
+  "voice": "kn-IN-GaganNeural",
+  "rate": "-5%",
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "beats": [
+    {"id":"01-village","minimumSeconds":9,"caption":"Monsoon rain follows you into Kalyanapura. You have come to help archive the village's community library.","kannada":"ಮಳೆಗಾಲದ ಒಂದು ಬೆಳಗ್ಗೆ, ನೀವು ಕಲ್ಯಾಣಪುರಕ್ಕೆ ಬರುತ್ತೀರಿ. ಗ್ರಾಮದ ಗ್ರಂಥಾಲಯದ ಹಳೆಯ ದಾಖಲೆಗಳನ್ನು ಸರಿಹೊಂದಿಸುವುದು ನಿಮ್ಮ ಕೆಲಸ."},
+    {"id":"02-appointment","minimumSeconds":9,"caption":"Ananya was meant to meet you at the bus stand and take you to the library. But she is not here.","kannada":"ನಿಮ್ಮನ್ನು ಬರಮಾಡಿಕೊಂಡು ಗ್ರಂಥಾಲಯಕ್ಕೆ ಕರೆದೊಯ್ಯಲು ಅನನ್ಯಾ ಬಸ್ ನಿಲ್ದಾಣಕ್ಕೆ ಬರಬೇಕಿತ್ತು. ಆದರೆ ಅವಳು ಇಲ್ಲ."},
+    {"id":"03-library","minimumSeconds":9,"caption":"The library is somewhere beyond these lanes. The people who know Ananya may help you find your way.","kannada":"ಈ ಬೀದಿಗಳಾಚೆ ಗ್ರಂಥಾಲಯವಿದೆ. ಇಲ್ಲಿನ ಜನರಿಗೆ ಅನನ್ಯಾ ಪರಿಚಿತಳು. ಅವರೊಂದಿಗೆ ಮಾತನಾಡಿ, ಮುಂದಿನ ದಾರಿಯನ್ನು ಹುಡುಕಿ."},
+    {"id":"04-notebook","minimumSeconds":8,"caption":"Speak with the villagers, read signs and notices, and keep what you learn in your field notebook.","kannada":"ಗ್ರಾಮದ ಜನರೊಂದಿಗೆ ಮಾತನಾಡಿ. ಫಲಕಗಳನ್ನು ಮತ್ತು ಸೂಚನೆಗಳನ್ನು ಓದಿ. ತಿಳಿದುಕೊಂಡ ವಿಷಯಗಳನ್ನು ನಿಮ್ಮ ಟಿಪ್ಪಣಿ ಪುಸ್ತಕದಲ್ಲಿ ಬರೆದಿಟ್ಟುಕೊಳ್ಳಿ."},
+    {"id":"05-language","minimumSeconds":10,"caption":"You can learn Kannada as you go. English meanings, Roman lettering and ready-to-use phrases will help. Take your time.","kannada":"ಆಡುತ್ತಾ ಕನ್ನಡ ಕಲಿಯಬಹುದು. ಇಂಗ್ಲಿಷ್ ಅರ್ಥಗಳು, ರೋಮನ್ ಲಿಪಿ ಮತ್ತು ಸಿದ್ಧವಾದ ಪದಗುಚ್ಛಗಳು ನಿಮಗೆ ನೆರವಾಗುತ್ತವೆ. ನಿಧಾನವಾಗಿ ಮುಂದುವರಿಯಿರಿ."},
+    {"id":"06-tea","minimumSeconds":10,"caption":"Start with Manjunatha at the tea stall. Greet him, order tea or water, and ask where the library is.","kannada":"ಮೊದಲು ಚಹಾ ಅಂಗಡಿಯ ಮಂಜುನಾಥರನ್ನು ಭೇಟಿ ಮಾಡಿ. ನಮಸ್ಕಾರ ಹೇಳಿ, ಚಹಾ ಅಥವಾ ನೀರು ಕೇಳಿ. ನಂತರ ಗ್ರಂಥಾಲಯಕ್ಕೆ ದಾರಿ ಕೇಳಿ."}
+  ]
+}

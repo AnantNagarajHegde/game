@@ -9,7 +9,7 @@ namespace Paridhwani {
  float phase,animationTime;Vector3 previousPosition,restPosition;bool restCaptured;
  VillageCharacterGait gait;
  public VillageCharacterGait Gait=>gait;
- void Start() {if(walker && leftLeg && rightLeg && leftArm && rightArm)gait=new VillageCharacterGait(this);}
+ void Start() {var resident=GetComponentInParent<VillageAmbientResident>();if((walker || resident) && leftLeg && rightLeg && leftArm && rightArm)gait=new VillageCharacterGait(this,resident);}
  void OnDestroy() {gait?.Dispose();}
  void OnEnable() {previousPosition=transform.position;if(!restCaptured){restPosition=transform.localPosition;restCaptured=true;}phase=Mathf.Repeat(transform.position.x*1.3f+transform.position.z*.7f,6.28f);}
  void Update() {

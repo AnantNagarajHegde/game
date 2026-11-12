@@ -1,0 +1,45 @@
+Paridhwani interface cleanup — 12 November 2026
+
+Implemented
+- Pause has a fixed category sidebar: Your visit, Display, Audio, Controls,
+  Accessibility. Resume is the main action; Back stays outside scrolling content.
+- Escape/controller Back returns from a settings category to Your visit and then
+  to the world. Settings opened from the title return to the title.
+- The notebook keeps the objective above separate Story notes and Words & phrases
+  tabs. Opening it from Pause now returns to Pause.
+- Chat places Send beside the input, Notes/Leave in the header, and language aids
+  below the composer. Existing keyboard and phrase controls remain available.
+- Shared surfaces have consistent rounded corners, spacing and quieter borders.
+  The exploration HUD no longer shows its tagline, full movement instructions,
+  or a permanent successful-save message. Save errors remain visible.
+- Scene demos moved into the title's secondary actions. Developer display options
+  start collapsed. The UI/graphics template records the updated conventions.
+
+Validation completed
+- verification/Verify-Sources.ps1 passed for Runtime, Editor and non-Editor
+  source branches using the installed Unity references.
+- CHAPTER_CHECKS_OK: 769 assertions passed.
+- Scoped git diff whitespace checks passed for the edited UI/runtime/docs files.
+
+Native validation pending
+- The editor control connection repeatedly returned: "Computer Use helper
+  already has an active request", including after reconnecting.
+- No new rendered-screen review or physical controller playtest is claimed.
+- The existing native visual review now covers each settings category, fixed Back,
+  category-to-visit Back, notebook return, and both notebook tabs at 1.0/1.3 scale.
+  Controller and smoke checks were updated to access settings through categories.
+- Run Paridhwani > Review UI and graphics at 960x540 and 1920x1080 when the
+  editor connection is available. Inspect title, HUD, notebook, each settings
+  category, chat, phrases and the on-screen keyboard. Captures go under
+  verification/Temp/UIReview. Run the native controller playtest as well.
+
+Implementation anchors
+Assets/_Paridhwani/Scripts/Runtime/VillageMenuUI.cs
+Assets/_Paridhwani/Scripts/Runtime/TeaStallUI.cs
+Assets/_Paridhwani/Scripts/Runtime/TeaStallSession.cs
+Assets/_Paridhwani/Scripts/Runtime/VillageMainMenuUI.cs
+Assets/_Paridhwani/Scripts/Runtime/VillageControllerUI.cs
+Assets/_Paridhwani/UI/TeaStall.uss
+
+Existing backend, story, intro and world changes in the working tree were retained.
+No commit, push, or standalone build was performed for this UI change.

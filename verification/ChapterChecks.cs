@@ -3,6 +3,32 @@ using Paridhwani;
 public static class ChapterChecks {
  static int checks;
  static void Check(bool ok,string why) { if(!ok) throw new Exception(why); checks++; }
+ static void SpeechPcmChecks() {
+  ServiceConnectionChecks();
+  byte[] wav={82,73,70,70,40,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,192,93,0,0,128,187,0,0,2,0,16,0,100,97,116,97,4,0,0,0,0,128,255,127};
+  Check(VillageSpeechPcm.TryDecode(wav,out var samples,out int rate) && rate==24000 && samples.Length==2,"voice WAV reads mono PCM at its recorded sample rate");
+  Check(samples[0]==-1f && samples[1]>.999f && samples[1]<1f,"voice PCM samples use signed 16-bit little-endian values");
+  var stereo=(byte[])wav.Clone();stereo[22]=2;
+  Check(!VillageSpeechPcm.TryDecode(stereo,out _,out _),"unexpected stereo speech is rejected");
+  var malformed=(byte[])wav.Clone();malformed[40]=250;
+  Check(!VillageSpeechPcm.TryDecode(malformed,out _,out _),"speech with an out-of-bounds data chunk is rejected");
+  Check(!VillageSpeechPcm.TryDecode(new byte[12],out _,out _),"truncated speech is rejected");
+ }
+ static void ServiceConnectionChecks() {
+  var local=new VillageServiceConnection(null,null);
+  Check(local.TurnEndpoint.AbsoluteUri=="http://127.0.0.1:8767/v2/village/turn","default chat remains on the local bridge");
+  string token=new string('a',48);
+  var remote=new VillageServiceConnection("https://example.invalid/private/",token);
+  Check(remote.TurnEndpoint.AbsoluteUri=="https://example.invalid/private/v2/village/turn" && remote.SpeechEndpoint.AbsoluteUri=="https://example.invalid/private/v2/village/speech","hosted chat and speech preserve the service path prefix");
+  foreach(string address in new[]{"http://example.invalid/","https://user:password@example.invalid/","https://example.invalid/?key=secret","https://example.invalid/#fragment","file:///C:/secret"}) {
+   bool rejected=false;try {new VillageServiceConnection(address,token);}catch(ArgumentException){rejected=true;}
+   Check(rejected,"unsafe hosted service address is rejected");
+  }
+  bool noToken=false;try {new VillageServiceConnection("https://example.invalid/",null);}catch(ArgumentException){noToken=true;}
+  Check(noToken,"private hosted service requires an access token");
+  bool invalidToken=false;try {new VillageServiceConnection(null,new string('a',32)+"\r\n");}catch(ArgumentException){invalidToken=true;}
+  Check(invalidToken,"request headers cannot be injected through the service token");
+ }
  sealed class HapticSaveCodec : ITeaProgressCodec {
  public float decoded;
  public string Encode(TeaProgress p) => "{\"version\":1,\"controllerVibration\":"+p.controllerVibration.ToString(System.Globalization.CultureInfo.InvariantCulture)+"}";
@@ -81,6 +107,16 @@ public static class ChapterChecks {
  public TeaProgress Decode(string json) => new TeaProgress {version=json.Contains("\"version\":99")?99:1,signRead=json.Contains("\"sign\":true")};
  }
  static void ExitMenuChecks() {
+ var fresh=new TeaProgress();
+ Check(ArrivalIntroStory.ShouldPlay(fresh,false),"a fresh main visit plays the bundled movie");
+ Check(!ArrivalIntroStory.ShouldPlay(fresh,true),"practice does not play the arrival movie");
+ fresh.arrivalIntroSeen=true;
+ Check(!ArrivalIntroStory.ShouldPlay(fresh,false),"a skipped or completed movie remains completed");
+ fresh.arrivalIntroSeen=false;fresh.arrivalAcknowledged=true;
+ Check(!ArrivalIntroStory.ShouldPlay(fresh,false),"legacy saves that already entered the village do not replay the movie");
+ var movie=new ArrivalMovieTimeline { cues=new[]{new ArrivalMovieCue{start=0,end=4,caption="first"},new ArrivalMovieCue{start=4,end=8,caption="second"}} };
+ Check(movie.Caption(3.999)=="first" && movie.Caption(4)=="second" && movie.Caption(8)=="","subtitles use decoder time with non-overlapping scene boundaries");
+ Check(!VillageInputPolicy.SaveShortcut("arrival-intro",false,false) && !VillageInputPolicy.NotebookShortcut("arrival-intro",false),"video cannot be interrupted by world save/notebook shortcuts");
  var menu=new VisitExitNavigation();
  Check(menu.ReturnMode(true)=="pause","quit recovery defaults to a safe modal");
  menu.Begin("main-menu",false);
@@ -100,7 +136,7 @@ public static class ChapterChecks {
  menu.Begin("conversation",false);
  Check(menu.ReturnMode(true)=="pause","unexpected quit entry falls back to Pause");
  Check(VisitExitNavigation.CanAcknowledgeArrival("arrival"),"welcome explicitly accepts arrival acknowledgment");
- foreach(string mode in new[]{"","main-menu","pause","quit-save-error","conversation","chapter-replay"})
+ foreach(string mode in new[]{"","main-menu","pause","quit-save-error","conversation","chapter-replay","arrival-intro"})
  Check(!VisitExitNavigation.CanAcknowledgeArrival(mode),"arrival callback cannot dismiss another screen: "+mode);
  }
  static void ReplayMenuChecks() {
@@ -203,6 +239,8 @@ public static class ChapterChecks {
  Check(initial==WorldRecipeSignature.Compute(recipes),"standalone verifier does not invalidate the generated world");
  System.IO.File.WriteAllText(runner,"changed tool");
  Check(initial==WorldRecipeSignature.Compute(recipes),"standalone verifier edits preserve world signature");
+ string diagnostics=System.IO.Path.Combine(recipes,"VillageConversationDiagnostics.cs");System.IO.File.WriteAllText(diagnostics,"diagnostic menu");
+ Check(initial==WorldRecipeSignature.Compute(recipes),"connection diagnostic tools do not require world regeneration");
  string other=System.IO.Path.Combine(recipes,"OtherScene.cs");System.IO.File.WriteAllText(other,"new world recipe");
  Check(initial!=WorldRecipeSignature.Compute(recipes),"new world recipes still invalidate the scene");System.IO.File.Delete(other);
  System.IO.File.WriteAllText(recipe,"changed\n");
@@ -216,42 +254,6 @@ public static class ChapterChecks {
  System.IO.File.Delete(blocker);
  Check(blockedStore.Write(unsaved,out _) && blockedStore.Read(out _).signRead && blockedStore.LastFailureDetail==null,"retry after storage recovery saves the same current snapshot and clears the old failure");
  } finally {if(System.IO.Directory.Exists(directory)) System.IO.Directory.Delete(directory,true);}
- }
- sealed class StubDialogueService : IDialogueTextService {
- public System.Func<DialogueServiceRequest,System.Threading.CancellationToken,System.Threading.Tasks.Task<DialogueServiceReply>> Handler;
- public int Calls;
- public System.Threading.Tasks.Task<DialogueServiceReply> ReplyAsync(DialogueServiceRequest request,System.Threading.CancellationToken cancellation){Calls++;return Handler(request,cancellation);}
- }
- static void DialogueServiceChecks() {
- var turn=new LocalTeaConversation().Start(new TeaProgress());var prompt=new DialoguePrompt("Manjunatha",turn,"Hello");
- var snapshot=new DialogueServiceRequest(prompt);var second=new DialogueServiceRequest(prompt);
- Check(snapshot.Version==1 && snapshot.RequestId.Length==32 && snapshot.RequestId!=second.RequestId,"each service request has a version and unique correlation ID");
- string original=snapshot.AuthoredLine.English,choice=snapshot.AvailableReplies[0].English;
- prompt.AuthoredLine.English="changed";prompt.AvailableReplies[0].English="changed";
- Check(snapshot.AuthoredLine.English==original && snapshot.AvailableReplies[0].English==choice,"service request owns immutable text snapshots");
- bool readOnly=false;try {((System.Collections.Generic.IList<DialogueServiceText>)snapshot.AvailableReplies)[0]=null;}catch(System.NotSupportedException){readOnly=true;}
- Check(readOnly,"service cannot mutate the available reply collection");
- var service=new StubDialogueService();var handler=DialogueServiceAdapter.Bind(service);
- using(var requests=new DialogueTextRequests()) {
- service.Handler=(r,c)=>System.Threading.Tasks.Task.FromResult(new DialogueServiceReply(r.Version,r.RequestId,r.TurnId,new DialogueServiceText("","","<b>Hello</b>")));
- var ready=requests.Send(c=>handler(prompt,c)).GetAwaiter().GetResult();
- Check(ready.Status==DialogueTextStatus.Ready && ready.Line.English=="<b>Hello</b>","matching service response preserves literal text");
- foreach(string invalid in new[]{"version","request","turn","missing","empty","oversized"}) {
- service.Handler=(r,c)=>System.Threading.Tasks.Task.FromResult(invalid=="missing"?null:new DialogueServiceReply(invalid=="version"?99:r.Version,invalid=="request"?"other-request":r.RequestId,invalid=="turn"?"other-turn":r.TurnId,new DialogueServiceText("","",invalid=="empty"?"":invalid=="oversized"?new string('x',4097):"Reply")));
- Check(requests.Send(c=>handler(prompt,c)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"reject incompatible service response: "+invalid);
- }
- var source=new TeaLine("","","Original reply");var copied=requests.Send(c=>System.Threading.Tasks.Task.FromResult(source)).GetAwaiter().GetResult();source.English="changed after validation";
- Check(copied.Line.English=="Original reply","legacy delegate response is copied before presentation");
- var late=new System.Threading.Tasks.TaskCompletionSource<DialogueServiceReply>();DialogueServiceRequest pending=null;System.Threading.CancellationToken forwarded=default;
- service.Handler=(r,c)=>{pending=r;forwarded=c;return late.Task;};
- Check(requests.Send(c=>handler(prompt,c),10).GetAwaiter().GetResult().Status==DialogueTextStatus.TimedOut && forwarded.IsCancellationRequested,"timeout cancels the actual service token");
- late.SetResult(new DialogueServiceReply(pending.Version,pending.RequestId,pending.TurnId,new DialogueServiceText("","","Late")));
- }
- using(var cancelled=new System.Threading.CancellationTokenSource()) {
- cancelled.Cancel();int before=service.Calls;bool rejected=false;
- try {handler(prompt,cancelled.Token).GetAwaiter().GetResult();}catch(System.OperationCanceledException){rejected=true;}
- Check(rejected && service.Calls==before,"cancelled requests never call the service");
- }
  }
  static void DialogueCancellationChecks() {
  using(var requests=new DialogueTextRequests()) {
@@ -300,7 +302,6 @@ public static class ChapterChecks {
  static void AsyncDialogueChecks() {
  using(var requests=new DialogueTextRequests()) {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","",new string('x',4097)))).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"oversized external response rejected");
- var turn=new LocalTeaConversation().Start(new TeaProgress());var prompt=new DialoguePrompt("Manjunatha",turn,new string('x',600));prompt.AvailableReplies[0].English="changed";Check(turn.Choices[0].Line.English!="changed" && prompt.LearnerText.Length==512,"optional request is bounded and copies authored choices without effects");
  Check(requests.Send(null).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"missing optional service falls back");
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult(new TeaLine("","","A bounded reply"))).GetAwaiter().GetResult().Status==DialogueTextStatus.Ready,"optional text returns without quest effects");
  Check(requests.Send(token=>throw new InvalidOperationException()).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"service failure falls back");
@@ -309,7 +310,11 @@ public static class ChapterChecks {
  Check(requests.Send(token=>System.Threading.Tasks.Task.FromResult<TeaLine>(null)).GetAwaiter().GetResult().Status==DialogueTextStatus.Unavailable,"empty external text falls back");
  }
  }
- public static int Main() { HapticChecks(); DemoPresentationChecks.Run(Check); ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueServiceChecks(); DialogueCancellationChecks();
+ public static int Main() { SpeechPcmChecks(); HapticChecks(); DemoPresentationChecks.Run(Check); ConversationResilienceChecks.Run(Check); ReplayMenuChecks();ExitMenuChecks(); InputChecks(); FootstepChecks(); CompanionChecks(); FileChecks(); AsyncDialogueChecks(); DialogueCancellationChecks();
+ var teaVisit=new TeaProgress();var teaStory=new LocalTeaConversation();
+ Check(teaStory.Start(teaVisit).Id=="hello","new visitors start at the introduction");
+ teaStory.Reply(teaStory.Start(teaVisit),0,teaVisit);
+ Check(teaVisit.greeted && teaStory.Start(teaVisit).Id=="order" && teaVisit.Objective.Contains("tea or water"),"returning after an introduction resumes ordering instead of restarting the greeting");
  Check(VillageWeatherPolicy.Raining(null) && VillageWeatherPolicy.Raining(new TeaProgress()),"new visits begin in rain");
  var weather=new TeaProgress{ananyaFound=true};Check(VillageWeatherPolicy.Raining(weather),"rain stays through Ananya's greeting");
  weather.disappearanceExplained=true;Check(!VillageWeatherPolicy.Raining(weather),"rain clears after the explanation");
