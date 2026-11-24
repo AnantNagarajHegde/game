@@ -4,6 +4,8 @@ Paridhwani is a story-led Kannada-learning adventure built in Unity. The prototy
 
 The main story is authored from arrival through the council review and epilogue, with a separate practice visit that preserves the completed story save. The game is still a procedural prototype, not a release-ready product; model quality, fluent language review, live integration and broader player acceptance testing remain outstanding.
 
+For the experimental Manjunatha tea stall with locally generated Kannada dialogue and speech, see the [joint model and laptop playtest](docs/MANJUNATHA_JOINT.md).
+
 ## Open and play
 
 1. Open `My project (1)` in Unity Hub using **Unity 6000.6.7f1**.

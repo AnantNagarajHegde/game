@@ -91,6 +91,8 @@ namespace Paridhwani {
     return new VillageConversationReply(reply.Choice<0?"none":"a"+reply.Choice,reply.Line);
    };
 #endif
+   bool joint=UseJointTea && transport==null;
+   if(joint)transport=StreamJointTea;
    var pending=conversation.Send(request,transport);
    string deliveryId=conversation.DisplayMessageId;
    ui.RecordChatMessage(input,deliveryId);
@@ -99,10 +101,17 @@ namespace Paridhwani {
    if(this && ui)ui.CompleteChatMessage(deliveryId,result.Status==DialogueTextStatus.Ready && conversation.IsCurrent(result));
    if(!this || Turn!=turn || ActiveNpc!=npc || !ReferenceEquals(provider,Provider) || ui.Mode!="conversation" || !conversation.IsCurrent(result))return;
    if(result.Status!=DialogueTextStatus.Ready){
+    if(joint && string.IsNullOrEmpty(TeaAssessmentInput))TeaAssessmentInput=input;
     Debug.LogWarning("PARIDHWANI_CHAT_FAILURE request="+request.Id+" kind="+result.Failure+" http="+result.HttpStatus+" type="+result.DiagnosticType);
     ui.ShowConversation();return;
    }
    if(result.ActionRejected)Debug.LogWarning("PARIDHWANI_CHAT_ACTION_IGNORED request="+request.Id+"; readable reply retained without story progress.");
+   if(joint){
+    conversation.ReceiveStreamingText(jointDisplayLine,input);
+    ui.ShowConversation();
+    ui.FollowJointCaption(jointDisplayLine);
+    return;
+   }
    int choice=Array.FindIndex(actions,a=>a.Id==result.ActionId);
    if(choice>=0)Choose(actions[choice].Choice,false,true,result.Line);
    else ui.ShowConversation();
@@ -110,10 +119,11 @@ namespace Paridhwani {
   }
 
   public void SpeakConversationLine(TeaLine line) {
+   if(JointTeaEnabled && ReferenceEquals(line,jointDisplayLine))return;
    PlayVillageSpeech(line,ActiveNpc?ActiveNpc.displayName:Turn?.Speaker??"Villager");
   }
   async void PlayVillageSpeech(TeaLine line,string speaker) {
-   if(line==null || IsAutomatedTest || (!Application.isFocused && !TeaBenchmark) || (Progress!=null && Progress.masterVolume<=0) ||
+   if(line==null || IsAutomatedTest || (!Application.isFocused && !TeaBenchmark) || (Progress!=null && (Progress.masterVolume<=0 || (JointTeaEnabled && Progress.muted))) ||
       (ReferenceEquals(line,villageLastSpokenLine) && speaker==villageLastSpokenSpeaker))return;
    string speech=string.IsNullOrWhiteSpace(line.Kannada)?line.English:line.Kannada;
    string language=string.IsNullOrWhiteSpace(line.Kannada)?"en-IN":"kn-IN";

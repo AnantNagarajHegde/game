@@ -40,6 +40,10 @@ namespace Paridhwani
 
         public void ResetTurn()
         { requests.Cancel(); Input=""; Feedback=""; Line=null; PhrasesVisible=false; retryable=false; DisplayMessageId=""; }
+        public void ReceiveStreamingText(TeaLine line,string input) {
+            Line=line; Feedback=""; PhrasesVisible=false;
+            if((Input??"").Trim()==input)Input="";
+        }
         public void ResetVisit() { ResetTurn(); history.Clear(); }
         public void Cancel()
         { requests.Cancel(); Feedback="Reply cancelled. Try your message again or choose a phrase."; }

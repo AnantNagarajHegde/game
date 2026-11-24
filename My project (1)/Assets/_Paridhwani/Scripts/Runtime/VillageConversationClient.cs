@@ -96,7 +96,7 @@ namespace Paridhwani
                         var root=doc.RootElement;
                         if(root.GetProperty("version").GetInt32()!=2)throw new DialogueRequestException(DialogueFailure.Configuration);
                         var provider=root.GetProperty("provider").GetString();
-                        if(provider!="groq" && provider!="openrouter" && provider!="ollama" && provider!="tea-local")throw new DialogueRequestException(DialogueFailure.InvalidResponse);
+                        if(provider!="groq" && provider!="openrouter" && provider!="ollama" && provider!="tea-local" && provider!="manjunatha-joint")throw new DialogueRequestException(DialogueFailure.InvalidResponse);
                         if(!root.GetProperty("model_configured").GetBoolean())throw new DialogueRequestException(DialogueFailure.Configuration);
                         if(root.GetProperty("authentication_required").GetBoolean() && connection.AccessToken.Length==0)
                             throw new DialogueRequestException(DialogueFailure.ServiceAuthentication);

@@ -1,0 +1,68 @@
+[
+  {
+    "prompt": "ಎರಡು ಚಹಾ ಕೊಡಿ. ಒಂದಕ್ಕೆ ಸಕ್ಕರೆ ಬೇಡ.",
+    "expected": "ಸರಿ, ಎರಡು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಒಂದಕ್ಕೆ ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ.",
+    "actual": "ಸರಿ, ಎರಡು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಒಂದಕ್ಕೆ ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 3,
+    "seconds": 5.008,
+    "first_packet_ms": 487,
+    "realtime_factor": 0.26
+  },
+  {
+    "prompt": "three hot coffees please with less sugar",
+    "expected": "ಸರಿ, ಮೂರು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಸಕ್ಕರೆ ಕಡಿಮೆ ಹಾಕುತ್ತೇನೆ. ಬಿಸಿಯಾಗಿ ತರುತ್ತೇನೆ.",
+    "actual": "ಸರಿ, ಮೂರು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಸಕ್ಕರೆ ಕಡಿಮೆ ಹಾಕುತ್ತೇನೆ. ಬಿಸಿಯಾಗಿ ತರುತ್ತೇನೆ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 4,
+    "seconds": 5.968,
+    "first_packet_ms": 469,
+    "realtime_factor": 0.247
+  },
+  {
+    "prompt": "naalku cup chaha ugurubechchage sakkare beda",
+    "expected": "ಸರಿ, ನಾಲ್ಕು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "actual": "ಸರಿ, ನಾಲ್ಕು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 4,
+    "seconds": 6.032,
+    "first_packet_ms": 539,
+    "realtime_factor": 0.246
+  },
+  {
+    "prompt": "ಒಂದು ಬಿಸಿ ಕಾಫಿ ಬೇಕು",
+    "expected": "ಸರಿ, ಒಂದು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಬಿಸಿಯಾಗಿ ತರುತ್ತೇನೆ.",
+    "actual": "ಸರಿ, ಒಂದು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಬಿಸಿಯಾಗಿ ತರುತ್ತೇನೆ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 3,
+    "seconds": 4.288,
+    "first_packet_ms": 475,
+    "realtime_factor": 0.247
+  },
+  {
+    "prompt": "four warm coffees one without sugar",
+    "expected": "ಸರಿ, ನಾಲ್ಕು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಒಂದಕ್ಕೆ ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "actual": "ಸರಿ, ನಾಲ್ಕು ಕಪ್ ಕಾಫಿ ಕೊಡುತ್ತೇನೆ. ಒಂದಕ್ಕೆ ಸಕ್ಕರೆ ಹಾಕುವುದಿಲ್ಲ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 4,
+    "seconds": 6.896,
+    "first_packet_ms": 523,
+    "realtime_factor": 0.246
+  },
+  {
+    "prompt": "ಮೂರು ಕಪ್ ಚಹಾ ಉಗುರುಬೆಚ್ಚಗೆ ಕೊಡಿ",
+    "expected": "ಸರಿ, ಮೂರು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "actual": "ಸರಿ, ಮೂರು ಕಪ್ ಚಹಾ ಕೊಡುತ್ತೇನೆ. ಬೆಚ್ಚಗೆ ತರುತ್ತೇನೆ.",
+    "exact": true,
+    "new_reply": true,
+    "packets": 3,
+    "seconds": 4.384,
+    "first_packet_ms": 471,
+    "realtime_factor": 0.246
+  }
+]

@@ -80,6 +80,7 @@ namespace Paridhwani {
    }
    StartConversation(npc);
    if(!TeaBenchmark)yield break;
+   if(JointTeaEnabled){yield return CheckJointTea(baselineFrames,activeFrames);yield break;}
    for(int step=0;step<3;step++){
     float deadline=Time.realtimeSinceStartup+45;
     while(CompletedVoiceLines<=step && Time.realtimeSinceStartup<deadline){activeFrames.Add(Time.unscaledDeltaTime);yield return null;}
