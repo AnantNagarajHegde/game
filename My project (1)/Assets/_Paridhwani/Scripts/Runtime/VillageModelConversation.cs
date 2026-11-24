@@ -113,7 +113,7 @@ namespace Paridhwani {
    PlayVillageSpeech(line,ActiveNpc?ActiveNpc.displayName:Turn?.Speaker??"Villager");
   }
   async void PlayVillageSpeech(TeaLine line,string speaker) {
-   if(line==null || IsAutomatedTest || !Application.isFocused || (Progress!=null && Progress.masterVolume<=0) ||
+   if(line==null || IsAutomatedTest || (!Application.isFocused && !TeaBenchmark) || (Progress!=null && Progress.masterVolume<=0) ||
       (ReferenceEquals(line,villageLastSpokenLine) && speaker==villageLastSpokenSpeaker))return;
    string speech=string.IsNullOrWhiteSpace(line.Kannada)?line.English:line.Kannada;
    string language=string.IsNullOrWhiteSpace(line.Kannada)?"en-IN":"kn-IN";
@@ -122,6 +122,9 @@ namespace Paridhwani {
    int generation=++villageSpeechGeneration;
    var cancel=new CancellationTokenSource();cancel.CancelAfter(35000);villageSpeechCancel=cancel;
    try {
+    if(TeaVoiceEnabled && ActiveNpc && ActiveNpc.role==VillageNpcRole.TeaVendor && language=="kn-IN"){
+     await SpeakTeaPhrases(line,speaker,cancel.Token);return;
+    }
     var data=await VillageConversationClient.Speech(speaker,language,speech,cancel.Token);
     if(!VillageSpeechPcm.TryDecode(data,out var samples,out int rate))throw new InvalidDataException("Invalid speech audio");
     if(!this || generation!=villageSpeechGeneration || cancel.IsCancellationRequested || !Application.isFocused)return;
@@ -129,12 +132,13 @@ namespace Paridhwani {
     if(!villageSpeechClip || !villageSpeechClip.SetData(samples,0))throw new InvalidDataException("Could not load speech audio");
     if(!villageSpeechSource){villageSpeechSource=gameObject.AddComponent<AudioSource>();villageSpeechSource.playOnAwake=false;villageSpeechSource.spatialBlend=0;}
     villageSpeechSource.clip=villageSpeechClip;villageSpeechSource.volume=1;villageSpeechSource.Play();
-   } catch(Exception) {
+   } catch(OperationCanceledException) {} catch(Exception error) {
+    if(TeaVoiceEnabled)Debug.LogWarning("TEA_VOICE_FAILURE "+error.GetType().Name);
     // Speech is optional. Its failure must not overwrite conversation guidance.
    } finally {if(villageSpeechCancel==cancel)villageSpeechCancel=null;cancel.Dispose();}
   }
   void StopVillageSpeech() {
-   villageSpeechGeneration++;var cancel=villageSpeechCancel;villageSpeechCancel=null;
+   RestoreTeaCaption();villageSpeechGeneration++;var cancel=villageSpeechCancel;villageSpeechCancel=null;
    if(cancel!=null)try{cancel.Cancel();}catch(ObjectDisposedException){}
    if(villageSpeechSource){villageSpeechSource.Stop();villageSpeechSource.clip=null;}
    if(villageSpeechClip){Destroy(villageSpeechClip);villageSpeechClip=null;}

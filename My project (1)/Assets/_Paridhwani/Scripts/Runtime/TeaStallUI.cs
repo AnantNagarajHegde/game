@@ -13,7 +13,7 @@ namespace Paridhwani
         VisualElement root,modal,prompt;
         TeaTurn displayedTurn;
         bool displayedPhrases;
-        sealed class ChatMessage { public bool player,pending,failed; public TeaLine line;public string deliveryId; }
+        sealed class ChatMessage { public bool player,pending,failed; public TeaLine line;public string deliveryId,caption; }
         readonly System.Collections.Generic.List<ChatMessage> chatMessages=new System.Collections.Generic.List<ChatMessage>();
         TeaTurn chatTurn; TeaLine chatLine; bool chatAutoScroll; Vector2 chatScrollPosition;
         public void BeginChat() {chatMessages.Clear();chatTurn=null;chatLine=null;displayedTurn=null;chatAutoScroll=true;chatScrollPosition=Vector2.zero;}
@@ -33,9 +33,16 @@ namespace Paridhwani
         void RecordChatReply(TeaTurn turn,TeaLine line) {
             if(line==null)return;
             if(!object.ReferenceEquals(chatTurn,turn) || (!object.ReferenceEquals(line,turn.Line) && !object.ReferenceEquals(chatLine,line))) {
-                chatMessages.Add(new ChatMessage{line=new TeaLine(line.Kannada,line.Roman,line.English)});chatTurn=turn;chatLine=line;chatAutoScroll=true;
+                chatMessages.Add(new ChatMessage{line=line});chatTurn=turn;chatLine=line;chatAutoScroll=true;
                 session.SpeakConversationLine(line);
             }
+        }
+        internal void SetTeaCaption(TeaLine line,string caption) {
+            var message=chatMessages.FindLast(item=>!item.player && ReferenceEquals(item.line,line));
+            if(message==null)return;
+            message.caption=caption;
+            var label=root?.Q("dialogue-speech")?.Q<Label>(className:"kannada");
+            if(label!=null && ReferenceEquals(label.userData,line))label.text=caption;
         }
         public void RecordCurrentChatReply(TeaLine line){RecordChatReply(session.Turn,line);}
         Label objective,saveStatus,promptText,routeHint,storyDay,placeDay;
@@ -219,6 +226,10 @@ namespace Paridhwani
             foreach(var message in chatMessages) {
                 var bubble=new VisualElement();Class(bubble,"chat-message");Class(bubble,message.player?"chat-player":"chat-npc");scroll.Add(bubble);
                 Add(bubble,message.player?"YOU":session.ConversationTitle,"chat-speaker");Line(bubble,message.line);
+                if(!message.player){
+                    var label=bubble.Q<Label>(className:"kannada");
+                    if(label!=null){label.userData=message.line;if(message.caption!=null)label.text=message.caption;}
+                }
                 if(message.player && (message.pending || message.failed))
                     Add(bubble,message.pending && session.TeaAssessmentBusy?"Sending...":"Not delivered · retry","chat-delivery");
                 latestMessage=bubble;

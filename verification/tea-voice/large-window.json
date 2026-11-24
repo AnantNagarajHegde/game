@@ -1,0 +1,41 @@
+{
+  "resolution": [
+    1920,
+    1080
+  ],
+  "text_scale": "1.3",
+  "baseline_rss_bytes": {
+    "editor": 6639691776,
+    "engine": 106389504,
+    "player": 974974976
+  },
+  "peak_sampled_rss_bytes": {
+    "editor": 6655287296,
+    "engine": 106389504,
+    "player": 1035522048,
+    "text": 390139904,
+    "speech": 250560512
+  },
+  "peak_extra_rss_bytes": 663973888,
+  "model_process_peak_working_sets": {
+    "text": 417738752,
+    "speech": 250564608
+  },
+  "samples": 98,
+  "limit_bytes": 1000000000,
+  "conservative_extra_bytes": 744445952,
+  "captions": [
+    "TEA_CAPTION samples=341 prefix=9",
+    "TEA_CAPTION samples=341 prefix=18",
+    "TEA_FIRST_AUDIO_MS 2402",
+    "TEA_CAPTION samples=341 prefix=5",
+    "TEA_CAPTION samples=341 prefix=26",
+    "TEA_CAPTION samples=341 prefix=10",
+    "TEA_CAPTION samples=341 prefix=20",
+    "TEA_FRAME_P95_MS baseline=13.89369 active=13.89339",
+    "TEA_BENCH_OK lines=3 phrases=6"
+  ],
+  "inference": [
+    "TEXT_INFERENCE intent=1 chars=26"
+  ]
+}

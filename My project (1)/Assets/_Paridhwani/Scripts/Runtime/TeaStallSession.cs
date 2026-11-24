@@ -89,7 +89,7 @@ namespace Paridhwani
 #endif
             bool locationProfile=VillageLocationProfile.Requested;
             IsAutomatedTest=smoke || locationProfile;
-            IsIsolatedTestVisit=smoke || locationProfile;
+            IsIsolatedTestVisit=smoke || locationProfile || TeaDemo || TeaBenchmark;
 #if UNITY_EDITOR
             IsIsolatedTestVisit|=UnityEditor.SessionState.GetBool(IsolatedTestKey,false);
 #endif
@@ -107,7 +107,8 @@ namespace Paridhwani
             player.Restore(Progress.position,Progress.heading);returnTrail.Reset(Progress.position);
             CaptureActorOrigins(); BindCharacterPresentation(); ApplyState(); ui.Bind(this); ready=true; nextSave=Time.unscaledTime+15;
             SetCursor(false);
-            if(!smoke && !locationProfile) { ui.ShowMainMenu(); SetCursor(true); }
+            if(TeaDemo || TeaBenchmark)StartCoroutine(OpenVoiceDemo());
+            else if(!smoke && !locationProfile) { ui.ShowMainMenu(); SetCursor(true); }
             if(Debug.isDebugBuild)
             {
                 if(Array.IndexOf(Environment.GetCommandLineArgs(),"-village-profile")>=0) gameObject.AddComponent<VillageFrameProfile>();
@@ -391,6 +392,7 @@ namespace Paridhwani
         }
         void OnApplicationFocus(bool focused)
         {
+            if(!focused && TeaBenchmark)return;
             if(!focused){StopControllerHaptics();StopVillageSpeech();}
             if(focused || !ready) return;
             Save();
