@@ -56,6 +56,8 @@ venv/
 !.env.example
 !.env.sample
 !.env.template
+village_backend/.tts-cache/
+sarvam-samples/
 
 # Operating system files
 .DS_Store

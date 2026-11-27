@@ -1,5 +1,7 @@
 """Local LLM conversation service; story effects remain owned by Unity."""
 import argparse
+import base64
+import hashlib
 import hmac
 import json
 import math
@@ -26,6 +28,15 @@ MAX_AUDIO = 4 * 1024 * 1024
 MODEL_CALL_TIMEOUT = 20
 MODEL_TURN_TIMEOUT = 45
 PROVIDER_USER_AGENT = "Paridhwani/2.0"
+SARVAM_TTS_URL = "https://api.sarvam.ai/text-to-speech"
+SARVAM_SPEAKERS = {"manjunatha": "chetan_kn_conversation", "somanna": "chetan_kn_conversation",
+                   "basavaraju": "chetan_kn_conversation", "giri": "chetan_kn_conversation",
+                   "gurumurthy": "chetan_kn_conversation", "shresthi": "chetan_kn_conversation",
+                   "kencha": "chetan_kn_conversation", "chetan": "chetan_kn_conversation",
+                   "chetan_kn_conversation": "chetan_kn_conversation", "ananya": "chaitra_kn_conversation",
+                   "shanthakka": "chaitra_kn_conversation", "rathnamma": "chaitra_kn_conversation",
+                   "kamalamma": "chaitra_kn_conversation", "chaitra": "chaitra_kn_conversation",
+                   "chaitra_kn_conversation": "chaitra_kn_conversation"}
 
 PROFILES = {
     "manjunatha": "You run the tea stall in Kalyanapura and welcome visitors warmly.",
@@ -361,6 +372,51 @@ def azure_speech(obj, api_key, region):
     return audio
 
 
+def sarvam_speech(obj, api_key, cache_dir, model="bulbul:v4-flash"):
+    """Synthesize Kannada through Sarvam and persist exact requests in a local cache."""
+    if not isinstance(obj, dict) or set(obj) != {"speaker", "language", "text"}:
+        raise ValueError("invalid speech request")
+    if any(not isinstance(obj[k], str) for k in obj):
+        raise ValueError("invalid speech fields")
+    text = obj["text"].strip()
+    if not 0 < len(text) <= 2500 or len(obj["speaker"]) > 128 or obj["language"] != "kn-IN":
+        raise ValueError("invalid speech content")
+    if not api_key:
+        raise OSError("speech service not configured")
+    speaker_key = obj["speaker"].strip().casefold()
+    voice = SARVAM_SPEAKERS.get(speaker_key, "chetan_kn_conversation")
+    cache_key = hashlib.sha256((model + "\0" + voice + "\0kn-IN\0" + text).encode("utf-8")).hexdigest()
+    cache_file = os.path.join(cache_dir, cache_key + ".wav")
+    try:
+        with open(cache_file, "rb") as cached:
+            audio = cached.read(MAX_AUDIO + 1)
+        if len(audio) <= MAX_AUDIO and len(audio) >= 44 and audio[:4] == b"RIFF" and audio[8:12] == b"WAVE":
+            return audio
+    except OSError:
+        pass
+    payload = json.dumps({"text": text, "language_code": "kn-IN", "model": model, "speaker": voice,
+                          "speech_sample_rate": 24000, "output_audio_codec": "wav"}).encode("utf-8")
+    req = urllib.request.Request(SARVAM_TTS_URL, data=payload,
+                                 headers={"api-subscription-key": api_key, "Content-Type": "application/json",
+                                          "Accept": "application/json", "User-Agent": PROVIDER_USER_AGENT}, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as response:
+        raw = response.read(MAX_BODY + MAX_AUDIO * 2)
+    envelope = json.loads(raw.decode("utf-8"))
+    audios = envelope.get("audios")
+    if not isinstance(audios, list) or not audios or not isinstance(audios[0], str):
+        raise ValueError("invalid speech response")
+    audio = base64.b64decode(audios[0], validate=True)
+    if len(audio) > MAX_AUDIO or len(audio) < 44 or audio[:4] != b"RIFF" or audio[8:12] != b"WAVE":
+        raise ValueError("invalid speech audio")
+    os.makedirs(cache_dir, exist_ok=True)
+    try:
+        with open(cache_file, "xb") as cached:
+            cached.write(audio)
+    except FileExistsError:
+        pass
+    return audio
+
+
 def upstream_http_failure(status, service, body=b""):
     """Classify provider HTTP failures without exposing response bodies or credentials."""
     if status == 403 and re.search(rb"\berror(?:\s+code)?\s*:?\s*1010\b", body, re.IGNORECASE):
@@ -433,6 +489,10 @@ def make_handler(model, provider="ollama"):
     api_key = provider_api_key(provider)
     speech_key = os.environ.get("AZURE_SPEECH_KEY", "")
     speech_region = os.environ.get("AZURE_SPEECH_REGION", "")
+    speech_provider = os.environ.get("PARIDHWANI_TTS_PROVIDER", "azure").strip().casefold()
+    sarvam_key = os.environ.get("SARVAM_API_KEY", "")
+    sarvam_model = os.environ.get("SARVAM_TTS_MODEL", "bulbul:v4-flash")
+    speech_cache = os.environ.get("PARIDHWANI_TTS_CACHE", os.path.join(os.path.dirname(__file__), ".tts-cache"))
     access_token = os.environ.get("PARIDHWANI_SERVICE_TOKEN", "")
     slots = BoundedSemaphore(4)
     class Handler(BaseHTTPRequestHandler):
@@ -488,7 +548,12 @@ def make_handler(model, provider="ollama"):
                         raise ValueError("truncated request")
                     obj = json.loads(raw.decode("utf-8"))
                     if self.path == SPEECH_ROUTE:
-                        audio = azure_speech(obj, speech_key, speech_region)
+                        if speech_provider == "sarvam":
+                            audio = sarvam_speech(obj, sarvam_key, speech_cache, sarvam_model)
+                        elif speech_provider == "azure":
+                            audio = azure_speech(obj, speech_key, speech_region)
+                        else:
+                            raise OSError("speech service not configured")
                         self.send_response(200)
                         self.send_header("Content-Type", "audio/wav")
                         self.send_header("Cache-Control", "no-store")
@@ -541,8 +606,9 @@ def configuration_status(model, provider, api_key=None):
         api_key = provider_api_key(provider)
     return {"version": 2, "provider": provider,
             "model_configured": bool(model and (provider == "ollama" or api_key)),
-            "speech_configured": bool(os.environ.get("AZURE_SPEECH_KEY") and
-                                      re.fullmatch(r"[a-z0-9-]{2,40}", os.environ.get("AZURE_SPEECH_REGION", ""))),
+            "speech_configured": (bool(os.environ.get("SARVAM_API_KEY")) if os.environ.get("PARIDHWANI_TTS_PROVIDER", "azure").strip().casefold() == "sarvam"
+                                  else bool(os.environ.get("AZURE_SPEECH_KEY") and
+                                            re.fullmatch(r"[a-z0-9-]{2,40}", os.environ.get("AZURE_SPEECH_REGION", "")))),
             "authentication_required": bool(os.environ.get("PARIDHWANI_SERVICE_TOKEN"))}
 
 

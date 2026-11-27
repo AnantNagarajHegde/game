@@ -1,7 +1,7 @@
 # Hosted conversation and spoken replies
 
 The default launcher uses Groq's `qwen/qwen3.8-27b` model. A small Python HTTP
-bridge runs beside Unity; model inference and Azure speech synthesis run remotely.
+bridge runs beside Unity; model inference and selected speech synthesis run remotely.
 The existing story and saved-progress rules remain in Unity.
 
 ## Set up the local bridge
@@ -21,14 +21,24 @@ the key, including on Linux/container hosts. Restart the bridge after changing
 the saved key. From the repository root, `groq.ps1` starts the same service.
 
 For OpenRouter, set `OPENROUTER_API_KEY` and launch with `-Provider openrouter`
-and `-Model '<provider/model-id>'`. For NPC speech, set `AZURE_SPEECH_KEY` and
-`AZURE_SPEECH_REGION` in the terminal before starting the bridge.
+and `-Model '<provider/model-id>'`. Sarvam Kannada speech is selected with
+`$env:PARIDHWANI_TTS_PROVIDER = 'sarvam'` and `SARVAM_API_KEY` before starting
+the bridge. It uses Bulbul v4 Flash by default; set `SARVAM_TTS_MODEL` only when
+choosing another supported Sarvam TTS model. The key stays in the backend
+environment and is never sent to Unity. A local disk cache avoids repeated API
+calls for the same text, voice and model (`village_backend/.tts-cache`; override
+with `PARIDHWANI_TTS_CACHE`). Azure remains available with
+`PARIDHWANI_TTS_PROVIDER=azure`, `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION`.
 
 The configuration check makes no provider calls and prints only configuration
 booleans and the provider name. It does not prove that credentials work, that the
 model is available, or that its Kannada is correct. Missing speech configuration
 keeps text chat usable. Keys belong in the backend's environment, never in Unity
 assets, commits, or a distributed game. Provider calls can incur charges.
+Sarvam currently accepts Kannada in this integration; English lines should use
+Azure or remain text-only. The configured Sarvam voice map uses Chetan for male
+NPCs and Chaitra for female NPCs. These are voice assignments by character
+group, not verified age or personality matches.
 
 Speech follows each newly added NPC chat line, including an initial greeting or
 an authored scene line. Refreshing the chat or changing a translation aid does
@@ -47,8 +57,9 @@ own 30-second timeout and cannot apply story actions.
 The backend can run on an existing container host behind its HTTPS reverse proxy.
 Build from `game/village_backend`; the Dockerfile copies only `server.py`, and
 requires no Python packages. The container build has not been verified here.
-Supply `GROQ_API_KEY`, `PARIDHWANI_MODEL`, `AZURE_SPEECH_KEY`, and
-`AZURE_SPEECH_REGION` as host runtime secrets. Set `PORT` to the host's service
+Supply `GROQ_API_KEY`, `PARIDHWANI_MODEL`, and the selected speech provider's
+secrets (`SARVAM_API_KEY` with `PARIDHWANI_TTS_PROVIDER=sarvam`, or
+`AZURE_SPEECH_KEY` plus `AZURE_SPEECH_REGION`) as host runtime secrets. Set `PORT` to the host's service
 port, or expose its default port 8767. Configure `/health` as the health check.
 
 Set an additional `PARIDHWANI_SERVICE_TOKEN` on the host: 32 to 256 random URL-safe
@@ -131,7 +142,9 @@ Start a fresh or arrival practice visit and talk to Manjunatha:
 These are real-model acceptance checks, not claims of measured language quality.
 A Kannada speaker should review both script and Romanised output before a demo.
 
-Provider references: [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs)
+Provider references: [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs),
+[Sarvam TTS REST API](https://docs.sarvam.ai/api/api-guides-tutorials/text-to-speech/rest-api),
+[Sarvam voices](https://docs.sarvam.ai/api/api-guides-tutorials/text-to-speech/voices),
 and [Azure text-to-speech REST API](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech).
 Diagnostic references: [Groq error codes](https://console.groq.com/docs/errors),
 [Groq model permissions](https://console.groq.com/docs/model-permissions),

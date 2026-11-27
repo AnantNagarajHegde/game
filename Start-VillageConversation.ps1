@@ -106,8 +106,19 @@ if ($Model -notin $names) {
 }
 
 Write-Host "Starting the village conversation bridge with $Provider / $Model. Keep this window open while playing."
-if (-not $env:AZURE_SPEECH_KEY -or -not $env:AZURE_SPEECH_REGION) {
-    Write-Host 'NPC speech is not configured. Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to enable spoken replies.' -ForegroundColor Yellow
+if (-not $env:PARIDHWANI_TTS_PROVIDER) { $env:PARIDHWANI_TTS_PROVIDER = 'azure' }
+if ($env:PARIDHWANI_TTS_PROVIDER -eq 'sarvam') {
+    if (-not $env:SARVAM_API_KEY) { Write-Host 'Set SARVAM_API_KEY before starting Sarvam speech.' -ForegroundColor Yellow }
+    else {
+        $sarvamTtsModel = if ($env:SARVAM_TTS_MODEL) { $env:SARVAM_TTS_MODEL } else { 'bulbul:v4-flash' }
+        Write-Host "NPC speech provider: Sarvam ($sarvamTtsModel)."
+    }
+} elseif ($env:PARIDHWANI_TTS_PROVIDER -eq 'azure') {
+    if (-not $env:AZURE_SPEECH_KEY -or -not $env:AZURE_SPEECH_REGION) {
+        Write-Host 'NPC speech is not configured. Set SARVAM_API_KEY and PARIDHWANI_TTS_PROVIDER=sarvam, or configure Azure Speech.' -ForegroundColor Yellow
+    }
+} else {
+    Write-Host 'PARIDHWANI_TTS_PROVIDER must be sarvam or azure; speech requests will be unavailable.' -ForegroundColor Yellow
 }
 & $python -B $bridge --provider $Provider --model $Model --port $Port
 if ($LASTEXITCODE -ne 0) {
