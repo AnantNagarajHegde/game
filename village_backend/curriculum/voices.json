@@ -1,0 +1,10 @@
+{
+ "note": "One Bulbul v4 Flash voice per speaker. Run: python tools/voices.py --list  to see every Kannada voice ID, and  python tools/voices.py --try <voice> to hear one. Keys are NPC display names in lower case. pace is 0.5 to 2.0.",
+ "speakers": {
+  "manjunatha": {"voice": "chetan_kn_conversation", "pace": 1.0},
+  "somanna": {"voice": "chetan_kn_conversation", "pace": 0.85},
+  "shanthakka": {"voice": "chaitra_kn_conversation", "pace": 1.0},
+  "notebook": {"voice": "chaitra_kn_conversation", "pace": 0.95},
+  "notebook_slow": {"voice": "chaitra_kn_conversation", "pace": 0.7}
+ }
+}

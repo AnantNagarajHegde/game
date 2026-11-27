@@ -301,7 +301,7 @@ namespace Paridhwani
         }
         public void ShowNotebook()
         {
-            var card=Card("notebook","notebook");card.style.height=Length.Percent(85);
+            var card=Card("notebook","notebook");card.style.height=Length.Percent(85);notebookWords.Clear();
             var header=new VisualElement(); Class(header,"row"); card.Add(header);
             Add(header,"YOUR FIELD NOTEBOOK","eyebrow"); Button(header,session.NotebookBackLabel,session.Close,"quiet-button").name="notebook-back";
             Add(card,session.Progress.epilogueStarted?"The reopened library":session.Progress.fridayFinaleStarted?"Friday at the library court":session.Progress.thursdayStarted?"Thursday morning":"The first morning","title");
@@ -412,13 +412,20 @@ namespace Paridhwani
             if(session.Progress.rathnammaAccountKnown) { Add(scroll,"RATHNAMMA / TUESDAY MORNING","section-title"); Add(scroll,"Reports seeing Ananya board Route 14. Did not see where she got off.","body"); Word(scroll,"ಬಸ್ಸು ಹತ್ತಿದಳು","Bassu hattidalu","She boarded the bus"); }
             if(session.Progress.witnessAccountsCompared) Add(scroll,"Witness comparison: boarding had an eyewitness account; those witnesses could not establish arrival or present safety.","body");
             if(session.Progress.guddaFamilyLeadKnown) Add(scroll,"Rathnamma: Ananya asked about Shankare Gowda's family at Gudda Mane. Check this name against Somanna's records next.","body");
+            foreach(var learned in CurriculumData.WordsFor(session.Progress))
+                if(!notebookWords.Contains(learned.Kn))Word(scroll,learned.Kn,learned.Ro,learned.En);
             OrganizeNotebook(card,scroll);
         }
+        readonly System.Collections.Generic.HashSet<string> notebookWords=new System.Collections.Generic.HashSet<string>();
         void Word(VisualElement parent,string kn,string ro,string en)
         {
             var row=new VisualElement(); Class(row,"word-row"); parent.Add(row);
             Kannada(row,kn,"word-kn"); var text=new VisualElement(); row.Add(text);
             Add(text,ro,"word-ro"); Add(text,en,"small");
+            notebookWords.Add(kn);
+            var listen=new VisualElement(); Class(listen,"row"); row.Add(listen); listen.style.marginLeft=StyleKeyword.Auto;
+            Button(listen,"Listen",()=>session.SpeakNotebook(kn,false),"quiet-button");
+            Button(listen,"Slow",()=>session.SpeakNotebook(kn,true),"quiet-button");
         }
         public void ShowArrival()
         {

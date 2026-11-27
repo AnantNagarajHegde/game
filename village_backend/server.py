@@ -373,20 +373,37 @@ def azure_speech(obj, api_key, region):
     return audio
 
 
+VOICES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "curriculum", "voices.json")
+
+
+def sarvam_voice(speaker_key):
+    """Voice and pace for a speaker: curriculum/voices.json first, then the gender map above."""
+    try:
+        with open(VOICES_PATH, encoding="utf-8") as handle:
+            entry = json.load(handle).get("speakers", {}).get(speaker_key)
+        if isinstance(entry, dict) and isinstance(entry.get("voice"), str) and entry["voice"]:
+            pace = float(entry.get("pace", 1.0))
+            if 0.5 <= pace <= 2.0:
+                return entry["voice"], pace
+    except (OSError, ValueError):
+        pass
+    return SARVAM_SPEAKERS.get(speaker_key, "chetan_kn_conversation"), 1.0
+
+
 def sarvam_speech(obj, api_key, cache_dir, model="bulbul:v4-flash"):
-    """Synthesize Kannada through Sarvam and persist exact requests in a local cache."""
+    """Synthesize Kannada (or Indian English) through Sarvam and persist exact requests in a local cache.
+    A cached line plays without a key or internet, which is how the demo runs offline."""
     if not isinstance(obj, dict) or set(obj) != {"speaker", "language", "text"}:
         raise ValueError("invalid speech request")
     if any(not isinstance(obj[k], str) for k in obj):
         raise ValueError("invalid speech fields")
     text = obj["text"].strip()
-    if not 0 < len(text) <= 2500 or len(obj["speaker"]) > 128 or obj["language"] != "kn-IN":
+    language = obj["language"]
+    if not 0 < len(text) <= 2500 or len(obj["speaker"]) > 128 or language not in ("kn-IN", "en-IN"):
         raise ValueError("invalid speech content")
-    if not api_key:
-        raise OSError("speech service not configured")
     speaker_key = obj["speaker"].strip().casefold()
-    voice = SARVAM_SPEAKERS.get(speaker_key, "chetan_kn_conversation")
-    cache_key = hashlib.sha256((model + "\0" + voice + "\0kn-IN\0" + text).encode("utf-8")).hexdigest()
+    voice, pace = sarvam_voice(speaker_key)
+    cache_key = hashlib.sha256((model + "\0" + voice + "\0" + language + "\0" + f"{pace:.2f}" + "\0" + text).encode("utf-8")).hexdigest()
     cache_file = os.path.join(cache_dir, cache_key + ".wav")
     try:
         with open(cache_file, "rb") as cached:
@@ -395,8 +412,13 @@ def sarvam_speech(obj, api_key, cache_dir, model="bulbul:v4-flash"):
             return audio
     except OSError:
         pass
-    payload = json.dumps({"text": text, "language_code": "kn-IN", "model": model, "speaker": voice,
-                          "speech_sample_rate": 24000, "output_audio_codec": "wav"}).encode("utf-8")
+    if not api_key:
+        raise OSError("speech service not configured")
+    request = {"text": text, "language_code": language, "model": model, "speaker": voice,
+               "speech_sample_rate": 24000, "output_audio_codec": "wav"}
+    if abs(pace - 1.0) > 1e-6:
+        request["pace"] = pace
+    payload = json.dumps(request).encode("utf-8")
     req = urllib.request.Request(SARVAM_TTS_URL, data=payload,
                                  headers={"api-subscription-key": api_key, "Content-Type": "application/json",
                                           "Accept": "application/json", "User-Agent": PROVIDER_USER_AGENT}, method="POST")
@@ -618,7 +640,7 @@ def configuration_status(model, provider, api_key=None):
         api_key = provider_api_key(provider)
     return {"version": 2, "provider": provider,
             "model_configured": bool(model and (provider == "ollama" or api_key)),
-            "speech_configured": (bool(os.environ.get("SARVAM_API_KEY")) if os.environ.get("PARIDHWANI_TTS_PROVIDER", "azure").strip().casefold() == "sarvam"
+            "speech_configured": (True if os.environ.get("PARIDHWANI_TTS_PROVIDER", "azure").strip().casefold() == "sarvam"
                                   else bool(os.environ.get("AZURE_SPEECH_KEY") and
                                             re.fullmatch(r"[a-z0-9-]{2,40}", os.environ.get("AZURE_SPEECH_REGION", "")))),
             "authentication_required": bool(os.environ.get("PARIDHWANI_SERVICE_TOKEN"))}

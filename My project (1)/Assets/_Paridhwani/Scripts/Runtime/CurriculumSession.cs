@@ -156,6 +156,14 @@ namespace Paridhwani
             ui.ShowConversation();
         }
 
+        // Notebook pronunciation: "notebook" and "notebook_slow" voices are set in curriculum/voices.json.
+        public void SpeakNotebook(string kannada, bool slow)
+        {
+            if (string.IsNullOrWhiteSpace(kannada)) return;
+            curriculumSpeech.Clear();
+            PlayVillageSpeech(new TeaLine(kannada, "", ""), slow ? "notebook_slow" : "notebook");
+        }
+
         // NPC lines in curriculum chats play one after another instead of cutting each other off.
         void QueueCurriculumSpeech(TeaLine line, string speaker)
         {

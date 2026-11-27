@@ -56,6 +56,12 @@ namespace Paridhwani
         public CurriculumLevel(int number, string name, string[] quests, string next) { Number = number; Name = name; Quests = quests; Next = next; }
     }
 
+    public sealed class CurriculumWord
+    {
+        public readonly string Id, Kn, Ro, En, FirstQuest;
+        public CurriculumWord(string id, string kn, string ro, string en, string firstQuest) { Id = id; Kn = kn; Ro = ro; En = en; FirstQuest = firstQuest; }
+    }
+
     public sealed class CurriculumNpcInfo
     {
         public readonly string Key, Display, Start;
@@ -77,6 +83,15 @@ namespace Paridhwani
         public static CurriculumQuest Quest(string id) { foreach (var q in Quests) if (q.Id == id) return q; return null; }
         public static CurriculumLevel Level(int number) { foreach (var l in Levels) if (l.Number == number) return l; return null; }
         public static CurriculumNpcInfo Npc(VillageNpcRole role) { foreach (var n in Npcs) if (n.Role == role) return n; return null; }
+        // Notebook words unlocked by completed quests or collected/read in word tasks.
+        public static List<CurriculumWord> WordsFor(TeaProgress p)
+        {
+            var result = new List<CurriculumWord>();
+            if (p == null || !CurriculumConversation.Enabled) return result;
+            CurriculumConversation.EnsureLists(p);
+            foreach (var w in Words) if (p.questsDone.Contains(w.FirstQuest) || p.curriculumWords.Contains(w.Id)) result.Add(w);
+            return result;
+        }
     }
 
     // Chapters 1 to 3 follow the learning-design curriculum (levels 1 to 3).

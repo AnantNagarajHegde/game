@@ -81,6 +81,19 @@ Use **Paridhwani > Play Isolated Test Visit** so the main save stays clean.
 | 13 | Stop the backend and type an answer | "The language engine is not running..." and the phrases open |
 | 14 | Leave in the middle of a level and talk again | Resumes at the same step |
 
+## Voice (Bulbul v4 Flash, cached)
+
+| File | Purpose |
+|---|---|
+| `village_backend/curriculum/voices.json` | One voice and pace per speaker (`manjunatha`, `somanna`, `shanthakka`, `notebook`, `notebook_slow`) |
+| `village_backend/tools/voices.py` | `--list` prints every voice ID Sarvam accepts; `--try <voice>` writes a sample WAV |
+| `village_backend/warm_tts_cache.py` | Records every level 1 to 3 line, reaction, fallback and notebook word (normal and slow) once. About 336 lines, about Rs 6 |
+| `start-demo.sh` | Starts the backend with Sarvam voice; `--warm` records missing lines first |
+| `village_backend/time_demo.py` | Measures the matcher path, cached voice and (with `--live`) live replies against the targets |
+
+Speech is cache-first: a recorded line plays with no key and no internet. Only live replies and lines that were never
+recorded need the network. The notebook's Words & phrases tab has Listen and Slow buttons on every word.
+
 ## Lines that need Kannada review
 
 These are new lines (everything else is copied from the JSON or the existing game).
