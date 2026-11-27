@@ -4,6 +4,7 @@ Every authored Phrase must pass the real matcher and map to its own choice.
 """
 import json
 import os
+import sys
 import threading
 import unittest
 import urllib.request
@@ -173,6 +174,14 @@ class LiveAndFallback(unittest.TestCase):
     def test_parse_json_object(self):
         self.assertEqual(ce.parse_json_object('```json\n{"kannada":"ಸರಿ"}\n```'), {"kannada": "ಸರಿ"})
         self.assertIsNone(ce.parse_json_object("no json"))
+
+
+class GeneratedUnityData(unittest.TestCase):
+    def test_unity_data_is_up_to_date(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tools"))
+        import gen_curriculum_cs as gen
+        current = gen.TARGET.read_text(encoding="utf-8") if gen.TARGET.exists() else ""
+        self.assertEqual(current, gen.generate(engine()), "Run: python tools/gen_curriculum_cs.py")
 
 
 class Validation(unittest.TestCase):

@@ -106,6 +106,8 @@ namespace Paridhwani
             return reason+" Your message is saved; you can retry or choose a phrase.";
         }
 
+        public void SetFeedback(string text) { Feedback=text??""; }
+        public void ShowPhrases() { PhrasesVisible=true; }
         public void PreparationFailed() { Feedback=FailureMessage(DialogueFailure.InvalidRequest);PhrasesVisible=true; }
 
         public void Remember(string speaker, string player, string npc)

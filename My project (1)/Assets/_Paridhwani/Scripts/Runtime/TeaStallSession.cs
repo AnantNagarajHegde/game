@@ -235,7 +235,7 @@ namespace Paridhwani
             if(!npc || !npc.eyes) return;
             PlayControllerFeedback(ControllerFeedback.Interaction);
             activityHistory.Clear(); notebookActivity=VillageActivity.None; returnToNotebook=false; activityChanged=false;
-            ui.BeginChat();NewDialogueTurn(); ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress);
+            ui.BeginChat();NewDialogueTurn(); ActiveNpc=npc; Provider=CreateConversation(npc); Turn=Provider.Start(Progress); CurriculumAfterTurn();
             player.BeginConversation(npc.eyes); ui.ShowConversation(); SetCursor(true);
         }
         public void Choose(int index) {Choose(index,true);}
@@ -248,7 +248,7 @@ namespace Paridhwani
                 OpenActivity(Turn.Choices[index].Activity); return;
             }
             NewDialogueTurn(); bool wasThursday=Progress.thursdayStarted;
-            Turn=Provider.Reply(Turn,index,Progress); ApplyState(); Save();
+            Turn=Provider.Reply(Turn,index,Progress); ApplyState(); Save(); CurriculumAfterTurn();
             if(!wasThursday && Progress.thursdayStarted) { ui.ShowRestTransition(); return; }
             if(Turn==null && keepOpen) Turn=new TeaTurn("conversation_end","",""," "){Speaker=ActiveNpc?ActiveNpc.displayName:"Villager"};
             conversation.Line=reply;

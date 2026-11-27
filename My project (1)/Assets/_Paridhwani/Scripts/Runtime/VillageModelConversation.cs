@@ -68,6 +68,7 @@ namespace Paridhwani {
    return result.ToArray();
   }
   async void AskVillageModel() {
+   if(Provider is CurriculumConversation){AskCurriculum();return;}
    if(Turn==null || !ui || ui.Mode!="conversation" || TeaAssessmentBusy || string.IsNullOrWhiteSpace(TeaAssessmentInput))return;
    ui.CloseTeaKeyboard();StopVillageSpeech();
    var turn=Turn;var provider=Provider;var npc=ActiveNpc;
@@ -120,6 +121,8 @@ namespace Paridhwani {
 
   public void SpeakConversationLine(TeaLine line) {
    if(JointTeaEnabled && ReferenceEquals(line,jointDisplayLine))return;
+   if(line==null || line.Silent)return;
+   if(Provider is CurriculumConversation){QueueCurriculumSpeech(line,ActiveNpc?ActiveNpc.displayName:Turn?.Speaker??"Villager");return;}
    PlayVillageSpeech(line,ActiveNpc?ActiveNpc.displayName:Turn?.Speaker??"Villager");
   }
   async void PlayVillageSpeech(TeaLine line,string speaker) {

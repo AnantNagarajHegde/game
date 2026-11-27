@@ -14,6 +14,7 @@ namespace Paridhwani
             if(npc.role==VillageNpcRole.AutoDriver || npc.role==VillageNpcRole.CheckpostDriver) return new TravelConversation(AtCheckpost);
             if(npc.role==VillageNpcRole.Ananya && Progress.deedRetrieved) return new ReturnConversation();
             if(npc.role==VillageNpcRole.ForestGuard) return new CheckpostConversation(ridgeRouteChecked);
+            if(CurriculumConversation.Handles(npc.role,Progress)) return new CurriculumConversation(npc.role);
             return npc.role==VillageNpcRole.Librarian && Progress.guddaFamilyLeadKnown?new ArchiveConversation():npc.CreateProvider();
         }
         bool AtCheckpost => CheckpostInvestigation.IsCheckpostPosition(player.transform.position);

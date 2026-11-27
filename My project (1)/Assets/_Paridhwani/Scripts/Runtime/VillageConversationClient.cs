@@ -190,6 +190,13 @@ namespace Paridhwani
                 if(item==null || !TextOk(item.Player,1000) || !TextOk(item.Npc,1000))throw new DialogueRequestException(DialogueFailure.InvalidRequest);
         }
 
+        public static async Task<byte[]> CurriculumTurn(byte[] body, CancellationToken token)
+        {
+            var connection=VillageServiceConnection.FromEnvironment();
+            var endpoint=new Uri(connection.HealthEndpoint,"v2/curriculum/turn");
+            return await Exchange(HttpMethod.Post,endpoint,connection.AccessToken,body,65536,client,token).ConfigureAwait(false);
+        }
+
         public static async Task<byte[]> Speech(string speaker, string language, string text, CancellationToken token)
         {
             using(var stream=new MemoryStream())

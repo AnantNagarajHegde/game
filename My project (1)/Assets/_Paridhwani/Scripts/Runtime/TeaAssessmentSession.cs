@@ -3,9 +3,9 @@ namespace Paridhwani {
   readonly VillageConversationFlow conversation=new VillageConversationFlow();
   public string TeaAssessmentInput {get=>conversation.Input;set=>conversation.Input=value??"";}
   public string TeaAssessmentFeedback=>conversation.Feedback;
-  public bool TeaAssessmentBusy=>conversation.Busy;
-  public bool ShowTeaAssessment=>Turn!=null;
-  public bool ConversationPhrasesVisible=>conversation.PhrasesVisible;
+  public bool TeaAssessmentBusy=>conversation.Busy || curriculumBusy;
+  public bool ShowTeaAssessment=>Turn!=null && CurriculumTyping;
+  public bool ConversationPhrasesVisible=>conversation.PhrasesVisible || CurriculumAutoPhrases;
   public TeaLine ConversationLine=>conversation.Line??Turn?.Line;
   public void AskTeaConversation(){AskVillageModel();}
   void ResetTeaAssessment(){if(ui)ui.CloseTeaKeyboard();StopVillageSpeech();conversation.ResetTurn();}

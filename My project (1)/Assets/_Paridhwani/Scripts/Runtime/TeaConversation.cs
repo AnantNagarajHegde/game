@@ -6,6 +6,7 @@ namespace Paridhwani
     public sealed class TeaLine
     {
         public string Kannada, Roman, English;
+        public bool Silent; // true: shown in chat but never sent to speech
         public TeaLine(string kn, string ro, string en) { Kannada=kn; Roman=ro; English=en; }
         public string DisplayFallback(bool showRoman,bool showEnglish)
         {

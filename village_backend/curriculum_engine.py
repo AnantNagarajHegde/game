@@ -43,6 +43,7 @@ class CurriculumError(ValueError):
 class CurriculumEngine:
     def __init__(self, language_engine=None, flow_path=None, npc_path=None, live=None):
         root = Path(language_engine) if language_engine else default_language_engine()
+        self.root = root
         src = root / "Paridhwani-NLP" / "src"
         if not (src / "matcher.py").exists():
             raise FileNotFoundError(f"Paridhwani-NLP not found under {root}. Set PARIDHWANI_LANGUAGE_ENGINE.")

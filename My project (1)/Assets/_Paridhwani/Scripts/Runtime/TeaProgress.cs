@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -24,6 +25,9 @@ namespace Paridhwani
         public bool reviewOutcomeKnown,libraryProtected,epilogueStarted,storyCompleted;
         public StoryEnding endingChoice;
         public string drink = "";
+        // Curriculum (levels 1 to 3): player name, resume node per NPC, completed quests, collected words.
+        public string playerName = "", teaNode = "", libraryNode = "", messNode = "";
+        public List<string> questsDone = new List<string>(), curriculumWords = new List<string>();
         public bool english = true, roman = true, muted;
         public bool reducedMotion,invertY;
         public float masterVolume=1,ambienceVolume=1,footstepVolume=1;
@@ -33,7 +37,7 @@ namespace Paridhwani
         public float textScale = 1f, sensitivity = 0.12f;
         public Vector3 position = new Vector3(2.1f, 0.2f, -5.7f);
         public float heading = -18f;
-        public string Objective => VillageStory.CurrentObjective(this);
+        public string Objective => CurriculumConversation.Objective(this) ?? VillageStory.CurrentObjective(this);
     }
 
     public interface ITeaProgressCodec

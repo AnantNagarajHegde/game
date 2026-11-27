@@ -13,7 +13,7 @@ namespace Paridhwani
         VisualElement root,modal,prompt;
         TeaTurn displayedTurn;
         bool displayedPhrases;
-        sealed class ChatMessage { public bool player,pending,failed; public TeaLine line;public string deliveryId,caption; }
+        sealed class ChatMessage { public bool player,pending,failed,system; public TeaLine line;public string deliveryId,caption; }
         readonly System.Collections.Generic.List<ChatMessage> chatMessages=new System.Collections.Generic.List<ChatMessage>();
         TeaTurn chatTurn; TeaLine chatLine; bool chatAutoScroll; Vector2 chatScrollPosition;
         public void BeginChat() {chatMessages.Clear();chatTurn=null;chatLine=null;displayedTurn=null;chatAutoScroll=true;chatScrollPosition=Vector2.zero;}
@@ -29,6 +29,7 @@ namespace Paridhwani
             var message=chatMessages.Find(item=>item.deliveryId==deliveryId && !string.IsNullOrEmpty(deliveryId));
             if(message!=null){message.pending=false;message.failed=!delivered;}
         }
+        public void RecordSystemNotice(string text) {if(!string.IsNullOrWhiteSpace(text)){chatMessages.Add(new ChatMessage{system=true,line=new TeaLine("","",text.Trim()){Silent=true}});chatAutoScroll=true;}}
         public void RecordChatChoice(TeaLine line) {if(line!=null){chatMessages.Add(new ChatMessage{player=true,line=new TeaLine(line.Kannada,line.Roman,line.English)});chatAutoScroll=true;}}
         void RecordChatReply(TeaTurn turn,TeaLine line) {
             if(line==null)return;
@@ -224,6 +225,12 @@ namespace Paridhwani
             scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden;
             VisualElement latestMessage=null,latestNpcMessage=null;
             foreach(var message in chatMessages) {
+                if(message.system) {
+                    var notice=new VisualElement();Class(notice,"chat-message");scroll.Add(notice);
+                    notice.style.alignSelf=Align.Center;notice.style.backgroundColor=new Color(.42f,.33f,.16f,.35f);
+                    var noticeLabel=Add(notice,message.line.English,"eyebrow");noticeLabel.style.marginBottom=0;noticeLabel.style.whiteSpace=WhiteSpace.Normal;
+                    latestMessage=notice;continue;
+                }
                 var bubble=new VisualElement();Class(bubble,"chat-message");Class(bubble,message.player?"chat-player":"chat-npc");scroll.Add(bubble);
                 Add(bubble,message.player?"YOU":session.ConversationTitle,"chat-speaker");Line(bubble,message.line);
                 if(!message.player){

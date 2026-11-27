@@ -46,6 +46,41 @@ python3 curriculum_engine.py --check-live --text "Is it going to rain today?"
 It prints the reply, the elapsed time and `source: live`. `source: fallback` means the call failed or took
 longer than 4.5 s.
 
+## Unity side
+
+| File | Purpose |
+|---|---|
+| `Runtime/CurriculumData.g.cs` | Generated from `flow.json` and the curriculum JSON. Regenerate with `python tools/gen_curriculum_cs.py` |
+| `Runtime/CurriculumConversation.cs` | Provider for Manjunatha (level 1), Somanna (level 2) and Shanthakka (level 3): nodes, story effects, quest and level completion, hints, objective |
+| `Runtime/CurriculumSession.cs` | Sends typed answers to the engine, shows reactions, tips and notices, plays NPC lines one after another |
+
+The curriculum is active for Manjunatha until the library directions are known, for Somanna until the mess lead is
+known, and for Shanthakka until the market lead is known. After that the existing story providers take over.
+Set `PARIDHWANI_CURRICULUM=0` before starting Unity to switch it off (for the old automated playtests).
+Progress is saved in the visit: player name, the node each NPC is on, completed quests and collected words.
+
+## Play-mode checklist (levels 1 to 3)
+
+Start the backend first (`python server.py --provider ollama --model preview --port 8767`), then press Play.
+Use **Paridhwani > Play Isolated Test Visit** so the main save stays clean.
+
+| # | Do | Expect |
+|---|---|---|
+| 1 | Talk to Manjunatha | Notice "LEVEL 1 · BUS STAND & TEA STALL · Quest: Order tea", then ನಿಮಗೆ ಏನು ಬೇಕು? |
+| 2 | Type `Nanage kaapi beku` | ಕಾಫಿ ಇಲ್ಲ. ಚಹಾ ಅಥವಾ ನೀರು? and no progress |
+| 3 | Type `asdf` twice | Fallback line twice, then "Hint: Start with Nanage..." |
+| 4 | Type `Nanage chaha` | Moves on, "Tip: Add the verb at the end..." |
+| 5 | Answer ನೀರು ಬೇಕಾ? with `Haudu, beku` | "QUEST COMPLETE · Order tea", menu board with three word buttons and no text box |
+| 6 | Tap ಕಾಫಿ, then ಚಹಾ | "Not that one. Look again.", then the name question |
+| 7 | Type `Nanna hesaru` + your name | "QUEST COMPLETE · Tell Manjunatha your name" |
+| 8 | Type `Library ellide?` | "LEVEL 1 COMPLETE", the next-level line, directions. Objective at top left changes to Level 2 |
+| 9 | Leave, walk to Somanna, talk | Level 2 banner, ಯಾರು? |
+| 10 | Type `Bagilu tegi` at the door step | Somanna frowns (no voice), hint after the second wrong try |
+| 11 | Finish level 2 (`Ananya`, tap ಕೀಲಿ, `Keeli ellide?`) | "LEVEL 2 COMPLETE", Shanthakka unlocked |
+| 12 | Level 3: `Haudu, oota kodi`, `Saaku`, `Eshtu rupayi?`, `Hattu`, `Aivattu`, `Ananya elli?`, tap ಬಸವರಾಜು | Wrong price gets ಇಲ್ಲ, ಐವತ್ತು!; ends with "LEVEL 3 COMPLETE" and the market lead |
+| 13 | Stop the backend and type an answer | "The language engine is not running..." and the phrases open |
+| 14 | Leave in the middle of a level and talk again | Resumes at the same step |
+
 ## Lines that need Kannada review
 
 These are new lines (everything else is copied from the JSON or the existing game).
