@@ -1,0 +1,772 @@
+{
+ "version": 1,
+ "removed_quests": [
+  "q1_1"
+ ],
+ "npcs": {
+  "manjunatha": {
+   "role": "TeaVendor",
+   "display": "Manjunatha",
+   "start": "m_order",
+   "level": 1
+  },
+  "somanna": {
+   "role": "Librarian",
+   "display": "Somanna",
+   "start": "s_who",
+   "level": 2
+  },
+  "shanthakka": {
+   "role": "MessOwner",
+   "display": "Shanthakka",
+   "start": "h_meal",
+   "level": 3
+  }
+ },
+ "levels": {
+  "1": {
+   "next": "Next: Level 2, the Library. Follow Manjunatha's directions and meet Somanna."
+  },
+  "2": {
+   "next": "Next: Level 3, Shanthakka's mess. Go straight, then left, and ask Shanthakka."
+  },
+  "3": {
+   "next": "All three levels complete. Continue the story: take Ananya's note to Basavaraju at the market."
+  }
+ },
+ "nodes": [
+  {
+   "id": "m_order",
+   "npc": "manjunatha",
+   "kind": "respond",
+   "quest": "q1_2",
+   "step": "q1_2_a",
+   "line": "json",
+   "resolve": {
+    "type": "item",
+    "map": {
+     "w_chaha": "tea",
+     "w_neeru": "water"
+    },
+    "unavailable": {
+     "kn": "{item_kn} ಇಲ್ಲ. ಚಹಾ ಅಥವಾ ನೀರು?",
+     "ro": "{item_ro} illa. Chaha athava neeru?",
+     "en": "No {item_en} here. Tea or water?",
+     "review": true
+    }
+   },
+   "choices": [
+    {
+     "key": "tea",
+     "next": "m_water",
+     "answer": "a_tea",
+     "effects": [
+      "greet",
+      "drink:tea"
+     ]
+    },
+    {
+     "key": "water",
+     "next": "m_menu",
+     "text": {
+      "kn": "ನನಗೆ ನೀರು ಬೇಕು.",
+      "ro": "Nanage neeru beku.",
+      "en": "I want water."
+     },
+     "effects": [
+      "greet",
+      "drink:water"
+     ],
+     "completes": [
+      "q1_2"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m_water",
+   "npc": "manjunatha",
+   "kind": "respond",
+   "quest": "q1_2",
+   "step": "q1_2_b",
+   "line": "json",
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_yes": "yes",
+     "a_no": "no"
+    }
+   },
+   "choices": [
+    {
+     "key": "yes",
+     "next": "m_menu",
+     "answer": "a_yes",
+     "completes": [
+      "q1_2"
+     ]
+    },
+    {
+     "key": "no",
+     "next": "m_menu",
+     "answer": "a_no",
+     "completes": [
+      "q1_2"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m_menu",
+   "npc": "manjunatha",
+   "kind": "word",
+   "quest": "q1_2",
+   "step": "q1_2_c",
+   "optional": true,
+   "silent": true,
+   "line": {
+    "kn": "ಚಹಾ   ·   ಕಾಫಿ   ·   ನೀರು",
+    "ro": "",
+    "en": "Bonus: this is the stall's menu board. Tap the word for tea."
+   },
+   "choices": [
+    {
+     "key": "read",
+     "next": "m_name",
+     "text": {
+      "kn": "ಚಹಾ",
+      "ro": "",
+      "en": ""
+     },
+     "effects": [
+      "read:w_chaha"
+     ]
+    },
+    {
+     "key": "wrong1",
+     "next": "m_menu",
+     "text": {
+      "kn": "ಕಾಫಿ",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    },
+    {
+     "key": "wrong2",
+     "next": "m_menu",
+     "text": {
+      "kn": "ನೀರು",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    },
+    {
+     "key": "skip",
+     "next": "m_name",
+     "text": {
+      "kn": "",
+      "ro": "",
+      "en": "Skip the bonus"
+     }
+    }
+   ]
+  },
+  {
+   "id": "m_name",
+   "npc": "manjunatha",
+   "kind": "respond",
+   "quest": "q1_3",
+   "step": "q1_3_a",
+   "line": "json",
+   "captures_name": true,
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_name": "name"
+    }
+   },
+   "choices": [
+    {
+     "key": "name",
+     "next": "m_where",
+     "text": {
+      "kn": "ನನ್ನ ಹೆಸರು ಅರುಣ್.",
+      "ro": "Nanna hesaru Arun.",
+      "en": "My name is Arun."
+     },
+     "effects": [
+      "name:Arun"
+     ],
+     "completes": [
+      "q1_3"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m_where",
+   "npc": "manjunatha",
+   "kind": "respond",
+   "quest": "q1_4",
+   "step": "q1_4_a",
+   "line": {
+    "kn": "ಇಲ್ಲಿ ಕುಳಿತುಕೊಳ್ಳಿ. ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗಬೇಕು?",
+    "ro": "Illi kulithukolli. Neevu ellige hogabeku?",
+    "en": "Take a seat here. Where do you need to go?"
+   },
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_library": "library"
+    }
+   },
+   "choices": [
+    {
+     "key": "library",
+     "next": "m_directions",
+     "answer": "a_library",
+     "effects": [
+      "directions"
+     ],
+     "completes": [
+      "q1_4"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m_directions",
+   "npc": "manjunatha",
+   "kind": "story",
+   "line": {
+    "kn": "ಮುಂದೆ ಹೋಗಿ. ಎಡಕ್ಕೆ ತಿರುಗಿ. ಅಲ್ಲಿ ಗ್ರಂಥಾಲಯ ಇದೆ.",
+    "ro": "Munde hogi. Edakke tirugi. Alli granthalaya ide.",
+    "en": "Go straight along the lane, then turn left. The library is there."
+   },
+   "choices": [
+    {
+     "key": "ananya",
+     "next": "m_ananya",
+     "text": {
+      "kn": "ಅನನ್ಯ ಇದ್ದಾರಾ?",
+      "ro": "Ananya iddara?",
+      "en": "Is Ananya there?"
+     },
+     "effects": [
+      "routine"
+     ]
+    },
+    {
+     "key": "thanks",
+     "next": "close",
+     "text": {
+      "kn": "ಧನ್ಯವಾದಗಳು.",
+      "ro": "Dhanyavadagalu.",
+      "en": "Thank you."
+     }
+    }
+   ]
+  },
+  {
+   "id": "m_ananya",
+   "npc": "manjunatha",
+   "kind": "story",
+   "line": {
+    "kn": "ಅನನ್ಯ ನಿನ್ನೆ ಬಂದಿಲ್ಲ. ಸೋಮಣ್ಣನನ್ನು ಕೇಳಿ.",
+    "ro": "Ananya ninne bandilla. Somannanna keli.",
+    "en": "Ananya didn't come yesterday. Ask Somanna at the library."
+   },
+   "choices": [
+    {
+     "key": "thanks",
+     "next": "close",
+     "text": {
+      "kn": "ಸರಿ. ಧನ್ಯವಾದಗಳು.",
+      "ro": "Sari. Dhanyavadagalu.",
+      "en": "All right. Thank you."
+     }
+    }
+   ]
+  },
+  {
+   "id": "s_who",
+   "npc": "somanna",
+   "kind": "respond",
+   "quest": "q2_1",
+   "step": "q2_1_a",
+   "line": "json",
+   "captures_name": true,
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_intro": "intro"
+    }
+   },
+   "choices": [
+    {
+     "key": "intro",
+     "next": "s_open",
+     "answer": "a_intro",
+     "effects": [
+      "library_greet"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "s_open",
+   "npc": "somanna",
+   "kind": "respond",
+   "quest": "q2_1",
+   "step": "q2_1_b",
+   "line": {
+    "kn": "ಏನು ಬೇಕು?",
+    "ro": "Enu beku?",
+    "en": "What do you need?",
+    "review": true
+   },
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_open": "open"
+    }
+   },
+   "choices": [
+    {
+     "key": "open",
+     "next": "s_key",
+     "answer": "a_open",
+     "completes": [
+      "q2_1"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "s_key",
+   "npc": "somanna",
+   "kind": "respond",
+   "quest": "q2_2",
+   "step": "q2_2_a",
+   "line": "json",
+   "english_hidden": true,
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_ananya": "ananya"
+    }
+   },
+   "choices": [
+    {
+     "key": "ananya",
+     "next": "s_board",
+     "answer": "a_ananya",
+     "completes": [
+      "q2_2"
+     ]
+    },
+    {
+     "key": "wrong1",
+     "next": "s_key",
+     "text": {
+      "kn": "ಸೋಮಣ್ಣ",
+      "ro": "Somanna",
+      "en": "Somanna"
+     },
+     "wrong": true
+    },
+    {
+     "key": "wrong2",
+     "next": "s_key",
+     "text": {
+      "kn": "ಮಂಜುನಾಥ",
+      "ro": "Manjunatha",
+      "en": "Manjunatha"
+     },
+     "wrong": true
+    }
+   ]
+  },
+  {
+   "id": "s_board",
+   "npc": "somanna",
+   "kind": "word",
+   "quest": "q2_3",
+   "step": "q2_3_a",
+   "silent": true,
+   "line": {
+    "kn": "ಕೀಲಿ   ·   ಬಾಗಿಲು   ·   ಪುಸ್ತಕ",
+    "ro": "",
+    "en": "The noticeboard shows a picture of a key. Tap the word for key to collect it."
+   },
+   "choices": [
+    {
+     "key": "collect",
+     "next": "s_where",
+     "text": {
+      "kn": "ಕೀಲಿ",
+      "ro": "",
+      "en": ""
+     },
+     "effects": [
+      "word:w_keeli"
+     ]
+    },
+    {
+     "key": "wrong1",
+     "next": "s_board",
+     "text": {
+      "kn": "ಬಾಗಿಲು",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    },
+    {
+     "key": "wrong2",
+     "next": "s_board",
+     "text": {
+      "kn": "ಪುಸ್ತಕ",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    }
+   ]
+  },
+  {
+   "id": "s_where",
+   "npc": "somanna",
+   "kind": "respond",
+   "quest": "q2_3",
+   "step": "q2_3_b",
+   "line": {
+    "kn": "ಏನು ಬೇಕು?",
+    "ro": "Enu beku?",
+    "en": "What do you need?",
+    "review": true
+   },
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_keeli": "keeli"
+    }
+   },
+   "choices": [
+    {
+     "key": "keeli",
+     "next": "s_lead",
+     "answer": "a_keeli",
+     "effects": [
+      "mess_lead"
+     ],
+     "completes": [
+      "q2_3"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "s_lead",
+   "npc": "somanna",
+   "kind": "story",
+   "line": {
+    "kn": "ನನ್ನ ಬಳಿ ಮುಖ್ಯ ಕೀಲಿ ಇದೆ. ಸ್ವಲ್ಪ ಕಾಯಿರಿ. ಅನನ್ಯ ಶಾಂತಕ್ಕನ ಮನೆಗೆ ಹೋಗಿದ್ದರು. ಮುಂದೆ ಹೋಗಿ, ಆಮೇಲೆ ಎಡಕ್ಕೆ.",
+    "ro": "Nanna bali mukhya keeli ide. Swalpa kaayiri. Ananya Shanthakkana manege hogiddaru. Munde hogi, aamele edakke.",
+    "en": "I have the master key. Wait a little. Ananya went to Shanthakka's mess. Go straight, then left.",
+    "review": true
+   },
+   "choices": [
+    {
+     "key": "thanks",
+     "next": "close",
+     "text": {
+      "kn": "ಸರಿ. ಧನ್ಯವಾದಗಳು.",
+      "ro": "Sari. Dhanyavadagalu.",
+      "en": "All right. Thank you."
+     }
+    }
+   ]
+  },
+  {
+   "id": "h_meal",
+   "npc": "shanthakka",
+   "kind": "respond",
+   "quest": "q3_1",
+   "step": "q3_1_a",
+   "line": "json",
+   "resolve": {
+    "type": "item",
+    "map": {
+     "w_neeru": "water",
+     "w_oota": "meal",
+     "w_anna": "meal",
+     "w_saaru": "meal",
+     "w_thindi": "meal",
+     "w_idli": "meal",
+     "w_dose": "meal",
+     "w_chapati": "meal",
+     "w_rotti": "meal",
+     "w_sambar": "meal",
+     "w_palya": "meal",
+     "w_mosaru": "meal",
+     "w_balehannu": "meal"
+    },
+    "default": "meal",
+    "unavailable": {
+     "kn": "{item_kn} ಇಲ್ಲ. ಊಟ ಬೇಕಾ?",
+     "ro": "{item_ro} illa. Oota beka?",
+     "en": "No {item_en} here. Would you like a meal?",
+     "review": true
+    }
+   },
+   "choices": [
+    {
+     "key": "meal",
+     "next": "h_more",
+     "answer": "a_meal",
+     "effects": [
+      "meal"
+     ],
+     "completes": [
+      "q3_1"
+     ]
+    },
+    {
+     "key": "water",
+     "next": "h_more",
+     "text": {
+      "kn": "ಹೌದು, ನೀರು ಕೊಡಿ.",
+      "ro": "Haudu, neeru kodi.",
+      "en": "Yes, water please."
+     },
+     "effects": [
+      "meal"
+     ],
+     "completes": [
+      "q3_1"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "h_more",
+   "npc": "shanthakka",
+   "kind": "respond",
+   "quest": "q3_2",
+   "step": "q3_2_a",
+   "line": "json",
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_saaku": "enough",
+     "a_beda": "enough"
+    }
+   },
+   "choices": [
+    {
+     "key": "enough",
+     "next": "h_price",
+     "answer": "a_saaku",
+     "effects": [
+      "enough"
+     ],
+     "completes": [
+      "q3_2"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "h_price",
+   "npc": "shanthakka",
+   "kind": "respond",
+   "quest": "q3_3",
+   "step": "q3_3_a",
+   "line": {
+    "kn": "ನಿಮಗೆ ಇನ್ನೇನು ಬೇಕು?",
+    "ro": "Nimage innenu beku?",
+    "en": "What else can I help you with?"
+   },
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_price": "price"
+    }
+   },
+   "choices": [
+    {
+     "key": "price",
+     "next": "h_pay",
+     "answer": "a_price"
+    }
+   ]
+  },
+  {
+   "id": "h_pay",
+   "npc": "shanthakka",
+   "kind": "respond",
+   "quest": "q3_3",
+   "step": "q3_3_b",
+   "line": "json_reply:q3_3_a",
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_50": "pay"
+    }
+   },
+   "choices": [
+    {
+     "key": "pay",
+     "next": "h_where",
+     "answer": "a_50",
+     "completes": [
+      "q3_3"
+     ]
+    },
+    {
+     "key": "wrong1",
+     "next": "h_pay",
+     "text": {
+      "kn": "ಹತ್ತು",
+      "ro": "Hattu",
+      "en": "10"
+     },
+     "wrong": true
+    },
+    {
+     "key": "wrong2",
+     "next": "h_pay",
+     "text": {
+      "kn": "ಇಪ್ಪತ್ತು",
+      "ro": "Ippattu",
+      "en": "20"
+     },
+     "wrong": true
+    }
+   ]
+  },
+  {
+   "id": "h_where",
+   "npc": "shanthakka",
+   "kind": "respond",
+   "quest": "q3_4",
+   "step": "q3_4_a",
+   "line": {
+    "kn": "ಸರಿ, ಧನ್ಯವಾದ. ನಿಮಗೆ ಇನ್ನೇನು ಬೇಕು?",
+    "ro": "Sari, dhanyavada. Nimage innenu beku?",
+    "en": "All right, thank you. What else do you need?",
+    "review": true
+   },
+   "resolve": {
+    "type": "answer",
+    "map": {
+     "a_where": "where"
+    }
+   },
+   "choices": [
+    {
+     "key": "where",
+     "next": "h_note",
+     "answer": "a_where",
+     "effects": [
+      "note"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "h_note",
+   "npc": "shanthakka",
+   "kind": "story",
+   "line": {
+    "kn": "ಗೊತ್ತಿಲ್ಲ. ಬೆಳಿಗ್ಗೆ ಎರಡು ಊಟ ತೆಗೆದುಕೊಂಡರು. ಈ ಚೀಟಿ ಇಲ್ಲೇ ಬಿಟ್ಟಿದ್ದರು.",
+    "ro": "Gottilla. Beligge eradu oota tegedukondaru. Ee cheeti ille bittiddaru.",
+    "en": "I don't know. She collected two packed meals yesterday morning and left this shopping note here.",
+    "review": true
+   },
+   "choices": [
+    {
+     "key": "note",
+     "next": "h_card",
+     "text": {
+      "kn": "ಈ ಚೀಟಿ ಯಾರದು?",
+      "ro": "Ee cheeti yaaradu?",
+      "en": "Whose note is this?"
+     }
+    }
+   ]
+  },
+  {
+   "id": "h_card",
+   "npc": "shanthakka",
+   "kind": "word",
+   "quest": "q3_4",
+   "step": "q3_4_b",
+   "silent": true,
+   "line": "json_text",
+   "line_en": "Ananya's note. Tap the name of the shop owner.",
+   "choices": [
+    {
+     "key": "read",
+     "next": "h_market",
+     "text": {
+      "kn": "ಬಸವರಾಜು",
+      "ro": "",
+      "en": ""
+     },
+     "effects": [
+      "market_lead",
+      "read:w_basavaraju"
+     ],
+     "completes": [
+      "q3_4"
+     ]
+    },
+    {
+     "key": "wrong1",
+     "next": "h_card",
+     "text": {
+      "kn": "ಅಂಗಡಿ",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    },
+    {
+     "key": "wrong2",
+     "next": "h_card",
+     "text": {
+      "kn": "ಮೇಣದಬತ್ತಿ",
+      "ro": "",
+      "en": ""
+     },
+     "wrong": true
+    }
+   ]
+  },
+  {
+   "id": "h_market",
+   "npc": "shanthakka",
+   "kind": "story",
+   "line": {
+    "kn": "ಅನನ್ಯ ಅವರದು. ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಬಸವರಾಜುವನ್ನು ಕೇಳಿ.",
+    "ro": "Ananya avaradu. Maarukatteyalli Basavarajuvannu keli.",
+    "en": "It is Ananya's. Ask Basavaraju at the market about the purchases."
+   },
+   "choices": [
+    {
+     "key": "thanks",
+     "next": "close",
+     "text": {
+      "kn": "ಧನ್ಯವಾದಗಳು.",
+      "ro": "Dhanyavadagalu.",
+      "en": "Thank you."
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -24,6 +24,7 @@ MAX_BODY = 65536
 ROUTE = "/v2/village/turn"
 SPEECH_ROUTE = "/v2/village/speech"
 HEALTH_ROUTE = "/health"
+CURRICULUM_ROUTE = "/v2/curriculum/turn"
 MAX_AUDIO = 4 * 1024 * 1024
 MODEL_CALL_TIMEOUT = 20
 MODEL_TURN_TIMEOUT = 45
@@ -537,7 +538,7 @@ def make_handler(model, provider="ollama"):
             status, result = 400, {"error": "invalid_request"}
             stage = "request"
             try:
-                if self.path not in (ROUTE, SPEECH_ROUTE):
+                if self.path not in (ROUTE, SPEECH_ROUTE, CURRICULUM_ROUTE):
                     status, result = 404, {"error": "not_found"}
                 elif len(self.headers.get_all("Content-Length", [])) == 1 and not self.headers.get("Transfer-Encoding") and not self.headers.get("Content-Encoding"):
                     length = int(self.headers["Content-Length"])
@@ -547,6 +548,14 @@ def make_handler(model, provider="ollama"):
                     if len(raw) != length:
                         raise ValueError("truncated request")
                     obj = json.loads(raw.decode("utf-8"))
+                    if self.path == CURRICULUM_ROUTE:
+                        # Matcher-first lesson turn (chapters 1 to 3); see curriculum_engine.py.
+                        import curriculum_engine
+                        stage = "curriculum"
+                        result = curriculum_engine.engine().turn(obj)
+                        status = 200
+                        self.respond(status, result)
+                        return
                     if self.path == SPEECH_ROUTE:
                         if speech_provider == "sarvam":
                             audio = sarvam_speech(obj, sarvam_key, speech_cache, sarvam_model)
@@ -580,6 +589,9 @@ def make_handler(model, provider="ollama"):
                         return value
                     result = evaluate(obj, generate)
                     status = 200
+            except FileNotFoundError:
+                status, result = 503, {"error": "curriculum_unavailable"}
+                print("Curriculum engine could not find language-engine. Set PARIDHWANI_LANGUAGE_ENGINE.", flush=True)
             except (ValueError, TypeError, KeyError, IndexError, UnicodeError):
                 status, result = (502, {"error": "invalid_model_response"}) if stage == "model" else (400, {"error": "invalid_request"})
                 print("Conversation request or provider response had an invalid format.", flush=True)
