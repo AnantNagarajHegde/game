@@ -241,11 +241,22 @@ class CurriculumEngine:
         if matched["answer_id"] == "" and matched["error_category"] == "unclear" and matched.get("reaction_id", "") in ("", "r_puzzled"):
             reply = None
             if self.live:
-                try:
-                    reply = self.live(self.live_prompt(node, speaker, text, history), LIVE_BUDGET_SECONDS)
-                except Exception:  # live replies are optional; any failure uses the fallback line
-                    reply = None
-            reply = validate_live(reply)
+                messages = self.live_prompt(node, speaker, text, history)
+                started = time.monotonic()
+                for attempt in (1, 2):
+                    remaining = LIVE_BUDGET_SECONDS - (time.monotonic() - started)
+                    if remaining < 1.5:
+                        break
+                    reason = ""
+                    try:
+                        reply = validate_live(self.live(messages, remaining))
+                        if reply is None:
+                            reason = "reply missing Kannada or not JSON"
+                    except Exception as error:  # live replies are optional; any failure uses the fallback line
+                        reply, reason = None, type(error).__name__ + (f" {error.code}" if hasattr(error, "code") else "")
+                    if reply:
+                        break
+                    print(f"Live reply attempt {attempt} failed: {reason}", flush=True)
             if reply:
                 result.update(reaction={**reply, "action": "", "speaker": speaker}, source="live")
             else:
@@ -267,7 +278,9 @@ class CurriculumEngine:
             f"\"{current['kn']}\" ({current['en'] or 'task: ' + step.get('task', '')}).\n"
             "Their answer was not one you expected. Reply in character in ONE or TWO very short, simple sentences, "
             "using mostly these beginner words: " + ", ".join(vocab[:80]) + ". "
-            "End by gently asking them again for what this moment needs. Never give the full answer.\n"
+            "Always address the player politely as ನೀವು / ನಿಮಗೆ / ನಿಮ್ಮ (never ನಾವು / ನಮಗೆ). "
+            "At most two short sentences. End by gently asking them again for what this moment needs. "
+            "Never give the full answer.\n"
             "Return ONLY a JSON object with keys kannada (Kannada script), roman (Romanised Kannada), english (translation)."
         )
         messages = [{"role": "system", "content": system}]
@@ -282,7 +295,15 @@ class CurriculumEngine:
 def validate_live(reply):
     if not isinstance(reply, dict):
         return None
-    kn, ro, en = (str(reply.get(k, "")).strip() for k in ("kannada", "roman", "english"))
+    lowered = {str(k).strip().casefold(): v for k, v in reply.items()}
+    def pick(*names):
+        for name in names:
+            if isinstance(lowered.get(name), str) and lowered[name].strip():
+                return lowered[name].strip()
+        return ""
+    kn = pick("kannada", "kn", "kannada_script", "reply")
+    ro = pick("roman", "ro", "romanised", "romanized", "kanglish", "transliteration")
+    en = pick("english", "en", "translation")
     if not kn or not KANNADA.search(kn) or len(kn) > 240 or len(ro) > 300 or len(en) > 300:
         return None
     return {"kn": kn, "ro": ro, "en": en}
@@ -305,7 +326,7 @@ def sarvam_live_reply(messages, budget_seconds):
     key = os.environ.get("SARVAM_API_KEY", "").strip()
     if not key:
         return None
-    payload = {"model": SARVAM_CHAT_MODEL, "messages": messages, "temperature": 0.3, "max_tokens": 220,
+    payload = {"model": SARVAM_CHAT_MODEL, "messages": messages, "temperature": 0.3, "max_tokens": 400,
                "reasoning_effort": None}
     request = urllib.request.Request(SARVAM_CHAT_URL, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
                                      headers={"api-subscription-key": key, "Authorization": "Bearer " + key,

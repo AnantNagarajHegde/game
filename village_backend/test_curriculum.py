@@ -164,6 +164,15 @@ class LiveAndFallback(unittest.TestCase):
             raise TimeoutError("slow")
         self.assertEqual(self.ask(engine(live=boom))["source"], "fallback")
 
+    def test_retries_once_then_uses_live(self):
+        calls = []
+        def flaky(messages, budget):
+            calls.append(budget)
+            return None if len(calls) == 1 else {"Kannada": "ಏನು? ಚಹಾ ಬೇಕಾ?", "Roman": "Enu? Chaha beka?", "English": "What? Tea?"}
+        result = self.ask(engine(live=flaky))
+        self.assertEqual((result["source"], len(calls)), ("live", 2))
+        self.assertIn("ನಿಮಗೆ", engine().live_prompt(engine().nodes["m_order"], "manjunatha", "x", [])[0]["content"])
+
     def test_known_mistakes_never_call_live(self):
         def fail(messages, budget):
             raise AssertionError("live must not be called")
