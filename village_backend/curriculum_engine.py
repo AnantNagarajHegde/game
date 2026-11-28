@@ -306,7 +306,37 @@ def validate_live(reply):
     en = pick("english", "en", "translation")
     if not kn or not KANNADA.search(kn) or len(kn) > 240 or len(ro) > 300 or len(en) > 300:
         return None
-    return {"kn": kn, "ro": ro, "en": en}
+    return polite({"kn": kn, "ro": ro, "en": en})
+
+
+LABELS = {"kannada": "kannada", "kn": "kannada", "roman": "roman", "romanised": "roman", "romanized": "roman",
+          "kanglish": "roman", "ro": "roman", "english": "english", "en": "english", "translation": "english"}
+
+
+def parse_reply(text):
+    """JSON object first; otherwise 'label: value' lines; otherwise the Kannada sentences alone."""
+    value = parse_json_object(text)
+    if value:
+        return value
+    found = {}
+    for line in text.splitlines():
+        match = re.match(r"^\W*([A-Za-z]+)\W*[:=-]\s*(.+)$", line.strip())
+        if match and match.group(1).casefold() in LABELS:
+            found.setdefault(LABELS[match.group(1).casefold()], match.group(2).strip().strip('"').strip())
+    if found.get("kannada"):
+        return found
+    kannada = " ".join(part.strip() for part in re.findall(r"[\u0C80-\u0CFF][\u0C80-\u0CFF\s,.!?]*", text) if part.strip())
+    return {"kannada": kannada} if kannada else None
+
+
+def polite(reply):
+    """Fix the model's recurring slip of asking the customer 'what do *we* need'."""
+    for old, new in (("ನಮಗೇನು", "ನಿಮಗೇನು"), ("ನಮಗೆ ಏನು", "ನಿಮಗೆ ಏನು")):
+        reply["kn"] = reply["kn"].replace(old, new)
+    for old, new in (("Namagenu", "Nimagenu"), ("namagenu", "nimagenu"), ("Namage enu", "Nimage enu"), ("namage enu", "nimage enu")):
+        reply["ro"] = reply["ro"].replace(old, new)
+    reply["en"] = re.sub(r"\bwhat do we (need|want)\b", r"what do you \1", reply["en"], flags=re.I)
+    return reply
 
 
 def parse_json_object(text):
@@ -335,7 +365,9 @@ def sarvam_live_reply(messages, budget_seconds):
     with urllib.request.urlopen(request, timeout=budget_seconds) as response:
         envelope = json.loads(response.read(65536).decode("utf-8"))
     content = envelope["choices"][0]["message"].get("content") or ""
-    return parse_json_object(content)
+    if os.environ.get("PARIDHWANI_LIVE_DEBUG") == "1":
+        print("Live raw reply:", content[:400].replace("\n", " | "), flush=True)
+    return parse_reply(content)
 
 
 _ENGINE = None

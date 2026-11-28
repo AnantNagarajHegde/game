@@ -180,6 +180,16 @@ class LiveAndFallback(unittest.TestCase):
         for text in ("Nanage chaha beda", "I want tea", "Nimage chaha beku"):
             self.assertEqual(self.ask(e, text)["source"], "matcher")
 
+    def test_parse_reply_formats_and_polite_fix(self):
+        lines = ce.parse_reply("Kannada: ಸರಿ, ನಮಗೇನು ಬೇಕು?\nRoman: Sari, namagenu beku?\nEnglish: OK, what do we need?")
+        fixed = ce.validate_live(lines)
+        self.assertEqual(fixed["kn"], "ಸರಿ, ನಿಮಗೇನು ಬೇಕು?")
+        self.assertEqual(fixed["ro"], "Sari, nimagenu beku?")
+        self.assertEqual(fixed["en"], "OK, what do you need?")
+        only = ce.validate_live(ce.parse_reply("Here you go: ನಿಮಗೆ ಚಹಾ ಬೇಕಾ?"))
+        self.assertEqual(only["kn"], "ನಿಮಗೆ ಚಹಾ ಬೇಕಾ?")
+        self.assertIsNone(ce.parse_reply("no kannada at all"))
+
     def test_parse_json_object(self):
         self.assertEqual(ce.parse_json_object('```json\n{"kannada":"ಸರಿ"}\n```'), {"kannada": "ಸರಿ"})
         self.assertIsNone(ce.parse_json_object("no json"))
